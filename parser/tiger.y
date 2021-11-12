@@ -6,7 +6,7 @@ int yylex(void); /* function prototype */
 
 void yyerror(char *s)
 {
-    fprintf(stderr, "Parse error\n");
+    fprintf(stderr, "Parse error: \"%s\"\n", s);
 }
 
 %}
@@ -22,7 +22,6 @@ void yyerror(char *s)
 %token <sval> ID STRING
 
 %token
-ID STRING INT
 COMMA COLON SEMICOLON LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE DOT
 PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE AND OR ASSIGN
 ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF BREAK NIL FUNCTION VAR TYPE
@@ -37,36 +36,11 @@ ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF BREAK NIL FUNCTION VAR TYPE
 
 %%
 
+/****************************************************************************
+ * Expressions
+ ****************************************************************************/
+
 program: exp
-
-exp: ID
-
-/****************************************************************************
- * Declerations
- ****************************************************************************/
-
-declares: /* epsilon */
-        | declare declares
-
-declare: type_declare
-       | variable_declare
-       | function_declare
-
-type_declare: TYPE ID EQ type
-
-type: ID
-    | LBRACE type_fields RBRACE
-    | ARRAY OF ID
-
-variable_declare: VAR ID ASSIGN exp
-                | VAR ID COLON ID ASSIGN exp
-
-function_declare: FUNCTION ID LPAREN type_fields RPAREN EQ exp
-                | FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ exp
-
-/****************************************************************************
- * Variables and Expressions
- ****************************************************************************/
 
 exp: exp_value
    | exp_sequence
@@ -113,7 +87,7 @@ exp_define: ID LBRACE record_fields RBRACE
 exp_assign: left_value ASSIGN exp
 
 exp_if: IF exp THEN exp
-      | IF exp THEN exp ElSE exp
+      | IF exp THEN exp ELSE exp
 
 exp_for: FOR ID ASSIGN exp TO exp DO exp
 
@@ -122,6 +96,34 @@ exp_while: WHILE exp DO exp
 exp_break: BREAK
 
 exp_let: LET declares IN exp_sequence END
+
+
+/****************************************************************************
+ * Declerations
+ ****************************************************************************/
+
+declares: /* epsilon */
+        | declare declares
+
+declare: type_declare
+       | variable_declare
+       | function_declare
+
+type_declare: TYPE ID EQ type
+
+type: ID
+    | LBRACE type_fields RBRACE
+    | ARRAY OF ID
+
+variable_declare: VAR ID ASSIGN exp
+                | VAR ID COLON ID ASSIGN exp
+
+function_declare: FUNCTION ID LPAREN type_fields RPAREN EQ exp
+                | FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ exp
+
+/****************************************************************************
+ * Fields
+ ****************************************************************************/
 
 type_fields: /* epsilon */
            | ID COLON ID

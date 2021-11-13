@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "y.tab.h"
 
-#define RETURN(x) ({ printf("%-10s \"%s\"\n", #x, yytext); return x; })
+#define RETURN(x) ({ printf("%10s \"%10s\"\n", #x, yytext); return x; })
 
 static int comment_layer;
 

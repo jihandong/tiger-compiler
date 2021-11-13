@@ -27,8 +27,8 @@ PLUS MINUS TIMES DIVIDE EQ NEQ LT LE GT GE AND OR ASSIGN
 ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF BREAK NIL FUNCTION VAR TYPE
 
 %nonassoc ASSIGN
-%nonassoc EQ NEQ LT LE GT GE
 %left AND OR
+%nonassoc EQ NEQ LT LE GT GE
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left UMINUS
@@ -42,61 +42,73 @@ ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF BREAK NIL FUNCTION VAR TYPE
 
 program: exp
 
-exp: exp_value
-   | exp_sequence
-   | exp_op
-   | exp_call
-   | exp_define
-   | exp_assign
-   | exp_if
-   | exp_for
-   | exp_while
-   | exp_break
-   | exp_let
+exp
+: exp_value         { printf("expression: value\n"); }
+| exp_sequence      { printf("expression: sequence\n"); }
+| exp_op            { printf("expression: op\n"); }
+| exp_call          { printf("expression: call\n"); }
+| exp_define        { printf("expression: define\n"); }
+| exp_assign        { printf("expression: assign\n"); }
+| exp_if            { printf("expression: if\n"); }
+| exp_for           { printf("expression: for\n"); }
+| exp_while         { printf("expression: while\n"); }
+| exp_break         { printf("expression: break\n"); }
+| exp_let           { printf("expression: let\n"); }
 
-left_value: ID
-          | left_value DOT ID
-          | left_value LBRACK ID RBRACK
+left_value
+: ID                            { printf("left value: identifier\n"); }
+| left_value DOT ID             { printf("left value: record member\n"); }
+| left_value LBRACK ID RBRACK   { printf("left value: array member\n"); }
 
-exp_value: NIL
-         | INT
-         | STRING
-         | left_value
+exp_value
+: NIL           { printf("expression value: nil\n"); }
+| INT           { printf("expression value: integer\n"); }
+| STRING        { printf("expression value: string\n"); }
+| left_value    { printf("expression value: left value\n"); }
 
-exp_sequence: LPAREN sequence_fields RPAREN
+exp_sequence
+: LPAREN sequence_fields RPAREN
 
-exp_op: exp PLUS exp
-      | exp MINUS exp
-      | exp TIMES exp
-      | exp DIVIDE exp
-      | exp EQ exp
-      | exp NEQ exp
-      | exp LT exp
-      | exp LE exp
-      | exp GT exp
-      | exp GE exp
-      | exp AND exp
-      | exp OR exp
-      | MINUS exp %prec UMINUS
+exp_op
+: exp PLUS exp              { printf("operand1 +  operand2\n"); }
+| exp MINUS exp             { printf("operand1 -  operand2\n"); }
+| exp TIMES exp             { printf("operand1 *  operand2\n"); }
+| exp DIVIDE exp            { printf("operand1 /  operand2\n"); }
+| exp EQ exp                { printf("operand1 =  operand2\n"); }
+| exp NEQ exp               { printf("operand1 <> operand2\n"); }
+| exp LT exp                { printf("operand1 <  operand2\n"); }
+| exp LE exp                { printf("operand1 <= operand2\n"); }
+| exp GT exp                { printf("operand1 >  operand2\n"); }
+| exp GE exp                { printf("operand1 >= operand2\n"); }
+| exp AND exp               { printf("operand1 &  operand2\n"); }
+| exp OR exp                { printf("operand1 |  operand2\n"); }
+| MINUS exp %prec UMINUS    { printf("- operand\n"); }
 
-exp_call: ID LPAREN argument_fields RPAREN
+exp_call
+: ID LPAREN argument_fields RPAREN
 
-exp_define: ID LBRACE record_fields RBRACE
-          | ID LBRACK exp RBRACK OF exp
+exp_define
+: ID LBRACE record_fields RBRACE
+| ID LBRACK exp RBRACK OF exp
 
-exp_assign: left_value ASSIGN exp
+exp_assign
+: left_value ASSIGN exp
 
-exp_if: IF exp THEN exp
-      | IF exp THEN exp ELSE exp
+exp_if
+: IF exp THEN exp           { printf("if then\n"); }
+| IF exp THEN exp ELSE exp  { printf("if then else\n"); }
 
-exp_for: FOR ID ASSIGN exp TO exp DO exp
+exp_for
+: FOR ID ASSIGN exp TO exp DO exp
 
-exp_while: WHILE exp DO exp
+exp_while
+: WHILE exp DO exp
 
-exp_break: BREAK
+exp_break
+: BREAK
 
-exp_let: LET declares IN exp_sequence END
-
+exp_let
+: LET declares IN exp_sequence END
 
 /****************************************************************************
  * Declerations
@@ -140,9 +152,3 @@ argument_fields: /* epsilon */
 record_fields: /* epsilon */
              | ID EQ exp
              | ID EQ exp COMMA record_fields
-
-
-
-
-
-

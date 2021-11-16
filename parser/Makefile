@@ -20,4 +20,4 @@ lex.yy.c: tiger.flex
 	flex tiger.flex
 
 clean:
-	rm -f parsetest tester.o lex.yy.o y.tab.c y.tab.h y.tab.o
+	rm -f parsetest tester.o lex.yy.o lex.yy.c y.tab.c y.tab.h y.tab.o y.output

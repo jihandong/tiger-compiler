@@ -29,6 +29,7 @@ typedef enum {
     kind_ast_op_eq,     kind_ast_op_neq,
     kind_ast_op_lt,     kind_ast_op_le,
     kind_ast_op_gt,     kind_ast_op_ge,
+    kind_ast_op_uminus,
 } ast_op;
 
 typedef int ast_pos;
@@ -153,7 +154,7 @@ ast_exp mk_ast_exp_int(ast_pos pos, int i);
 ast_exp mk_ast_exp_string(ast_pos pos, const char *s);
 ast_exp mk_ast_exp_call(ast_pos pos, symbol func, ast_exp_list args);
 ast_exp mk_ast_exp_op(ast_pos pos, ast_op oper, ast_exp left, ast_exp right);
-ast_exp mk_ast_exp_record(ast_pos pos, symbol typ, ast_record_list fields);
+ast_exp mk_ast_exp_record(ast_pos pos, symbol name, ast_record_list fields);
 ast_exp mk_ast_exp_seq(ast_pos pos, ast_exp_list seq);
 ast_exp mk_ast_exp_assign(ast_pos pos, ast_var var, ast_exp exp);
 ast_exp mk_ast_exp_if(ast_pos pos, ast_exp test, ast_exp then, ast_exp elsee);

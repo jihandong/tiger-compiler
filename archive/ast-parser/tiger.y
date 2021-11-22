@@ -60,7 +60,7 @@ exp
 
 left_value
 : ID                            { $$ = mk_ast_var_trival(AST_POS, $1); }
-| left_value DOT ID             { $$ = mk_ast_var_field(AST_POS, $1, $3; }
+| left_value DOT ID             { $$ = mk_ast_var_field(AST_POS, $1, $3); }
 | left_value LBRACK exp RBRACK  { $$ = mk_ast_var_subscript(AST_POS, $1, $3); }
 
 exp_value
@@ -125,25 +125,25 @@ declares
 | declare declares  { $$ = mk_ast_dec_list($1, $2); }
 
 declare
-: type_declare      { ; }
-| variable_declare  { ; }
-| function_declare  { ; }
+: type_declare      { $$ = $1; }
+| function_declare  { $$ = $1; }
+| variable_declare  { $$ = $1; }
 
 type_declare
-: TYPE ID EQ type   { $$ = mk_ast_dec_type }
+: TYPE ID EQ type   { $$ = mk_ast_type_dec($2, $4); }
 
 type
-: ID                        { ; }
-| LBRACE type_fields RBRACE { ; }
-| ARRAY OF ID               { ; }
+: ID                        { $$ = mk_ast_type_name(AST_POS, $1); }
+| ARRAY OF ID               { $$ = mk_ast_type_array(AST_POS, $3); }
+| LBRACE type_fields RBRACE { $$ = mk_ast_type_record(AST_POS, $2); }
 
 variable_declare
-: VAR ID ASSIGN exp             { ; }
-| VAR ID COLON ID ASSIGN exp    { ; }
+: VAR ID ASSIGN exp             { $$ = mk_ast_dec_var(AST_POS, $2, NULL, $4); }
+| VAR ID COLON ID ASSIGN exp    { $$ = mk_ast_dec_var(AST_POS, $2, $4, $6); }
 
 function_declare
-: FUNCTION ID LPAREN type_fields RPAREN EQ exp          { ; }
-| FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ exp { ; }
+: FUNCTION ID LPAREN type_fields RPAREN EQ exp          { $$ = mk_ast_func_dec(AST_POS, $2, $4, NULL, $7); }
+| FUNCTION ID LPAREN type_fields RPAREN COLON ID EQ exp { $$ = mk_ast_func_dec(AST_POS, $2, $4, $7, $9); }
 
 /****************************************************************************
  * Fields
@@ -151,8 +151,8 @@ function_declare
 
 type_fields
 : /* epsilon */                 { $$ = NULL; }
-| ID COLON ID                   { }
-| ID COLON ID COMMA type_fields { }
+| ID COLON ID                   { $$ = mk_ast_arg_list($1, NULL); }
+| ID COLON ID COMMA type_fields { $$ = mk_ast_arg_list($1, $3); }
 
 sequence_fields
 : exp                           { $$ = mk_ast_exp_list($1, NULL); }

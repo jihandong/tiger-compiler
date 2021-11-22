@@ -3,6 +3,7 @@
 
 #include "symbol.h"
 #include "ast.h"
+#include "util.h"
 
 /****************************************************************************
  * variables
@@ -10,7 +11,7 @@
 
 ast_var mk_ast_var_trival(ast_pos pos, symbol sym)
 {
-    ast_var p = malloc(sizeof(*p));
+    ast_var p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_var_trival;
     p->pos      = pos;
@@ -21,7 +22,7 @@ ast_var mk_ast_var_trival(ast_pos pos, symbol sym)
 
 ast_var mk_ast_var_field(ast_pos pos, ast_var var, symbol sym)
 {
-    ast_var p = malloc(sizeof(*p));
+    ast_var p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_var_field;
     p->pos          = pos;
@@ -33,7 +34,7 @@ ast_var mk_ast_var_field(ast_pos pos, ast_var var, symbol sym)
 
 ast_var mk_ast_var_subscript(ast_pos pos, ast_var var, ast_exp exp)
 {
-    ast_var p = malloc(sizeof(*p));
+    ast_var p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_var_subscript;
     p->pos              = pos;
@@ -49,7 +50,7 @@ ast_var mk_ast_var_subscript(ast_pos pos, ast_var var, ast_exp exp)
 
 ast_exp mk_ast_exp_var(ast_pos pos, ast_var var)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_exp_var;
     p->pos      = pos;
@@ -60,7 +61,7 @@ ast_exp mk_ast_exp_var(ast_pos pos, ast_var var)
 
 ast_exp mk_ast_exp_nil(ast_pos pos)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_exp_nil;
     p->pos      = pos;
@@ -70,7 +71,7 @@ ast_exp mk_ast_exp_nil(ast_pos pos)
 
 ast_exp mk_ast_exp_int(ast_pos pos, int i)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_exp_int;
     p->pos      = pos;
@@ -81,7 +82,7 @@ ast_exp mk_ast_exp_int(ast_pos pos, int i)
 
 ast_exp mk_ast_exp_string(ast_pos pos, const char *s)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_exp_string;
     p->pos          = pos;
@@ -92,7 +93,7 @@ ast_exp mk_ast_exp_string(ast_pos pos, const char *s)
 
 ast_exp mk_ast_exp_call(ast_pos pos, symbol func, ast_exp_list args)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_exp_call;
     p->pos          = pos;
@@ -104,7 +105,7 @@ ast_exp mk_ast_exp_call(ast_pos pos, symbol func, ast_exp_list args)
 
 ast_exp mk_ast_exp_op(ast_pos pos, ast_op op, ast_exp left, ast_exp right)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_exp_call;
     p->pos          = pos;
@@ -115,9 +116,9 @@ ast_exp mk_ast_exp_op(ast_pos pos, ast_op op, ast_exp left, ast_exp right)
     return p;
 }
 
-ast_exp mk_ast_exp_record(ast_pos pos, symbol name, ast_record_list fields)
+ast_exp mk_ast_exp_record(ast_pos pos, symbol name, ast_efield_list fields)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_record;
     p->pos              = pos;
@@ -129,7 +130,7 @@ ast_exp mk_ast_exp_record(ast_pos pos, symbol name, ast_record_list fields)
 
 ast_exp mk_ast_exp_seq(ast_pos pos, ast_exp_list seq)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_exp_seq;
     p->pos      = pos;
@@ -140,7 +141,7 @@ ast_exp mk_ast_exp_seq(ast_pos pos, ast_exp_list seq)
 
 ast_exp mk_ast_exp_assign(ast_pos pos, ast_var var, ast_exp exp)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_exp_assign;
     p->pos          = pos;
@@ -152,7 +153,7 @@ ast_exp mk_ast_exp_assign(ast_pos pos, ast_var var, ast_exp exp)
 
 ast_exp mk_ast_exp_if(ast_pos pos, ast_exp cond, ast_exp then, ast_exp else_)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_exp_if;
     p->pos          = pos;
@@ -165,7 +166,7 @@ ast_exp mk_ast_exp_if(ast_pos pos, ast_exp cond, ast_exp then, ast_exp else_)
 
 ast_exp mk_ast_exp_while(ast_pos pos, ast_exp cond, ast_exp body)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_while;
     p->pos              = pos;
@@ -177,7 +178,7 @@ ast_exp mk_ast_exp_while(ast_pos pos, ast_exp cond, ast_exp body)
 
 ast_exp mk_ast_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp body)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_for;
     p->pos              = pos;
@@ -192,7 +193,7 @@ ast_exp mk_ast_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp 
 
 ast_exp mk_ast_exp_break(ast_pos pos)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_break;
     p->pos              = pos;
@@ -202,7 +203,7 @@ ast_exp mk_ast_exp_break(ast_pos pos)
 
 ast_exp mk_ast_exp_let(ast_pos pos, ast_dec_list decs, ast_exp body)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_let;
     p->pos              = pos;
@@ -214,7 +215,7 @@ ast_exp mk_ast_exp_let(ast_pos pos, ast_dec_list decs, ast_exp body)
 
 ast_exp mk_ast_exp_array(ast_pos pos, symbol name, ast_exp size, ast_exp init)
 {
-    ast_exp p = malloc(sizeof(*p));
+    ast_exp p = try_malloc(sizeof(*p));
 
     p->kind             = kind_ast_exp_array;
     p->pos              = pos;
@@ -231,7 +232,7 @@ ast_exp mk_ast_exp_array(ast_pos pos, symbol name, ast_exp size, ast_exp init)
 
 ast_dec mk_ast_dec_function(ast_pos pos, ast_func_dec_list function)
 {
-    ast_dec p = malloc(sizeof(*p));
+    ast_dec p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_dec_function;
     p->pos          = pos;
@@ -242,7 +243,7 @@ ast_dec mk_ast_dec_function(ast_pos pos, ast_func_dec_list function)
 
 ast_dec mk_ast_dec_type(ast_pos pos, ast_type_dec_list type)
 {
-    ast_dec p = malloc(sizeof(*p));
+    ast_dec p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_dec_type;
     p->pos      = pos;
@@ -253,7 +254,7 @@ ast_dec mk_ast_dec_type(ast_pos pos, ast_type_dec_list type)
 
 ast_dec mk_ast_dec_var(ast_pos pos, symbol var, symbol name, ast_exp init)
 {
-    ast_dec p = malloc(sizeof(*p));
+    ast_dec p = try_malloc(sizeof(*p));
 
     p->kind         = kind_ast_dec_var;
     p->pos          = pos;
@@ -271,7 +272,7 @@ ast_dec mk_ast_dec_var(ast_pos pos, symbol var, symbol name, ast_exp init)
 
 ast_type mk_ast_type_name(ast_pos pos, symbol name)
 {
-    ast_type p = malloc(sizeof(*p));
+    ast_type p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_dec_var;
     p->pos      = pos;
@@ -282,7 +283,7 @@ ast_type mk_ast_type_name(ast_pos pos, symbol name)
 
 ast_type mk_ast_type_array(ast_pos pos, symbol array)
 {
-    ast_type p = malloc(sizeof(*p));
+    ast_type p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_dec_var;
     p->pos      = pos;
@@ -291,9 +292,9 @@ ast_type mk_ast_type_array(ast_pos pos, symbol array)
     return p;
 }
 
-ast_type mk_ast_type_record(ast_pos pos, ast_arg_list record)
+ast_type mk_ast_type_record(ast_pos pos, ast_field_list record)
 {
-    ast_type p = malloc(sizeof(*p));
+    ast_type p = try_malloc(sizeof(*p));
 
     p->kind     = kind_ast_dec_var;
     p->pos      = pos;
@@ -306,10 +307,10 @@ ast_type mk_ast_type_record(ast_pos pos, ast_arg_list record)
  * Link List
  ****************************************************************************/
 
-ast_func_dec mk_ast_func_dec(ast_pos pos, symbol name, ast_arg_list params,
+ast_func_dec mk_ast_func_dec(ast_pos pos, symbol name, ast_field_list params,
                              symbol result, ast_exp body)
 {
-    ast_func_dec p = checked_malloc(sizeof(*p));
+    ast_func_dec p = try_malloc(sizeof(*p));
 
     p->pos      = pos;
     p->name     = name;
@@ -322,7 +323,7 @@ ast_func_dec mk_ast_func_dec(ast_pos pos, symbol name, ast_arg_list params,
 
 ast_type_dec mk_ast_type_dec(symbol name, ast_type type)
 {
-    ast_type_dec p = checked_malloc(sizeof(*p));
+    ast_type_dec p = try_malloc(sizeof(*p));
 
     p->name = name;
     p->type = type;
@@ -330,9 +331,9 @@ ast_type_dec mk_ast_type_dec(symbol name, ast_type type)
     return p;
 }
 
-ast_arg mk_ast_arg(ast_pos pos, symbol name, symbol type_name)
+ast_field mk_ast_field(ast_pos pos, symbol name, symbol type_name)
 {
-    ast_arg p = checked_malloc(sizeof(*p));
+    ast_field p = try_malloc(sizeof(*p));
 
     p->pos          = pos;
     p->name         = name;
@@ -342,9 +343,9 @@ ast_arg mk_ast_arg(ast_pos pos, symbol name, symbol type_name)
     return p;
 }
 
-ast_record mk_ast_record(symbol name, ast_exp exp)
+ast_efield mk_ast_efield(symbol name, ast_exp exp)
 {
-    ast_record p = checked_malloc(sizeof(*p));
+    ast_efield p = try_malloc(sizeof(*p));
 
     p->name = name;
     p->exp  = exp;
@@ -354,7 +355,7 @@ ast_record mk_ast_record(symbol name, ast_exp exp)
 
 ast_exp_list mk_ast_exp_list(ast_exp head, ast_exp_list tail)
 {
-    ast_exp_list p = malloc(sizeof(*p));
+    ast_exp_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -364,7 +365,7 @@ ast_exp_list mk_ast_exp_list(ast_exp head, ast_exp_list tail)
 
 ast_dec_list mk_ast_dec_list(ast_dec head, ast_dec_list tail)
 {
-    ast_dec_list p = malloc(sizeof(*p));
+    ast_dec_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -374,7 +375,7 @@ ast_dec_list mk_ast_dec_list(ast_dec head, ast_dec_list tail)
 
 ast_func_dec_list mk_ast_func_dec_list(ast_func_dec head, ast_func_dec_list tail)
 {
-    ast_func_dec_list p = malloc(sizeof(*p));
+    ast_func_dec_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -384,7 +385,7 @@ ast_func_dec_list mk_ast_func_dec_list(ast_func_dec head, ast_func_dec_list tail
 
 ast_type_dec_list mk_ast_type_dec_list(ast_type_dec head, ast_type_dec_list tail)
 {
-    ast_type_dec_list p = malloc(sizeof(*p));
+    ast_type_dec_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -392,9 +393,9 @@ ast_type_dec_list mk_ast_type_dec_list(ast_type_dec head, ast_type_dec_list tail
     return p;
 }
 
-ast_arg_list mk_ast_arg_list(ast_arg head, ast_arg_list tail)
+ast_field_list mk_ast_field_list(ast_field head, ast_field_list tail)
 {
-    ast_arg_list p = malloc(sizeof(*p));
+    ast_field_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -402,13 +403,12 @@ ast_arg_list mk_ast_arg_list(ast_arg head, ast_arg_list tail)
     return p;
 }
 
-ast_record_list mk_ast_record_list(ast_record head, ast_record_list tail)
+ast_efield_list mk_ast_efield_list(ast_efield head, ast_efield_list tail)
 {
-    ast_record_list p = malloc(sizeof(*p));
+    ast_efield_list p = try_malloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
 
     return p;
 }
-

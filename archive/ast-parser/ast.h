@@ -130,7 +130,7 @@ struct ast_func_dec_ {
     ast_pos pos; symbol name; ast_field_list params; symbol result; ast_exp body;
 };
 struct ast_type_dec_ { symbol name; ast_type type; };
-struct ast_field_    { symbol name, type_name; ast_pos pos; bool escape; };
+struct ast_field_    { symbol name, type; ast_pos pos; bool escape; };
 struct ast_efield_   { symbol name; ast_exp exp; };
 
 struct ast_exp_list_        { ast_exp       head; ast_exp_list      tail; };

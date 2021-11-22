@@ -1,15 +1,42 @@
 %{
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdio.h>
+#include <stdlib.h>
 #include "ast.h"
+
+/****************************************************************************
+ * Parsing
+ ****************************************************************************/
 
 #define AST_POS 0
 
-int yylex(void); /* function prototype */
+extern FILE *yyin;
+int yyparse(void);
+int yylex(void);
 
 void yyerror(char *s)
 {
     fprintf(stderr, "Parse error: \"%s\"\n", s);
+}
+
+ast_exp ast_root;
+
+ast_exp parse(const char *filename)
+{
+    yyin = fopen(filename, "r");
+    if (!yyin) {
+        fprintf(stderr, "cannot open %s\n", filename);
+        exit(1);
+    }
+
+    if (yyparse() == 0)
+        return ast_root;
+
+    return NULL;
 }
 
 %}
@@ -42,7 +69,7 @@ ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF BREAK NIL FUNCTION VAR TYPE
  * Expressions
  ****************************************************************************/
 
-program: exp { $$ = $1; }
+program: exp { ast_root = $1; }
 
 exp
 : exp_value     { $$ = $1; }
@@ -70,7 +97,7 @@ exp_value
 | left_value    { $$ = mk_ast_exp_var(AST_POS, $1); }
 
 exp_sequence
-: LPAREN sequence_fields RPAREN { $$ = $$2; }
+: LPAREN sequence_fields RPAREN { $$ = mk_ast_exp_seq(AST_POS, $2); }
 
 exp_op
 : exp PLUS exp              { $$ = mk_ast_exp_op(AST_POS, kind_ast_op_plus,   $1, $3); }
@@ -151,17 +178,17 @@ function_declare
 
 type_fields
 : /* epsilon */                 { $$ = NULL; }
-| ID COLON ID                   { $$ = mk_ast_arg_list($1, NULL); }
-| ID COLON ID COMMA type_fields { $$ = mk_ast_arg_list($1, $3); }
+| ID COLON ID                   { $$ = mk_ast_field(AST_POS, $1, $3); }
+| ID COLON ID COMMA type_fields { $$ = mk_ast_field_list(mk_ast_field(AST_POS, $1, $3), $5); }
+
+record_fields
+: ID EQ exp                     { $$ = mk_ast_efield($1, $3); }
+| ID EQ exp COMMA record_fields { $$ = mk_ast_efield_list(mk_ast_efield($1, $3), $5); }
 
 sequence_fields
-: exp                           { $$ = mk_ast_exp_list($1, NULL); }
+: exp                           { $$ = $1; }
 | exp SEMICOLON sequence_fields { $$ = mk_ast_exp_list($1, $3); }
 
 argument_fields
-: exp                       { $$ = mk_ast_arg_list($1, NULL); }
-| exp COMMA argument_fields { $$ = mk_ast_arg_list($1, $3); }
-
-record_fields
-: ID EQ exp                     { $$ = mk_ast_record_list(mk_ast_record($1, $3), NULL); }
-| ID EQ exp COMMA record_fields { $$ = mk_ast_record_list(mk_ast_record($1, $3), $5); }
+: exp                       { $$ = $1; }
+| exp COMMA argument_fields { $$ = mk_ast_exp_list($1, $3); }

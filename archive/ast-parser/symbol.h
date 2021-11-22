@@ -1,1 +1,4 @@
-typedef int symbol;
+typedef struct symbol_
+{
+    const char *name;
+} symbol;

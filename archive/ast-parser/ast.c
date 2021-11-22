@@ -1,3 +1,6 @@
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <stdbool.h>
 
@@ -331,14 +334,14 @@ ast_type_dec mk_ast_type_dec(symbol name, ast_type type)
     return p;
 }
 
-ast_field mk_ast_field(ast_pos pos, symbol name, symbol type_name)
+ast_field mk_ast_field(ast_pos pos, symbol name, symbol type)
 {
     ast_field p = try_malloc(sizeof(*p));
 
-    p->pos          = pos;
-    p->name         = name;
-    p->type_name    = type_name;
-    p->escape       = true;
+    p->pos      = pos;
+    p->name     = name;
+    p->type     = type;
+    p->escape   = true;
 
     return p;
 }
@@ -412,3 +415,5 @@ ast_efield_list mk_ast_efield_list(ast_efield head, ast_efield_list tail)
 
     return p;
 }
+
+

@@ -18,20 +18,21 @@ typedef struct symbol_table_*   symbol_table;
 symbol sym_new(const char *name);
 
 /**
- * get symbol name.
+ * Get symbol name.
  * @param[in] s symbol
  * @return symbol name, cannot fail.
  */
 const char *sym_name(symbol s);
 
 /**
- * make a new empty symbol table.
+ * Make a new empty symbol table.
  * @return new symbol table, cannot fail.
  */
 symbol_table sym_table_new(void);
 
 /**
- * add a new bind(symbol->value) to symbol table.
+ * Add a new bind(symbol->value) to symbol table.
+ * If symbol already exists, old value will be shadowed.
  * @param[in] t     symbol table
  * @param[in] s     bind symbol
  * @param[in] v     bind value
@@ -39,7 +40,7 @@ symbol_table sym_table_new(void);
 void sym_table_add(symbol_table t, symbol s, void *v);
 
 /**
- * get symbol's current value.
+ * Get symbol's current value.
  * @param[in] t     symbol table
  * @param[in] s     symbol
  * @return symbol value, cannot fail.
@@ -47,14 +48,15 @@ void sym_table_add(symbol_table t, symbol s, void *v);
 void *sym_table_get(symbol_table t, symbol s);
 
 /**
- * begin of scope.
+ * Begin of scope.
+ * Push a begin sign into table.
  * @param[in] t     symbol table
  */
 void sym_table_begin(symbol_table t);
 
 
 /**
- * end of scope.
+ * End of scope.
  * @param[in] t     symbol table
  */
 void sym_table_end(symbol_table t);

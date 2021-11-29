@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "symbol.h"
 
 /********************************************************************************
  * External
@@ -15,6 +16,12 @@
 extern FILE *yyin;
 int yyparse(void);
 int yylex(void);
+
+/********************************************************************************
+ * Private
+ ********************************************************************************/
+
+static ast_exp ast_root;
 
 /********************************************************************************
  * Public
@@ -29,6 +36,8 @@ void yyerror(char *s)
 
 ast_exp parse(const char *filename)
 {
+    ast_exp ret = NULL;
+
     yyin = fopen(filename, "r");
     if (!yyin) {
         fprintf(stderr, "cannot open %s\n", filename);
@@ -36,9 +45,10 @@ ast_exp parse(const char *filename)
     }
 
     if (yyparse())
-        return NULL;
+        ret = ast_root;
 
-    return ast_root;
+    fclose(yyin);
+    return ret;
 }
 
 /********************************************************************************

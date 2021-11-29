@@ -137,7 +137,7 @@ exp_op
 | exp GE exp                { $$ = mk_ast_exp_op(0, kind_op_ge,     $1, $3); }
 | exp AND exp               { $$ = mk_ast_exp_op(0, kind_op_and,    $1, $3); }
 | exp OR exp                { $$ = mk_ast_exp_op(0, kind_op_or,     $1, $3); }
-| MINUS exp %prec UMINUS    { $$ = mk_ast_exp_op(0, kind_op_uminus, NULL, $3); }
+| MINUS exp %prec UMINUS    { $$ = mk_ast_exp_op(0, kind_op_minus,  mk_ast_exp_int(0, 0), $2); }
 
 exp_call
 : ID LPAREN RPAREN                  { $$ = mk_ast_exp_call(0, $1, NULL); }

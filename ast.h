@@ -2,6 +2,7 @@
  * Include Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include "symbol.h"
 
 /****************************************************************************
@@ -32,8 +33,102 @@ typedef enum {
     kind_op_le,
     kind_op_gt,
     kind_op_ge,
-    kind_op_uminus,
 } ast_op;
+
+struct ast_dec_ {
+    ast_pos pos;
+
+    enum {
+        kind_dec_var,
+        kind_dec_type,
+        kind_dec_func,
+    } kind;
+
+    union {
+	    struct { symbol var, type; ast_exp init; bool escape; }                                 var;
+	    struct { symbol type_s; ast_type type; }                                                type;
+        struct { ast_pos pos; symbol func; ast_tfield_list params; symbol ret; ast_exp body; }  func;
+	} u;
+};
+
+struct ast_exp_ {
+    ast_pos pos;
+
+    enum {
+        kind_exp_var,
+        kind_exp_nil,
+        kind_exp_int,
+        kind_exp_string,
+        kind_exp_call,
+	    kind_exp_op,
+        kind_exp_record,
+        kind_exp_seq,
+        kind_exp_assign,
+        kind_exp_if,
+	    kind_exp_while,
+        kind_exp_for,
+        kind_exp_break,
+        kind_exp_let,
+        kind_exp_array,
+    } kind;
+
+    union {
+        ast_var                                                     var;
+        //                                                          nil;
+	    int                                                         int_;
+	    const char *                                                string_;
+	    struct { symbol func; ast_exp_list args; }                  call;
+	    struct { ast_op op; ast_exp left; ast_exp right; }          op;
+	    struct { symbol record; ast_rfield_list members; }          record;
+	    ast_exp_list                                                seq;
+	    struct { ast_var var; ast_exp exp; }                        assign;
+	    struct { ast_exp cond, then, else_; }                       if_;
+	    struct { ast_exp cond, body;}                               while_;
+	    struct { symbol var; ast_exp lo, hi, body; bool escape; }   for_;
+	    //                                                          break;
+	    struct { ast_dec_list decs; ast_exp body; }                 let;
+	    struct { symbol array; ast_exp size, init; }                array;
+	} u;
+};
+
+struct ast_var_ {
+    ast_pos pos;
+
+    enum {
+        kind_var,
+        kind_var_slice,  // array slice
+        kind_var_member, // record member
+    } kind;
+
+    union {
+        symbol                                  var;
+        struct { ast_var var; ast_exp exp; }    slice;
+        struct { ast_var var; symbol member; }  member;
+    } u;
+};
+
+struct ast_type_ {
+    ast_pos pos;
+
+    enum {
+        kind_type_var,
+        kind_type_array,
+        kind_type_record,
+    } kind;
+
+	union {
+        symbol          var;
+		symbol          array;
+		ast_rfield_list record;
+	} u;
+};
+
+struct ast_dec_list_            { ast_dec       head; ast_dec_list      tail; };
+struct ast_exp_list_            { ast_exp       head; ast_exp_list      tail; };
+struct ast_type_field_list_     { ast_tfield    head; ast_tfield_list   tail; };
+struct ast_record_field_list_   { ast_rfield    head; ast_rfield_list   tail; };
+struct ast_type_field_          { symbol var, type; ast_pos pos; bool escape; };
+struct ast_record_field_        { symbol var; ast_exp exp; };
 
 /****************************************************************************
  * Public Functions

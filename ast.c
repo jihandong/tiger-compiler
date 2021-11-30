@@ -3,7 +3,6 @@
  ****************************************************************************/
 
 #include <stdbool.h>
-
 #include "symbol.h"
 #include "ast.h"
 #include "util.h"
@@ -113,7 +112,7 @@ ast_exp ast_mk_exp_op(ast_pos pos, ast_op op, ast_exp left, ast_exp right)
 {
     ast_exp p = try_malloc(sizeof(*p));
 
-    p->kind         = kind_exp_call;
+    p->kind         = kind_exp_op;
     p->pos          = pos;
     p->u.op.op      = op;
     p->u.op.left    = left;

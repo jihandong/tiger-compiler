@@ -86,7 +86,7 @@ struct ast_exp_ {
 	    struct { ast_exp cond, body;}                               while_;
 	    struct { symbol var; ast_exp lo, hi, body; bool escape; }   for_;
 	    //                                                          break;
-	    struct { ast_dec_list decs; ast_exp body; }                 let;
+	    struct { ast_dec_list decs; ast_exp_list body; }            let;
 	    struct { symbol array; ast_exp size, init; }                array;
 	} u;
 };
@@ -151,7 +151,7 @@ ast_exp ast_mk_exp_if(ast_pos pos, ast_exp test, ast_exp then, ast_exp elsee);
 ast_exp ast_mk_exp_while(ast_pos pos, ast_exp test, ast_exp body);
 ast_exp ast_mk_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp body);
 ast_exp ast_mk_exp_break(ast_pos pos);
-ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp body);
+ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body);
 ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init);
 
 ast_var ast_mk_var(ast_pos pos, symbol var);

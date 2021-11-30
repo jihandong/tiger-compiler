@@ -207,7 +207,7 @@ ast_exp ast_mk_exp_break(ast_pos pos)
     return p;
 }
 
-ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp body)
+ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body)
 {
     ast_exp p = try_malloc(sizeof(*p));
 

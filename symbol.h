@@ -10,19 +10,19 @@ typedef struct symbol_table_*   symbol_table;
  ********************************************************************************/
 
 /**
- * Make a new symbol.
+ * Get symbol or make a new symbol if not exists.
  * Hash symbol name into integer as index.
  * @param[in] mame  symbol name
  * @return new symbol, cannot fail.
  */
-symbol sym_new(const char *name);
+symbol sym_get(const char *name);
 
 /**
  * Get symbol name.
  * @param[in] s symbol
  * @return symbol name, cannot fail.
  */
-const char *sym_name(symbol s);
+const char *sym_get_name(symbol s);
 
 /**
  * Make a new empty symbol table.

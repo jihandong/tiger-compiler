@@ -14,7 +14,7 @@
  ********************************************************************************/
 
 // print white spaces
-#define WHITE(x) ({ int i; for(i = 0; i <= x; i++) fprintf(out, " "); })
+#define WHITE(x) ({ int i; for(i = 0; i <= x; i++) fprintf(out, ".   "); })
 
 static const char * kind_op[] =
 {
@@ -45,11 +45,6 @@ static void ast_pr_rfield_list(FILE *out, ast_rfield_list n, int d);
  * Private Functions
  ********************************************************************************/
 
-static inline void indent(FILE *out, int d) {
-    int i;
-    for(i = 0; i <= d; i++) fprintf(out, " ");
-}
-
 static inline void ast_pr_op(FILE *out, ast_op op)
 {
     fprintf(out, "%s", kind_op[op]);
@@ -62,10 +57,10 @@ static void ast_pr_dec(FILE *out, ast_dec n, int d)
         case kind_dec_var:
             fprintf(out, "dec_variable(\n");
             if (n->u.var.type) {
-                WHITE(d + 1); fprintf(out, "type:%s", sym_get_name(n->u.var.type));
+                WHITE(d + 1); fprintf(out, "type:%s\n", sym_get_name(n->u.var.type));
             }
             ast_pr_exp(out, n->u.var.init, d + 1);
-            WHITE(d + 1); fprintf(out, "escape%s\n", n->u.var.escape ? "true" : "false");
+            WHITE(d + 1); fprintf(out, "escape:%s\n", n->u.var.escape ? "true" : "false");
             break;
 
         case kind_dec_type:
@@ -142,7 +137,7 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
 
         case kind_exp_if:
             fprintf(out, "exp_if(\n");
-            ast_pr_var(out, n->u.if_.cond, d + 1);
+            ast_pr_exp(out, n->u.if_.cond, d + 1);
             ast_pr_exp(out, n->u.if_.then, d + 1);
             if (n->u.if_.else_) {
                 ast_pr_exp(out, n->u.if_.else_, d + 1);
@@ -157,7 +152,7 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
 
         case kind_exp_for:
             fprintf(out, "exp_for(\n");
-            ast_pr_var(out, n->u.for_.var, d + 1);
+            WHITE(d + 1); fprintf(out, "var:%s\n", sym_get_name(n->u.for_.var)); 
             ast_pr_exp(out, n->u.for_.lo, d + 1);
             ast_pr_exp(out, n->u.for_.hi, d + 1);
             ast_pr_exp(out, n->u.for_.body, d + 1);
@@ -176,7 +171,7 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
 
         case kind_exp_array:
             fprintf(out, "exp_array(\n");
-            WHITE(d + 1); fprintf(out, "%s\n", sym_get_name(n->u.array.array));
+            WHITE(d + 1); fprintf(out, "array:%s\n", sym_get_name(n->u.array.array));
             ast_pr_exp(out, n->u.array.size, d + 1);
             ast_pr_exp(out, n->u.array.init, d + 1);
             break;
@@ -192,8 +187,8 @@ static void ast_pr_var(FILE *out, ast_var n, int d)
     WHITE(d);
     switch(n->kind) {
         case kind_var:
-            fprintf(out, "var_simple(\n%s", sym_get_name(n->u.var));
-            break;
+            fprintf(out, "var_simple(%s)\n", sym_get_name(n->u.var));
+            return;
 
         case kind_var_slice:
             fprintf(out, "var_array_slice(\n");
@@ -202,9 +197,9 @@ static void ast_pr_var(FILE *out, ast_var n, int d)
             break;
 
         case kind_var_member:
-            fprintf(out, "var_record_member(\n", sym_get_name(n->u.var));
+            fprintf(out, "var_record_member(\n");
             ast_pr_var(out, n->u.member.var, d + 1);
-            WHITE(d + 1); fprintf("member:%s\n", sym_get_name(n->u.member.member));
+            WHITE(d + 1); fprintf(out, "member:%s\n", sym_get_name(n->u.member.member));
             break;
 
         default:
@@ -218,12 +213,12 @@ static void ast_pr_type(FILE *out, ast_type n, int d)
     WHITE(d);
     switch(n->kind) {
         case kind_type_var:
-            fprintf(out, "type_variable(\n%s\n", sym_get_name(n->u.var));
-            break;
+            fprintf(out, "type_variable(%s)\n", sym_get_name(n->u.var));
+            return;
 
         case kind_type_array:
-            fprintf(out, "type_array(\n%s\n", sym_get_name(n->u.array));
-            break;
+            fprintf(out, "type_array(%s)\n", sym_get_name(n->u.array));
+            return;
 
         case kind_type_record:
             fprintf(out, "type_record(\n");
@@ -238,22 +233,26 @@ static void ast_pr_type(FILE *out, ast_type n, int d)
 
 static void ast_pr_dec_list(FILE *out, ast_dec_list n, int d)
 {
-    WHITE(d); fprintf(out, "dec_list(\n");
+    WHITE(d); fprintf(out, "dec_list(");
     if (n) {
+        fprintf(out, "\n");
         ast_pr_dec(out, n->head, d + 1);
         ast_pr_dec_list(out, n->tail, d + 1);
+        WHITE(d);
     }
-    WHITE(d); fprintf(out, ")\n");
+    fprintf(out, ")\n");
 }
 
 static void ast_pr_exp_list(FILE *out, ast_exp_list n, int d)
 {
-    WHITE(d); fprintf(out, "exp_list(\n");
+    WHITE(d); fprintf(out, "exp_list(");
     if (n) {
+        fprintf(out, "\n");
         ast_pr_exp(out, n->head, d + 1);
         ast_pr_exp_list(out, n->tail, d + 1);
+        WHITE(d);
     }
-    WHITE(d); fprintf(out, ")\n");
+    fprintf(out, ")\n");
 }
 
 static void ast_pr_tfield(FILE *out, ast_tfield n, int d)
@@ -263,12 +262,14 @@ static void ast_pr_tfield(FILE *out, ast_tfield n, int d)
 
 static void ast_pr_tfield_list(FILE *out, ast_tfield_list n, int d)
 {
-    WHITE(d); fprintf(out, "type_field_list(\n");
+    WHITE(d); fprintf(out, "type_field_list(");
     if (n) {
+        fprintf(out, "\n");
         ast_pr_tfield(out, n->head, d + 1);
         ast_pr_tfield_list(out, n->tail, d + 1);
+        WHITE(d);
     }
-    WHITE(d); fprintf(out, ")\n");
+    fprintf(out, ")\n");
 }
 
 static void ast_pr_rfield(FILE *out, ast_rfield n, int d)
@@ -278,12 +279,14 @@ static void ast_pr_rfield(FILE *out, ast_rfield n, int d)
 
 static void ast_pr_rfield_list(FILE *out, ast_rfield_list n, int d)
 {
-    WHITE(d); fprintf(out, "record_field_list(\n");
+    WHITE(d); fprintf(out, "record_field_list(");
     if (n) {
+        fprintf(out, "\n");
         ast_pr_rfield(out, n->head, d + 1);
         ast_pr_rfield_list(out, n->tail, d + 1);
+        WHITE(d);
     }
-    WHITE(d); fprintf(out, ")\n");
+    fprintf(out, ")\n");
 }
 
 

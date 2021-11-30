@@ -2,6 +2,7 @@
  * Include Files
  ********************************************************************************/
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +43,7 @@ struct symbol_table_
  ********************************************************************************/
 
 static symbol hashtable[HASH_TABLE_SIZE];
-static symbol empty = NULL;
+static symbol empty = 0x000000001;
 
 /********************************************************************************
  * Private Functions
@@ -91,9 +92,9 @@ static inline bind bind_mk(symbol key, void *value, bind head, symbol top)
  * Public Functions
  ********************************************************************************/
 
-symbol sym_new(const char *name)
+symbol sym_get(const char *name)
 {
-    int index = BKDRhash(name);
+    unsigned index = BKDRhash(name);
     symbol head = hashtable[index];
     symbol node;
 
@@ -122,7 +123,7 @@ symbol_table sym_table_new(void)
 
 void sym_table_add(symbol_table t, symbol s, void *v)
 {
-    int index = hash(s);
+    unsigned index = ptrhash(s);
 
     assert(t && s);
     t->binds[index] = bind_mk(s, v, t->binds[index], t->top);
@@ -133,7 +134,7 @@ void sym_table_add(symbol_table t, symbol s, void *v)
 
 void *sym_table_get(symbol_table t, symbol s)
 {
-    int index = hash(s);
+    unsigned index = ptrhash(s);
     bind b;
 
     assert(t && s);
@@ -153,12 +154,13 @@ void sym_table_begin(symbol_table t)
 
 void sym_table_end(symbol_table t)
 {
-    int index;
+    unsigned index;
     bind b;
 
     assert(t);
-    for(b = t->top; b->key != empty; b = b->prevtop) {
-        index           = hash(b->key);
+    while(t->top != empty) {
+        index           = ptrhash(t->top);
+        b               = t->binds[index];
         t->binds[index] = b->next;
         t->top          = b->prevtop;
     }

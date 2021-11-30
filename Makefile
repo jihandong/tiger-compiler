@@ -29,7 +29,7 @@ show.o: show.c show.h ast.h
 	cc -g -c show.c
 
 symbol.o: symbol.c util.h
-	cc -g -c symbol.c
+	cc -g -c symbol.c -Wincompatible-pointer-types
 
 util.o: util.c util.h
 	cc -g -c util.c

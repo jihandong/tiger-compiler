@@ -1,6 +1,7 @@
 %{
 
 #include <stdio.h>
+#include "ast.h"
 #include "y.tab.h"
 
 #define RETURN(x) ({ printf("%10s %10s\n", #x, yytext); return x; })

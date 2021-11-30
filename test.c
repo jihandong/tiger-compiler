@@ -3,23 +3,38 @@
 #include "ast.h"
 #include "show.h"
 
-extern ast_exp parse(const char *);
+extern ast_exp ast_root;
+int parse(const char *);
 
 int main(int argc, char **argv) {
-    ast_exp root;
+    const char *sep = "-----------------------------------------------------";
+    FILE* fp;
+    char ch;
 
     if (argc != 2) {
         fprintf(stderr, "usage: a.out filename\n");
         exit(1);
     }
 
-    root = parse(argv[1]);
-    if (!root) {
+    printf("%s\nStep 1. parsing:\n", sep);
+    if (parse(argv[1]) != 0) {
         fprintf(stderr, "parse error\n");
         exit(1);
     }
 
-    ast_pr(stdout, root);
+    printf("%s\nStep 2. ast:\n", sep);
+    ast_pr(stdout, ast_root);
+
+    printf("%s\nStep 3. contrast:\n", sep);
+    fp = fopen(argv[1], "r");
+    if (!fp) {
+        fprintf(stderr, "open error?\n");
+        exit(1);
+    }
+    while((ch = fgetc(fp)) != EOF)
+        putchar(ch);
+
+    printf("%s\nsuccess\n", sep);
 
     return 0;
 }

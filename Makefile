@@ -26,10 +26,10 @@ ast.o: ast.c ast.h
 	cc -g -c ast.c
 
 show.o: show.c show.h ast.h
-	cc -g -c show.c
+	cc -g -c show.c -Wincompatible-pointer-types
 
 symbol.o: symbol.c util.h
-	cc -g -c symbol.c -Wincompatible-pointer-types
+	cc -g -c symbol.c -Wincompatible-pointer-types -Wint-conversion
 
 util.o: util.c util.h
 	cc -g -c util.c

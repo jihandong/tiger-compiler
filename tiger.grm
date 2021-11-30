@@ -13,15 +13,11 @@
  * External
  ********************************************************************************/
 
+ast_exp ast_root;
+
 extern FILE *yyin;
 int yyparse(void);
 int yylex(void);
-
-/********************************************************************************
- * Private
- ********************************************************************************/
-
-static ast_exp ast_root;
 
 /********************************************************************************
  * Public
@@ -32,9 +28,9 @@ void yyerror(char *s)
     fprintf(stderr, "Parse error: \"%s\"\n", s);
 }
 
-ast_exp parse(const char *filename)
+int parse(const char *filename)
 {
-    ast_exp ret = NULL;
+    int ret;
 
     yyin = fopen(filename, "r");
     if (!yyin) {
@@ -42,8 +38,7 @@ ast_exp parse(const char *filename)
         exit(1);
     }
 
-    if (yyparse())
-        ret = ast_root;
+    ret = yyparse();
 
     fclose(yyin);
     return ret;
@@ -57,19 +52,20 @@ ast_exp parse(const char *filename)
 
 %union
 {
-	int                 pos;
-	int                 ival;
-	const char *        sval;
-    ast_dec             dec;
-    ast_exp             exp;
-    ast_var             var;
-    ast_type            type;
-    ast_dec_list        decs;
-    ast_exp_list        exps;
-    ast_tfield          tfield;
-    ast_tfield_list     tfields;
-    ast_rfield          rfield;
-    ast_rfield_list     rfields;
+
+	int                         pos;
+	int                         ival;
+	const char *                sval;
+    ast_dec                     dec;
+    ast_exp                     exp;
+    ast_var                     var;
+    ast_type                    type;
+    ast_dec_list                decs;
+    ast_exp_list                exps;
+    ast_tfield                  tfield;
+    ast_tfield_list             tfields;
+    ast_rfield                  rfield;
+    ast_rfield_list             rfields;
 }
 
 %token <ival>   INT
@@ -89,7 +85,7 @@ ast_exp parse(const char *filename)
 %type <dec>     dec dec_var dec_type dec_func
 %type <exp>     program exp exp_value exp_seq exp_op exp_call exp_create
                 exp_assign exp_if exp_for exp_while exp_break exp_let
-%type <var>     lvalue
+%type <var>     lvalue lvalue_helper
 %type <type>    type
 %type <decs>    decs
 %type <exps>    seq_fields arg_fields
@@ -144,7 +140,7 @@ exp
 | exp_while     { $$ = $1; }
 | exp_break     { $$ = $1; }
 | exp_let       { $$ = $1; }
-| error         { $$ = NULL; }
+| error         { ; }
 
 exp_value
 : NIL       { $$ = ast_mk_exp_nil(0); }
@@ -201,12 +197,22 @@ exp_let
 
 /****************************************************************************
  * variables
+ *
+ * lvalue
+ * : ID                        { $$ = ast_mk_var(0, sym_get($1)); }
+ * | lvalue LBRACK exp RBRACK  { $$ = ast_mk_var_slice(0, $1, $3); }
+ * | lvalue DOT ID             { $$ = ast_mk_var_member(0, $1, sym_get($3)); }
+ *
  ****************************************************************************/
 
 lvalue
-: ID                        { $$ = ast_mk_var(0, sym_get($1)); }
-| lvalue LBRACK exp RBRACK  { $$ = ast_mk_var_slice(0, $1, $3); }
-| lvalue DOT ID             { $$ = ast_mk_var_member(0, $1, sym_get($3)); }
+: ID                { $$ = ast_mk_var(0, sym_get($1)); }
+| ID lvalue_helper  { $$ = ast_mk_var(0, sym_get($1)); /* dummy */ }
+
+lvalue_helper
+: /* epsilon */                     { $$ = NULL; /* dummy */ }
+| LBRACK exp RBRACK lvalue_helper   { $$ = NULL; /* dummy */ }
+| DOT ID lvalue_helper              { $$ = NULL; /* dummy */ }
 
 /****************************************************************************
  * types

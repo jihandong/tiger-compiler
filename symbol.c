@@ -59,7 +59,7 @@ static inline unsigned BKDRhash(const char *s)
     return hash % HASH_TABLE_SIZE;
 }
 
-static inline unsigned ptrhash(symbol *s)
+static inline unsigned ptrhash(symbol s)
 {
     unsigned hash = s;
 
@@ -128,8 +128,6 @@ void sym_table_add(symbol_table t, symbol s, void *v)
     assert(t && s);
     t->binds[index] = bind_mk(s, v, t->binds[index], t->top);
     t->top = s;
-
-    return t->binds[index];
 }
 
 void *sym_table_get(symbol_table t, symbol s)

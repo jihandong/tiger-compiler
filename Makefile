@@ -7,8 +7,8 @@ test.o: test.c ast.h util.h
 y.tab.o: y.tab.c ast.h symbol.h util.h
 	cc -g -c y.tab.c
 
-y.tab.c: tiger.y
-	yacc -dv tiger.y
+y.tab.c: tiger.grm
+	yacc -dv tiger.grm
 
 y.tab.h: y.tab.c
 	echo "y.tab.h was created at the same time as y.tab.c"
@@ -16,8 +16,8 @@ y.tab.h: y.tab.c
 lex.yy.o: lex.yy.c y.tab.h
 	cc -g -c lex.yy.c
 
-lex.yy.c: tiger.flex
-	lex tiger.flex
+lex.yy.c: tiger.lex
+	lex tiger.lex
 
 ast.o: ast.c ast.h
 	cc -g -c ast.c

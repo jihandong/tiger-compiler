@@ -48,10 +48,10 @@ struct ast_dec_ {
 
     union
     {
-	    struct { symbol var, type; ast_exp init; bool escape; }                                 var;
-	    struct { symbol type_s; ast_type type; }                                                type;
+        struct { symbol var, type; ast_exp init; bool escape; }                                 var;
+        struct { symbol type_s; ast_type type; }                                                type;
         struct { ast_pos pos; symbol func; ast_tfield_list params; symbol ret; ast_exp body; }  func;
-	} u;
+    } u;
 };
 
 struct ast_exp_ {
@@ -64,12 +64,12 @@ struct ast_exp_ {
         kind_exp_int,
         kind_exp_string,
         kind_exp_call,
-	    kind_exp_op,
+        kind_exp_op,
         kind_exp_record,
         kind_exp_seq,
         kind_exp_assign,
         kind_exp_if,
-	    kind_exp_while,
+        kind_exp_while,
         kind_exp_for,
         kind_exp_break,
         kind_exp_let,
@@ -80,20 +80,20 @@ struct ast_exp_ {
     {
         ast_var                                                     var;
         //                                                          nil;
-	    int                                                         int_;
-	    const char *                                                string_;
-	    struct { symbol func; ast_exp_list args; }                  call;
-	    struct { ast_op op; ast_exp left; ast_exp right; }          op;
-	    struct { symbol record; ast_rfield_list members; }          record;
-	    ast_exp_list                                                seq;
-	    struct { ast_var var; ast_exp exp; }                        assign;
-	    struct { ast_exp cond, then, else_; }                       if_;
-	    struct { ast_exp cond, body;}                               while_;
-	    struct { symbol var; ast_exp lo, hi, body; bool escape; }   for_;
-	    //                                                          break;
-	    struct { ast_dec_list decs; ast_exp_list body; }            let;
-	    struct { symbol array; ast_exp size, init; }                array;
-	} u;
+        int                                                         int_;
+        const char *                                                string_;
+        struct { symbol func; ast_exp_list args; }                  call;
+        struct { ast_op op; ast_exp left; ast_exp right; }          op;
+        struct { symbol record; ast_rfield_list members; }          record;
+        ast_exp_list                                                seq;
+        struct { ast_var var; ast_exp exp; }                        assign;
+        struct { ast_exp cond, then, else_; }                       if_;
+        struct { ast_exp cond, body;}                               while_;
+        struct { symbol var; ast_exp lo, hi, body; bool escape; }   for_;
+        //                                                          break;
+        struct { ast_dec_list decs; ast_exp_list body; }            let;
+        struct { symbol array; ast_exp size, init; }                array;
+    } u;
 };
 
 struct ast_var_ {
@@ -124,12 +124,12 @@ struct ast_type_ {
         kind_type_record,
     } kind;
 
-	union
+    union
     {
         symbol          var;
-		symbol          array;
-		ast_tfield_list record;
-	} u;
+        symbol          array;
+        ast_tfield_list record;
+    } u;
 };
 
 struct ast_dec_list_            { ast_dec       head; ast_dec_list      tail; };

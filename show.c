@@ -16,7 +16,7 @@
 // print white spaces
 #define WHITE(x) ({ int i; for(i = 0; i <= x; i++) fprintf(out, ".   "); })
 
-static const char * kind_op[] =
+static const char *kind_op[] =
 {
     "plus",
     "minus",

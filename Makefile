@@ -31,6 +31,9 @@ show.o: show.c show.h ast.h
 symbol.o: symbol.c util.h
 	cc -g -c symbol.c -Wincompatible-pointer-types -Wint-conversion
 
+type.o: type.c symbol.h util.h
+	cc -g -c type.c
+
 util.o: util.c util.h
 	cc -g -c util.c
 

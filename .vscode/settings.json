@@ -1,7 +1,0 @@
-{
-    "makefile.extensionOutputFolder": "./.vscode",
-    "files.associations": {
-        "*.lex": "lex",
-        "ast.h": "c"
-    }
-}

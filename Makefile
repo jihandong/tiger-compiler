@@ -36,4 +36,4 @@ util.o: util.c util.h
 
 # clean
 clean:
-	rm -rf test *.o lex.yy.c y.tab.c y.tab.h y.output
+	rm -rf a.out *.o lex.yy.c y.tab.c y.tab.h y.output

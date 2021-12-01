@@ -80,6 +80,7 @@ static void ast_pr_dec(FILE *out, ast_dec n, int d)
             break;
 
         default:
+            all_free();
             assert(0);
     }
     WHITE(d); fprintf(out, ")\n");
@@ -177,6 +178,7 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
             break;
 
         default:
+            all_free();
             assert(0);
     }
     WHITE(d); fprintf(out, ")\n");
@@ -206,6 +208,7 @@ static void ast_pr_var(FILE *out, ast_var n, int d)
                 break;
 
             default:
+                all_free();
                 assert(0);
         }
         WHITE(d); fprintf(out, ")\n");
@@ -230,6 +233,7 @@ static void ast_pr_type(FILE *out, ast_type n, int d)
             break;
 
         default:
+            all_free();
             assert(0);
     }
     WHITE(d); fprintf(out, ")\n");

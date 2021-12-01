@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "ast.h"
 #include "show.h"
+#include "util.h"
 
 extern ast_exp ast_root;
 int parse(const char *);
@@ -36,5 +37,6 @@ int main(int argc, char **argv) {
     ast_pr(stdout, ast_root);
 
     printf("\n%s\nsuccess\n", sep);
+    all_free();
     return 0;
 }

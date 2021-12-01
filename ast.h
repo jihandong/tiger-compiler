@@ -22,7 +22,8 @@ typedef struct ast_record_field_list_ *     ast_rfield_list;
 
 typedef int ast_pos;
 
-typedef enum {
+typedef enum
+{
     kind_op_plus,
     kind_op_minus,
     kind_op_times,
@@ -38,13 +39,15 @@ typedef enum {
 struct ast_dec_ {
     ast_pos pos;
 
-    enum {
+    enum
+    {
         kind_dec_var,
         kind_dec_type,
         kind_dec_func,
     } kind;
 
-    union {
+    union
+    {
 	    struct { symbol var, type; ast_exp init; bool escape; }                                 var;
 	    struct { symbol type_s; ast_type type; }                                                type;
         struct { ast_pos pos; symbol func; ast_tfield_list params; symbol ret; ast_exp body; }  func;
@@ -54,7 +57,8 @@ struct ast_dec_ {
 struct ast_exp_ {
     ast_pos pos;
 
-    enum {
+    enum
+    {
         kind_exp_var,
         kind_exp_nil,
         kind_exp_int,
@@ -72,7 +76,8 @@ struct ast_exp_ {
         kind_exp_array,
     } kind;
 
-    union {
+    union
+    {
         ast_var                                                     var;
         //                                                          nil;
 	    int                                                         int_;
@@ -94,13 +99,15 @@ struct ast_exp_ {
 struct ast_var_ {
     ast_pos pos;
 
-    enum {
+    enum
+    {
         kind_var,
         kind_var_slice,  // array slice
         kind_var_member, // record member
     } kind;
 
-    union {
+    union
+    {
         struct { symbol base; ast_var suffix; }     base;
         struct { ast_exp exp; ast_var suffix; }     slice;
         struct { symbol member; ast_var suffix; }   member;
@@ -110,13 +117,15 @@ struct ast_var_ {
 struct ast_type_ {
     ast_pos pos;
 
-    enum {
+    enum
+    {
         kind_type_var,
         kind_type_array,
         kind_type_record,
     } kind;
 
-	union {
+	union
+    {
         symbol          var;
 		symbol          array;
 		ast_tfield_list record;

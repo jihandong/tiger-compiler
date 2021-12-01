@@ -16,13 +16,13 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    printf("%s\nStep 1. parsing:\n", sep);
+    printf("\n%s\nStep 1. parsing:\n", sep);
     if (parse(argv[1]) != 0) {
         fprintf(stderr, "parse error\n");
         exit(1);
     }
 
-    printf("%s\nStep 2. contrast:\n", sep);
+    printf("\n%s\nStep 2. contrast:\n", sep);
     fp = fopen(argv[1], "r");
     if (!fp) {
         fprintf(stderr, "open error?\n");
@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
         putchar(ch);
     fclose(fp);
 
-    printf("%s\nStep 3. ast:\n", sep);
+    printf("\n%s\nStep 3. ast:\n", sep);
     ast_pr(stdout, ast_root);
 
-    printf("%s\nsuccess\n", sep);
+    printf("\n%s\nsuccess\n", sep);
     return 0;
 }

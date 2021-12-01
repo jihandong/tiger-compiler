@@ -85,7 +85,7 @@ int parse(const char *filename)
 %type <dec>     dec dec_var dec_type dec_func
 %type <exp>     program exp exp_value exp_seq exp_op exp_call exp_create
                 exp_assign exp_if exp_for exp_while exp_break exp_let
-%type <var>     lvalue lvalue_helper
+%type <var>     lvalue
 %type <type>    type
 %type <decs>    decs
 %type <exps>    seqfs argfs
@@ -109,9 +109,9 @@ decs
 | dec decs          { $$ = ast_mk_dec_list($1, $2); }
 
 dec
-: dec_var   { fprintf(stdout, "\\___ var  declare ___/\n"); $$ = $1; }
-| dec_type  { fprintf(stdout, "\\___ type declare ___/\n"); $$ = $1; }
-| dec_func  { fprintf(stdout, "\\___ func declare ___/\n"); $$ = $1; }
+: dec_var   { fprintf(stdout, "declaration(var)\n"); $$ = $1; }
+| dec_type  { fprintf(stdout, "declaration(type)\n"); $$ = $1; }
+| dec_func  { fprintf(stdout, "declaration(func)\n"); $$ = $1; }
 
 dec_var
 : VAR ID ASSIGN exp             { $$ = ast_mk_dec_var(0, sym_get($2), NULL, $4); }
@@ -121,25 +121,27 @@ dec_type
 : TYPE ID EQ type   { $$ = ast_mk_dec_type(sym_get($2), $4); }
 
 dec_func
-: FUNCTION ID LPAREN typefs RPAREN EQ exp          { $$ = ast_mk_dec_func(0, sym_get($2), $4, NULL, $7); }
-| FUNCTION ID LPAREN typefs RPAREN COLON ID EQ exp { $$ = ast_mk_dec_func(0, sym_get($2), $4, sym_get($7), $9); }
+: FUNCTION ID LPAREN RPAREN EQ exp                  { $$ = ast_mk_dec_func(0, sym_get($2), NULL, NULL, $6); }
+| FUNCTION ID LPAREN RPAREN COLON ID EQ exp         { $$ = ast_mk_dec_func(0, sym_get($2), NULL, sym_get($6), $8); }
+| FUNCTION ID LPAREN typefs RPAREN EQ exp           { $$ = ast_mk_dec_func(0, sym_get($2), $4, NULL, $7); }
+| FUNCTION ID LPAREN typefs RPAREN COLON ID EQ exp  { $$ = ast_mk_dec_func(0, sym_get($2), $4, sym_get($7), $9); }
 
 /****************************************************************************
  * expressions
  ****************************************************************************/
 
 exp
-: exp_value     { fprintf(stdout, "\\___ value  expression ___/\n"); $$ = $1; }
-| exp_seq       { fprintf(stdout, "\\___ seq    expression ___/\n"); $$ = $1; }
-| exp_op        { fprintf(stdout, "\\___ op     expression ___/\n"); $$ = $1; }
-| exp_call      { fprintf(stdout, "\\___ call   expression ___/\n"); $$ = $1; }
-| exp_create    { fprintf(stdout, "\\___ create expression ___/\n"); $$ = $1; }
-| exp_assign    { fprintf(stdout, "\\___ assign expression ___/\n"); $$ = $1; }
-| exp_if        { fprintf(stdout, "\\___ if     expression ___/\n"); $$ = $1; }
-| exp_for       { fprintf(stdout, "\\___ for    expression ___/\n"); $$ = $1; }
-| exp_while     { fprintf(stdout, "\\___ while  expression ___/\n"); $$ = $1; }
-| exp_break     { fprintf(stdout, "\\___ break  expression ___/\n"); $$ = $1; }
-| exp_let       { fprintf(stdout, "\\___ let    expression ___/\n"); $$ = $1; }
+: exp_value     { fprintf(stdout, "expression(value)\n"); $$ = $1; }
+| exp_seq       { fprintf(stdout, "expression(seq)\n"); $$ = $1; }
+| exp_op        { fprintf(stdout, "expression(op)\n"); $$ = $1; }
+| exp_call      { fprintf(stdout, "expression(call)\n"); $$ = $1; }
+| exp_create    { fprintf(stdout, "expression(create)\n"); $$ = $1; }
+| exp_assign    { fprintf(stdout, "expression(assign)\n"); $$ = $1; }
+| exp_if        { fprintf(stdout, "expression(if)\n"); $$ = $1; }
+| exp_for       { fprintf(stdout, "expression(for)\n"); $$ = $1; }
+| exp_while     { fprintf(stdout, "expression(while)\n"); $$ = $1; }
+| exp_break     { fprintf(stdout, "expression(break)\n"); $$ = $1; }
+| exp_let       { fprintf(stdout, "expression(let)\n"); $$ = $1; }
 | error         { ; }
 
 exp_value
@@ -192,37 +194,26 @@ exp_break
 : BREAK { $$ = ast_mk_exp_break(0); }
 
 exp_let
-: LET decs IN END       { $$ = ast_mk_exp_let(0, $2, NULL); }
-| LET decs IN seqfs END { $$ = ast_mk_exp_let(0, $2, $4); }
+: LET decs IN seqfs END { $$ = ast_mk_exp_let(0, $2, $4); }
 
 /****************************************************************************
  * variables
- *
- * lvalue
- * : ID                        { $$ = ast_mk_var(0, sym_get($1)); }
- * | lvalue LBRACK exp RBRACK  { $$ = ast_mk_var_slice(0, $1, $3); }
- * | lvalue DOT ID             { $$ = ast_mk_var_member(0, $1, sym_get($3)); }
- *
  ****************************************************************************/
 
 lvalue
-: ID                { $$ = ast_mk_var(0, sym_get($1)); }
-| ID lvalue_helper  { $$ = ast_mk_var(0, sym_get($1)); /* dummy */ }
-
-lvalue_helper
-: /* epsilon */                     { $$ = NULL; /* dummy */ }
-| LBRACK exp RBRACK lvalue_helper   { $$ = NULL; /* dummy */ }
-| DOT ID lvalue_helper              { $$ = NULL; /* dummy */ }
+: ID                        { $$ = ast_mk_var(0, sym_get($1)); }
+| lvalue LBRACK exp RBRACK  { $$ = ast_mk_var_slice(0, $1, $3); }
+| lvalue DOT ID             { $$ = ast_mk_var_member(0, $1, sym_get($3)); }
 
 /****************************************************************************
  * types
  ****************************************************************************/
 
 type
-: ID                    { fprintf(stdout, "\\___ var    type ___/\n"); $$ = ast_mk_type_var(0, sym_get($1)); }
-| ARRAY OF ID           { fprintf(stdout, "\\___ array  type ___/\n"); $$ = ast_mk_type_array(0, sym_get($3)); }
-| LBRACE typefs RBRACE  { fprintf(stdout, "\\___ record type ___/\n"); $$ = ast_mk_type_record(0, $2); }
-| LBRACE RBRACE         { fprintf(stdout, "\\___ record type ___/\n"); $$ = ast_mk_type_record(0, NULL); }
+: ID                    { fprintf(stdout, "type(simple)\n"); $$ = ast_mk_type_var(0, sym_get($1)); }
+| ARRAY OF ID           { fprintf(stdout, "type(array)\n"); $$ = ast_mk_type_array(0, sym_get($3)); }
+| LBRACE typefs RBRACE  { fprintf(stdout, "type(record)\n"); $$ = ast_mk_type_record(0, $2); }
+| LBRACE RBRACE         { fprintf(stdout, "type(record)\n"); $$ = ast_mk_type_record(0, NULL); }
 
 /****************************************************************************
  * link list

@@ -121,7 +121,7 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
 
         case kind_exp_record:
             fprintf(out, "exp_record(\n");
-            ast_pr_rfield_list(out, n->u.record.members, d + 1); fprintf(out, "\n");
+            ast_pr_rfield_list(out, n->u.record.members, d + 1);
             break;
 
         case kind_exp_seq:

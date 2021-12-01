@@ -296,7 +296,7 @@ ast_type ast_mk_type_array(ast_pos pos, symbol array)
     return p;
 }
 
-ast_type ast_mk_type_record(ast_pos pos, ast_rfield_list record)
+ast_type ast_mk_type_record(ast_pos pos, ast_tfield_list record)
 {
     ast_type p = try_malloc(sizeof(*p));
 

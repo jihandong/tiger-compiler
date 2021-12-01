@@ -222,7 +222,7 @@ static void ast_pr_type(FILE *out, ast_type n, int d)
 
         case kind_type_record:
             fprintf(out, "type_record(\n");
-            ast_pr_rfield_list(out, n->u.record, d + 1);
+            ast_pr_tfield_list(out, n->u.record, d + 1);
             break;
 
         default:
@@ -257,7 +257,7 @@ static void ast_pr_exp_list(FILE *out, ast_exp_list n, int d)
 
 static void ast_pr_tfield(FILE *out, ast_tfield n, int d)
 {
-    WHITE(d); fprintf(out, "type_field(");
+    WHITE(d); fprintf(out, "type_field(\n");
     WHITE(d + 1); fprintf(out, "var:%s\n", sym_get_name(n->var));
     WHITE(d + 1); fprintf(out, "type:%s\n", sym_get_name(n->type));
     WHITE(d + 1); fprintf(out, "escape:%s\n", n->escape ? "true" : "false");
@@ -278,7 +278,7 @@ static void ast_pr_tfield_list(FILE *out, ast_tfield_list n, int d)
 
 static void ast_pr_rfield(FILE *out, ast_rfield n, int d)
 {
-    WHITE(d); fprintf(out, "record_field(");
+    WHITE(d); fprintf(out, "record_field(\n");
     WHITE(d + 1); fprintf(out, "member:%s\n", sym_get_name(n->var));
     ast_pr_exp(out, n->exp, d + 1);
     WHITE(d); fprintf(out, ")\n");

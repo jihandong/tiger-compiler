@@ -119,7 +119,7 @@ struct ast_type_ {
 	union {
         symbol          var;
 		symbol          array;
-		ast_rfield_list record;
+		ast_tfield_list record;
 	} u;
 };
 
@@ -160,7 +160,7 @@ ast_var ast_mk_var_member(ast_pos pos, ast_var var, symbol member);
 
 ast_type ast_mk_type_var(ast_pos pos, symbol name);
 ast_type ast_mk_type_array(ast_pos pos, symbol array);
-ast_type ast_mk_type_record(ast_pos pos, ast_rfield_list record);
+ast_type ast_mk_type_record(ast_pos pos, ast_tfield_list record);
 
 ast_dec_list ast_mk_dec_list(ast_dec head, ast_dec_list tail);
 ast_exp_list ast_mk_exp_list(ast_exp head, ast_exp_list tail);

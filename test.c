@@ -22,10 +22,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    printf("%s\nStep 2. ast:\n", sep);
-    ast_pr(stdout, ast_root);
-
-    printf("%s\nStep 3. contrast:\n", sep);
+    printf("%s\nStep 2. contrast:\n", sep);
     fp = fopen(argv[1], "r");
     if (!fp) {
         fprintf(stderr, "open error?\n");
@@ -33,8 +30,11 @@ int main(int argc, char **argv) {
     }
     while((ch = fgetc(fp)) != EOF)
         putchar(ch);
+    fclose(fp);
+
+    printf("%s\nStep 3. ast:\n", sep);
+    ast_pr(stdout, ast_root);
 
     printf("%s\nsuccess\n", sep);
-
     return 0;
 }

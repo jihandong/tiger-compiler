@@ -101,9 +101,9 @@ struct ast_var_ {
     } kind;
 
     union {
-        symbol                                  var;
-        struct { ast_var var; ast_exp exp; }    slice;
-        struct { ast_var var; symbol member; }  member;
+        struct { symbol base; ast_var suffix; }     base;
+        struct { ast_exp exp; ast_var suffix; }     slice;
+        struct { symbol member; ast_var suffix; }   member;
     } u;
 };
 
@@ -154,9 +154,9 @@ ast_exp ast_mk_exp_break(ast_pos pos);
 ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body);
 ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init);
 
-ast_var ast_mk_var(ast_pos pos, symbol var);
-ast_var ast_mk_var_slice(ast_pos pos, ast_var var, ast_exp exp);
-ast_var ast_mk_var_member(ast_pos pos, ast_var var, symbol member);
+ast_var ast_mk_var(ast_pos pos, symbol base, ast_var suffix);
+ast_var ast_mk_var_slice(ast_pos pos, ast_exp exp, ast_var suffix);
+ast_var ast_mk_var_member(ast_pos pos, symbol member, ast_var suffix);
 
 ast_type ast_mk_type_var(ast_pos pos, symbol name);
 ast_type ast_mk_type_array(ast_pos pos, symbol array);

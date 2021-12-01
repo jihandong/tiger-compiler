@@ -235,37 +235,38 @@ ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init)
  * Public Functions: variables
  ****************************************************************************/
 
-ast_var ast_mk_var(ast_pos pos, symbol var)
+ast_var ast_mk_var(ast_pos pos, symbol base, ast_var suffix)
 {
     ast_var p = try_malloc(sizeof(*p));
 
-    p->kind     = kind_var;
-    p->pos      = pos;
-    p->u.var    = var;
+    p->kind             = kind_var;
+    p->pos              = pos;
+    p->u.base.base      = base;
+    p->u.base.suffix    = suffix;
 
     return p;
 }
 
-ast_var ast_mk_var_slice(ast_pos pos, ast_var var, ast_exp exp)
+ast_var ast_mk_var_slice(ast_pos pos, ast_exp exp, ast_var suffix)
 {
     ast_var p = try_malloc(sizeof(*p));
 
-    p->kind         = kind_var_slice;
-    p->pos          = pos;
-    p->u.slice.var  = var;
-    p->u.slice.exp  = exp;
+    p->kind             = kind_var_slice;
+    p->pos              = pos;
+    p->u.slice.exp      = exp;
+    p->u.slice.suffix   = suffix;
 
     return p;
 }
 
-ast_var ast_mk_var_member(ast_pos pos, ast_var var, symbol member)
+ast_var ast_mk_var_member(ast_pos pos, symbol member, ast_var suffix)
 {
     ast_var p = try_malloc(sizeof(*p));
 
     p->kind             = kind_var_member;
     p->pos              = pos;
-    p->u.member.var     = var;
     p->u.member.member  = member;
+    p->u.member.suffix  = suffix;
 
     return p;
 }

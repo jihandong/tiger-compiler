@@ -184,28 +184,32 @@ static void ast_pr_exp(FILE *out, ast_exp n, int d)
 
 static void ast_pr_var(FILE *out, ast_var n, int d)
 {
-    WHITE(d);
-    switch(n->kind) {
-        case kind_var:
-            fprintf(out, "var_simple(%s)\n", sym_get_name(n->u.var));
-            return;
+    if (n) {
+        WHITE(d);
+        switch(n->kind) {
+            case kind_var:
+                fprintf(out, "var(\n");
+                WHITE(d + 1); fprintf(out, "base:%s\n", sym_get_name(n->u.base.base));
+                ast_pr_var(out, n->u.slice.suffix, d + 1);
+                return;
 
-        case kind_var_slice:
-            fprintf(out, "var_array_slice(\n");
-            ast_pr_var(out, n->u.slice.var, d + 1);
-            ast_pr_exp(out, n->u.slice.exp, d + 1);
-            break;
+            case kind_var_slice:
+                fprintf(out, "var_array_slice(\n");
+                ast_pr_exp(out, n->u.slice.exp, d + 1);
+                ast_pr_var(out, n->u.slice.suffix, d + 1);
+                break;
 
-        case kind_var_member:
-            fprintf(out, "var_record_member(\n");
-            ast_pr_var(out, n->u.member.var, d + 1);
-            WHITE(d + 1); fprintf(out, "member:%s\n", sym_get_name(n->u.member.member));
-            break;
+            case kind_var_member:
+                fprintf(out, "var_record_member(\n");
+                WHITE(d + 1); fprintf(out, "member:%s\n", sym_get_name(n->u.member.member));
+                ast_pr_var(out, n->u.slice.suffix, d + 1);
+                break;
 
-        default:
-            assert(0);
+            default:
+                assert(0);
+        }
+        WHITE(d); fprintf(out, ")\n");
     }
-    WHITE(d); fprintf(out, ")\n");
 }
 
 static void ast_pr_type(FILE *out, ast_type n, int d)

@@ -80,12 +80,12 @@ int parse(const char *filename)
 %nonassoc   EQ NEQ LT LE GT GE
 %left       PLUS MINUS
 %left       TIMES DIVIDE
-%left       UMINUS
+%nonassoc   UMINUS
 
 %type <dec>     dec dec_var dec_type dec_func
 %type <exp>     program exp exp_value exp_seq exp_op exp_call exp_create
                 exp_assign exp_if exp_for exp_while exp_break exp_let
-%type <var>     lvalue
+%type <var>     lvalue lvalue_suffix
 %type <type>    type
 %type <decs>    decs
 %type <exps>    seqfs argfs
@@ -109,9 +109,9 @@ decs
 | dec decs          { $$ = ast_mk_dec_list($1, $2); }
 
 dec
-: dec_var   { fprintf(stdout, "declaration(var)\n"); $$ = $1; }
-| dec_type  { fprintf(stdout, "declaration(type)\n"); $$ = $1; }
-| dec_func  { fprintf(stdout, "declaration(func)\n"); $$ = $1; }
+: dec_var   { printf("declaration(var)\n"); $$ = $1; }
+| dec_type  { printf("declaration(type)\n"); $$ = $1; }
+| dec_func  { printf("declaration(func)\n"); $$ = $1; }
 
 dec_var
 : VAR ID ASSIGN exp             { $$ = ast_mk_dec_var(0, sym_get($2), NULL, $4); }
@@ -131,17 +131,17 @@ dec_func
  ****************************************************************************/
 
 exp
-: exp_value     { fprintf(stdout, "expression(value)\n"); $$ = $1; }
-| exp_seq       { fprintf(stdout, "expression(seq)\n"); $$ = $1; }
-| exp_op        { fprintf(stdout, "expression(op)\n"); $$ = $1; }
-| exp_call      { fprintf(stdout, "expression(call)\n"); $$ = $1; }
-| exp_create    { fprintf(stdout, "expression(create)\n"); $$ = $1; }
-| exp_assign    { fprintf(stdout, "expression(assign)\n"); $$ = $1; }
-| exp_if        { fprintf(stdout, "expression(if)\n"); $$ = $1; }
-| exp_for       { fprintf(stdout, "expression(for)\n"); $$ = $1; }
-| exp_while     { fprintf(stdout, "expression(while)\n"); $$ = $1; }
-| exp_break     { fprintf(stdout, "expression(break)\n"); $$ = $1; }
-| exp_let       { fprintf(stdout, "expression(let)\n"); $$ = $1; }
+: exp_value     { printf("expression(value)\n");    $$ = $1; }
+| exp_seq       { printf("expression(seq)\n");      $$ = $1; }
+| exp_op        { printf("expression(op)\n");       $$ = $1; }
+| exp_call      { printf("expression(call)\n");     $$ = $1; }
+| exp_create    { printf("expression(create)\n");   $$ = $1; }
+| exp_assign    { printf("expression(assign)\n");   $$ = $1; }
+| exp_if        { printf("expression(if)\n");       $$ = $1; }
+| exp_for       { printf("expression(for)\n");      $$ = $1; }
+| exp_while     { printf("expression(while)\n");    $$ = $1; }
+| exp_break     { printf("expression(break)\n");    $$ = $1; }
+| exp_let       { printf("expression(let)\n");      $$ = $1; }
 | error         { ; }
 
 exp_value
@@ -201,19 +201,23 @@ exp_let
  ****************************************************************************/
 
 lvalue
-: ID                        { $$ = ast_mk_var(0, sym_get($1)); }
-| lvalue LBRACK exp RBRACK  { $$ = ast_mk_var_slice(0, $1, $3); }
-| lvalue DOT ID             { $$ = ast_mk_var_member(0, $1, sym_get($3)); }
+: ID                { $$ = ast_mk_var(0, sym_get($1), NULL); }
+| ID lvalue_suffix  { $$ = ast_mk_var(0, sym_get($1), $2); }
+
+lvalue_suffix
+: /* spsilon */                     { $$ = NULL; }
+| LBRACK exp RBRACK lvalue_suffix   { $$ = ast_mk_var_slice(0, $2, $4); }
+| DOT ID lvalue_suffix              { $$ = ast_mk_var_member(0, sym_get($2), $3); }
 
 /****************************************************************************
  * types
  ****************************************************************************/
 
 type
-: ID                    { fprintf(stdout, "type(simple)\n"); $$ = ast_mk_type_var(0, sym_get($1)); }
-| ARRAY OF ID           { fprintf(stdout, "type(array)\n"); $$ = ast_mk_type_array(0, sym_get($3)); }
-| LBRACE typefs RBRACE  { fprintf(stdout, "type(record)\n"); $$ = ast_mk_type_record(0, $2); }
-| LBRACE RBRACE         { fprintf(stdout, "type(record)\n"); $$ = ast_mk_type_record(0, NULL); }
+: ID                    { printf("type(simple)\n"); $$ = ast_mk_type_var(0, sym_get($1)); }
+| ARRAY OF ID           { printf("type(array)\n"); $$ = ast_mk_type_array(0, sym_get($3)); }
+| LBRACE typefs RBRACE  { printf("type(record)\n"); $$ = ast_mk_type_record(0, $2); }
+| LBRACE RBRACE         { printf("type(record)\n"); $$ = ast_mk_type_record(0, NULL); }
 
 /****************************************************************************
  * link list

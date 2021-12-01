@@ -1,0 +1,7 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/jhd/Downloads/tiger-compiler'
+echo "y.tab.h was created at the same time as y.tab.c"
+cc -g -c lex.yy.c
+cc -g test.o y.tab.o lex.yy.o ast.o show.o symbol.o util.o
+make: Leaving directory '/home/jhd/Downloads/tiger-compiler'
+ 

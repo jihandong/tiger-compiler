@@ -63,6 +63,17 @@ ty_type ty_mk_name(symbol name, ty_type type)
     return t;
 }
 
+ty_type ty_mk_func(ty_type ret, ty_type_list args)
+{
+    ty_type t = try_malloc(sizeof(*t));
+
+    t->kind         = kind_ty_func;
+    t->u.func.ret   = ret;
+    t->u.func.args  = args;
+
+    return t;
+}
+
 ty_type ty_mk_array(ty_type type)
 {
     ty_type t = try_malloc(sizeof(*t));

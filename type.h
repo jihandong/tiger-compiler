@@ -23,12 +23,14 @@ struct ty_type_
         kind_ty_array,
         kind_ty_record,
         kind_ty_name,
+        kind_ty_func,
         kind_ty_void,
     } kind;
 
     union
     {
         struct { symbol name; ty_type type; }   name;
+        struct { ty_type ret; ty_type args; }   func;
         ty_type                                 array;
         ty_rfield_list                          record;
     } u;
@@ -48,6 +50,7 @@ ty_type ty_mk_string(void);
 ty_type ty_mk_void(void);
 
 ty_type ty_mk_name(symbol name, ty_type type);
+ty_type ty_mk_func(ty_type ret, ty_type_list args);
 ty_type ty_mk_array(ty_type type);
 ty_type ty_mk_record(ty_rfield_list members);
 

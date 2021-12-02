@@ -66,19 +66,19 @@ static inline unsigned ptrhash(S_symbol s)
     return hash % HASH_TABLE_SIZE;
 }
 
-static inline S_symbol Sf_symbol_(const char *name, S_symbol head)
+static inline S_symbol S_mk_symbol_(const char *name, S_symbol head)
 {
-    S_symbol s = Ualloc(sizeof(*s));
+    S_symbol s = U_alloc(sizeof(*s));
 
-    s->name = Ustrdup(name);
+    s->name = U_strdup(name);
     s->next = head;
 
     return s;
 }
 
-static inline bind Sf_bind(S_symbol key, void *value, bind head, S_symbol top)
+static inline bind S_bind(S_symbol key, void *value, bind head, S_symbol top)
 {
-    bind b = Ualloc(sizeof(*b));
+    bind b = U_alloc(sizeof(*b));
 
     b->key      = key;
     b->value    = value;
@@ -92,7 +92,7 @@ static inline bind Sf_bind(S_symbol key, void *value, bind head, S_symbol top)
  * Public Functions
  ********************************************************************************/
 
-S_symbol Sf_symbol(const char *name)
+S_symbol S_mk_symbol(const char *name)
 {
     unsigned index = BKDRhash(name);
     S_symbol head = hashtable[index];
@@ -103,34 +103,34 @@ S_symbol Sf_symbol(const char *name)
             return node;
     }
 
-    hashtable[index] = Sf_symbol_(name, head);
+    hashtable[index] = S_mk_symbol_(name, head);
     return hashtable[index];
 }
 
-S_table Sf_table(void)
+S_table S_mk_table(void)
 {
-    S_table t = Ualloc(sizeof(*t));
+    S_table t = U_alloc(sizeof(*t));
 
     memset(t, 0, sizeof(*t));
 
     return t;
 }
 
-const char *Sf_name(S_symbol s)
+const char *S_get_name(S_symbol s)
 {
     return s->name;
 }
 
-void Sf_enter(S_table t, S_symbol s, void *v)
+void S_enter(S_table t, S_symbol s, void *v)
 {
     unsigned index = ptrhash(s);
 
     assert(t && s);
-    t->binds[index] = Sf_bind(s, v, t->binds[index], t->top);
+    t->binds[index] = S_bind(s, v, t->binds[index], t->top);
     t->top = s;
 }
 
-void *Sf_look(S_table t, S_symbol s)
+void *S_look(S_table t, S_symbol s)
 {
     unsigned index = ptrhash(s);
     bind b;
@@ -144,13 +144,13 @@ void *Sf_look(S_table t, S_symbol s)
     return NULL;
 }
 
-void Sf_begin(S_table t)
+void S_begin(S_table t)
 {
     assert(t);
-    Sf_enter(t, empty, NULL); // sign of scope begin
+    S_enter(t, empty, NULL); // sign of scope begin
 }
 
-void Sf_end(S_table t)
+void S_end(S_table t)
 {
     unsigned index;
     bind b;

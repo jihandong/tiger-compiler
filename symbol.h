@@ -15,20 +15,20 @@ typedef struct S_table_ *S_table;
  * @param[in] mame  symbol name
  * @return new symbol, cannot fail.
  */
-S_symbol Sf_symbol(const char *name);
+S_symbol S_mk_symbol(const char *name);
 
 /**
  * Make a new empty symbol table.
  * @return new symbol table, cannot fail.
  */
-S_table Sf_table(void);
+S_table S_mk_table(void);
 
 /**
  * Get symbol name.
  * @param[in] s symbol
  * @return symbol name, cannot fail.
  */
-const char *Sf_name(S_symbol s);
+const char *S_get_name(S_symbol s);
 
 /**
  * Add a new bind(symbol->value) to symbol table.
@@ -37,7 +37,7 @@ const char *Sf_name(S_symbol s);
  * @param[in] s     bind symbol
  * @param[in] v     bind value
  */
-void Sf_enter(S_table t, S_symbol s, void *v);
+void S_enter(S_table t, S_symbol s, void *v);
 
 /**
  * Get symbol's current value.
@@ -45,18 +45,18 @@ void Sf_enter(S_table t, S_symbol s, void *v);
  * @param[in] s     symbol
  * @return symbol value, cannot fail.
  */
-void *Sf_look(S_table t, S_symbol s);
+void *S_look(S_table t, S_symbol s);
 
 /**
  * Begin of scope.
  * Push a begin sign into table.
  * @param[in] t     symbol table
  */
-void Sf_begin(S_table t);
+void S_begin(S_table t);
 
 
 /**
  * End of scope.
  * @param[in] t     symbol table
  */
-void Sf_end(S_table t);
+void S_end(S_table t);

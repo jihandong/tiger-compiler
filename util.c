@@ -13,7 +13,11 @@
 
 typedef struct U_slice_ * U_slice;
 
-struct U_slice_ { void * ptr; U_slice next; };
+struct U_slice_
+{
+    void *  ptr;
+    U_slice next;
+};
 
 /****************************************************************************
  * Privates
@@ -21,11 +25,11 @@ struct U_slice_ { void * ptr; U_slice next; };
 
 static U_slice slices;
 
-static void Uadd(void* p)
+static void U_add(void* p)
 {
     U_slice s = malloc(sizeof(*s));
     if (!s)
-        Uerror(-1, "run out of memory");
+        U_error(-1, "run out of memory");
 
     s->ptr  = p;
     s->next = slices;
@@ -36,7 +40,7 @@ static void Uadd(void* p)
  * Public Functions
  ****************************************************************************/
 
-void Ufree(void)
+void U_free(void)
 {
     int cnt = 0;
     U_slice tmp;
@@ -52,33 +56,33 @@ void Ufree(void)
     printf("%d slices have been free\n", cnt);
 }
 
-void *Ualloc(int size)
+void *U_alloc(int size)
 {
     void *p = malloc(size);
     if (!p)
-        Uerror(-1, "run out of memory");
+        U_error(-1, "run out of memory");
 
-    Uadd(p);
+    U_add(p);
     return p;
 }
 
-char *Ustrdup(const char *s)
+char *U_strdup(const char *s)
 {
     char *p = strdup(s);
     if (!p)
-        Uerror(-1, "run out of memory");
+        U_error(-1, "run out of memory");
 
-    Uadd(p);
+    U_add(p);
     return p;
 }
 
-void Uerror(int pos, const char *msg)
+void U_error(int pos, const char *msg)
 {
     if (pos > 0)
         printf("Error at %d: %s\n", pos, msg);
     else
         printf("Error: %s\n", msg);
 
-    Ufree();
+    U_free();
     exit(1);
 }

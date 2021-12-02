@@ -33,9 +33,9 @@ int main(int argc, char **argv) {
     fclose(fp);
 
     printf("\n%s\nStep 3. ast:\n", sep);
-    Af_print(stdout, A_root);
+    A_pr_print(stdout, A_root);
 
     printf("\n%s\nsuccess\n", sep);
-    Ufree();
+    U_free();
     return 0;
 }

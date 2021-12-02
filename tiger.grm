@@ -106,7 +106,7 @@ program: exp { A_root = $1; }
 
 decs
 : /* epsilon */     { $$ = NULL; }
-| dec decs          { $$ = Am_dec_list($1, $2); }
+| dec decs          { $$ = A_mk_dec_list($1, $2); }
 
 dec
 : dec_var   { printf("declaration(var)\n"); $$ = $1; }
@@ -114,17 +114,17 @@ dec
 | dec_func  { printf("declaration(func)\n"); $$ = $1; }
 
 dec_var
-: VAR ID ASSIGN exp             { $$ = Am_dec_var(0, Sf_symbol($2), NULL, $4); }
-| VAR ID COLON ID ASSIGN exp    { $$ = Am_dec_var(0, Sf_symbol($2), Sf_symbol($4), $6); }
+: VAR ID ASSIGN exp             { $$ = A_mk_dec_var(0, S_mk_symbol($2), NULL, $4); }
+| VAR ID COLON ID ASSIGN exp    { $$ = A_mk_dec_var(0, S_mk_symbol($2), S_mk_symbol($4), $6); }
 
 dec_type
-: TYPE ID EQ type   { $$ = Am_dec_type(Sf_symbol($2), $4); }
+: TYPE ID EQ type   { $$ = A_mk_dec_type(S_mk_symbol($2), $4); }
 
 dec_func
-: FUNCTION ID LPAREN RPAREN EQ exp                  { $$ = Am_dec_func(0, Sf_symbol($2), NULL, NULL, $6); }
-| FUNCTION ID LPAREN RPAREN COLON ID EQ exp         { $$ = Am_dec_func(0, Sf_symbol($2), NULL, Sf_symbol($6), $8); }
-| FUNCTION ID LPAREN paras RPAREN EQ exp           { $$ = Am_dec_func(0, Sf_symbol($2), $4, NULL, $7); }
-| FUNCTION ID LPAREN paras RPAREN COLON ID EQ exp  { $$ = Am_dec_func(0, Sf_symbol($2), $4, Sf_symbol($7), $9); }
+: FUNCTION ID LPAREN RPAREN EQ exp                  { $$ = A_mk_dec_func(0, S_mk_symbol($2), NULL, NULL, $6); }
+| FUNCTION ID LPAREN RPAREN COLON ID EQ exp         { $$ = A_mk_dec_func(0, S_mk_symbol($2), NULL, S_mk_symbol($6), $8); }
+| FUNCTION ID LPAREN paras RPAREN EQ exp           { $$ = A_mk_dec_func(0, S_mk_symbol($2), $4, NULL, $7); }
+| FUNCTION ID LPAREN paras RPAREN COLON ID EQ exp  { $$ = A_mk_dec_func(0, S_mk_symbol($2), $4, S_mk_symbol($7), $9); }
 
 /****************************************************************************
  * expressions
@@ -145,103 +145,103 @@ exp
 | error         { ; }
 
 exp_value
-: NIL       { $$ = Am_exp_nil(0); }
-| INT       { $$ = Am_exp_int(0, $1); }
-| STRING    { $$ = Am_exp_string(0, $1); }
-| lvalue    { $$ = Am_exp_var(0, $1); }
+: NIL       { $$ = A_mk_exp_nil(0); }
+| INT       { $$ = A_mk_exp_int(0, $1); }
+| STRING    { $$ = A_mk_exp_string(0, $1); }
+| lvalue    { $$ = A_mk_exp_var(0, $1); }
 
 exp_seq
-: LPAREN seqfs RPAREN { $$ = Am_exp_seq(0, $2); }
+: LPAREN seqfs RPAREN { $$ = A_mk_exp_seq(0, $2); }
 
 exp_op
-: exp PLUS exp              { $$ = Am_exp_op(0, Ak_op_plus,   $1, $3); }
-| exp MINUS exp             { $$ = Am_exp_op(0, Ak_op_minus,  $1, $3); }
-| exp TIMES exp             { $$ = Am_exp_op(0, Ak_op_times,  $1, $3); }
-| exp DIVIDE exp            { $$ = Am_exp_op(0, Ak_op_divide, $1, $3); }
-| exp EQ exp                { $$ = Am_exp_op(0, Ak_op_eq,     $1, $3); }
-| exp NEQ exp               { $$ = Am_exp_op(0, Ak_op_neq,    $1, $3); }
-| exp LT exp                { $$ = Am_exp_op(0, Ak_op_lt,     $1, $3); }
-| exp LE exp                { $$ = Am_exp_op(0, Ak_op_le,     $1, $3); }
-| exp GT exp                { $$ = Am_exp_op(0, Ak_op_gt,     $1, $3); }
-| exp GE exp                { $$ = Am_exp_op(0, Ak_op_ge,     $1, $3); }
-| MINUS exp %prec UMINUS    { $$ = Am_exp_op(0, Ak_op_minus,  Am_exp_int(0, 0), $2); }
+: exp PLUS exp              { $$ = A_mk_exp_op(0, A_kind_op_plus,   $1, $3); }
+| exp MINUS exp             { $$ = A_mk_exp_op(0, A_kind_op_minus,  $1, $3); }
+| exp TIMES exp             { $$ = A_mk_exp_op(0, A_kind_op_times,  $1, $3); }
+| exp DIVIDE exp            { $$ = A_mk_exp_op(0, A_kind_op_divide, $1, $3); }
+| exp EQ exp                { $$ = A_mk_exp_op(0, A_kind_op_eq,     $1, $3); }
+| exp NEQ exp               { $$ = A_mk_exp_op(0, A_kind_op_neq,    $1, $3); }
+| exp LT exp                { $$ = A_mk_exp_op(0, A_kind_op_lt,     $1, $3); }
+| exp LE exp                { $$ = A_mk_exp_op(0, A_kind_op_le,     $1, $3); }
+| exp GT exp                { $$ = A_mk_exp_op(0, A_kind_op_gt,     $1, $3); }
+| exp GE exp                { $$ = A_mk_exp_op(0, A_kind_op_ge,     $1, $3); }
+| MINUS exp %prec UMINUS    { $$ = A_mk_exp_op(0, A_kind_op_minus,  A_mk_exp_int(0, 0), $2); }
 
 exp_call
-: ID LPAREN RPAREN          { $$ = Am_exp_call(0, Sf_symbol($1), NULL); }
-| ID LPAREN argfs RPAREN    { $$ = Am_exp_call(0, Sf_symbol($1), $3); }
+: ID LPAREN RPAREN          { $$ = A_mk_exp_call(0, S_mk_symbol($1), NULL); }
+| ID LPAREN argfs RPAREN    { $$ = A_mk_exp_call(0, S_mk_symbol($1), $3); }
 
 exp_create
-: ID LBRACE RBRACE              { $$ = Am_exp_record(0, Sf_symbol($1), NULL); }
-| ID LBRACE argus RBRACE     { $$ = Am_exp_record(0, Sf_symbol($1), $3); }
-| ID LBRACK exp RBRACK OF exp   { $$ = Am_exp_array(0, Sf_symbol($1), $3, $6); }
+: ID LBRACE RBRACE              { $$ = A_mk_exp_record(0, S_mk_symbol($1), NULL); }
+| ID LBRACE argus RBRACE     { $$ = A_mk_exp_record(0, S_mk_symbol($1), $3); }
+| ID LBRACK exp RBRACK OF exp   { $$ = A_mk_exp_array(0, S_mk_symbol($1), $3, $6); }
 
 exp_assign
-: lvalue ASSIGN exp { $$ = Am_exp_assign(0, $1, $3); }
+: lvalue ASSIGN exp { $$ = A_mk_exp_assign(0, $1, $3); }
 
 exp_if
-: IF exp THEN exp ELSE exp  { $$ = Am_exp_if(0, $2, $4, $6); }
-| IF exp THEN exp           { $$ = Am_exp_if(0, $2, $4, NULL); }
-| exp AND exp               { $$ = Am_exp_if(0, $1, $3, Am_exp_int(0, 0)); }
-| exp OR exp                { $$ = Am_exp_if(0, $1, Am_exp_int(0, 1), $3); }
+: IF exp THEN exp ELSE exp  { $$ = A_mk_exp_if(0, $2, $4, $6); }
+| IF exp THEN exp           { $$ = A_mk_exp_if(0, $2, $4, NULL); }
+| exp AND exp               { $$ = A_mk_exp_if(0, $1, $3, A_mk_exp_int(0, 0)); }
+| exp OR exp                { $$ = A_mk_exp_if(0, $1, A_mk_exp_int(0, 1), $3); }
 
 exp_for
-: FOR ID ASSIGN exp TO exp DO exp { $$ = Am_exp_for(0, Sf_symbol($2), $4, $6, $8); }
+: FOR ID ASSIGN exp TO exp DO exp { $$ = A_mk_exp_for(0, S_mk_symbol($2), $4, $6, $8); }
 
 exp_while
-: WHILE exp DO exp { $$ = Am_exp_while(0, $2, $4); }
+: WHILE exp DO exp { $$ = A_mk_exp_while(0, $2, $4); }
 
 exp_break
-: BREAK { $$ = Am_exp_break(0); }
+: BREAK { $$ = A_mk_exp_break(0); }
 
 exp_let
-: LET decs IN seqfs END { $$ = Am_exp_let(0, $2, $4); }
+: LET decs IN seqfs END { $$ = A_mk_exp_let(0, $2, $4); }
 
 /****************************************************************************
  * variables
  ****************************************************************************/
 
 lvalue
-: ID                { $$ = Am_var(0, Sf_symbol($1), NULL); }
-| ID lvalue_suffix  { $$ = Am_var(0, Sf_symbol($1), $2); }
+: ID                { $$ = A_mk_var(0, S_mk_symbol($1), NULL); }
+| ID lvalue_suffix  { $$ = A_mk_var(0, S_mk_symbol($1), $2); }
 
 lvalue_suffix
 : /* spsilon */                     { $$ = NULL; }
-| LBRACK exp RBRACK lvalue_suffix   { $$ = Am_var_slice(0, $2, $4); }
-| DOT ID lvalue_suffix              { $$ = Am_var_member(0, Sf_symbol($2), $3); }
+| LBRACK exp RBRACK lvalue_suffix   { $$ = A_mk_var_slice(0, $2, $4); }
+| DOT ID lvalue_suffix              { $$ = A_mk_var_member(0, S_mk_symbol($2), $3); }
 
 /****************************************************************************
  * types
  ****************************************************************************/
 
 type
-: ID                    { printf("type(simple)\n"); $$ = Am_type_var(0, Sf_symbol($1)); }
-| ARRAY OF ID           { printf("type(array)\n");  $$ = Am_type_array(0, Sf_symbol($3)); }
-| LBRACE paras RBRACE  { printf("type(record)\n"); $$ = Am_type_record(0, $2); }
-| LBRACE RBRACE         { printf("type(record)\n"); $$ = Am_type_record(0, NULL); }
+: ID                    { printf("type(simple)\n"); $$ = A_mk_type_var(0, S_mk_symbol($1)); }
+| ARRAY OF ID           { printf("type(array)\n");  $$ = A_mk_type_array(0, S_mk_symbol($3)); }
+| LBRACE paras RBRACE  { printf("type(record)\n"); $$ = A_mk_type_record(0, $2); }
+| LBRACE RBRACE         { printf("type(record)\n"); $$ = A_mk_type_record(0, NULL); }
 
 /****************************************************************************
  * link list
  ****************************************************************************/
 
 paras
-: para                 { $$ = Am_para_list($1, NULL); }
-| para COMMA paras    { $$ = Am_para_list($1, $3); }
+: para                 { $$ = A_mk_para_list($1, NULL); }
+| para COMMA paras    { $$ = A_mk_para_list($1, $3); }
 
 para
-: ID COLON ID   { $$ = Am_para(0, Sf_symbol($1), Sf_symbol($3)); }
+: ID COLON ID   { $$ = A_mk_para(0, S_mk_symbol($1), S_mk_symbol($3)); }
 
 argus
-: argu                   { $$ = Am_argu_list($1, NULL); }
-| argu COMMA argus    { $$ = Am_argu_list($1, $3); }
+: argu                   { $$ = A_mk_argu_list($1, NULL); }
+| argu COMMA argus    { $$ = A_mk_argu_list($1, $3); }
 
 argu
-: ID EQ exp { $$ = Am_argu(Sf_symbol($1), $3); }
+: ID EQ exp { $$ = A_mk_argu(S_mk_symbol($1), $3); }
 
 seqfs
-: exp                   { $$ = Am_exp_list($1, NULL); }
-| exp SEMICOLON seqfs   { $$ = Am_exp_list($1, $3); }
+: exp                   { $$ = A_mk_exp_list($1, NULL); }
+| exp SEMICOLON seqfs   { $$ = A_mk_exp_list($1, $3); }
 
 argfs
-: exp               { $$ = Am_exp_list($1, NULL); }
-| exp COMMA argfs   { $$ = Am_exp_list($1, $3); }
+: exp               { $$ = A_mk_exp_list($1, NULL); }
+| exp COMMA argfs   { $$ = A_mk_exp_list($1, $3); }
 

@@ -17,14 +17,14 @@ struct T_type_
 {
     enum
     {
-        Tk_nil,
-        Tk_int,
-        Tk_string,
-        Tk_void,
-        Tk_name,
-        Tk_func,
-        Tk_array,
-        Tk_record,
+        T_kind_nil,
+        T_kind_int,
+        T_kind_string,
+        T_kind_void,
+        T_kind_name,
+        T_kind_func,
+        T_kind_array,
+        T_kind_record,
     } kind;
 
     union
@@ -44,19 +44,19 @@ struct T_field_list_    { T_field head; T_field_list tail; };
  * Public Functions
  ****************************************************************************/
 
-T_type Tm_nil(void);
-T_type Tm_int(void);
-T_type Tm_string(void);
-T_type Tm_void(void);
+T_type T_mk_nil(void);
+T_type T_mk_int(void);
+T_type T_mk_string(void);
+T_type T_mk_void(void);
 
-T_type Tm_name(S_symbol name, T_type type);
-T_type Tm_func(T_type ret, T_type_list args);
-T_type Tm_array(T_type type);
-T_type Tm_record(T_field_list members);
+T_type T_mk_name(S_symbol name, T_type type);
+T_type T_mk_func(T_type ret, T_type_list args);
+T_type T_mk_array(T_type type);
+T_type T_mk_record(T_field_list members);
 
-T_field Tm_field(S_symbol name, T_type type);
-T_type_list Tm_type_list(T_type head, T_type_list tail);
-T_field_list Tm_field_list(T_field head, T_field_list tail);
+T_field T_mk_field(S_symbol name, T_type type);
+T_type_list T_mk_type_list(T_type head, T_type_list tail);
+T_field_list T_mk_field_list(T_field head, T_field_list tail);
 
-void Tp_type(T_type type);
-void Tp_type_list(T_type_list types);
+void T_pr_type(T_type type);
+void T_pr_type_list(T_type_list types);

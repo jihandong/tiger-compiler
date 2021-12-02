@@ -11,24 +11,21 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct slice_ * slice;
+typedef struct U_slice_ * U_slice;
 
-struct slice_ { void * ptr; slice next; };
+struct U_slice_ { void * ptr; U_slice next; };
 
 /****************************************************************************
  * Privates
  ****************************************************************************/
 
-static slice slices;
+static U_slice slices;
 
-static void add_slice(void* p)
+static void Uadd(void* p)
 {
-    slice s = malloc(sizeof(*s));
-    if (!s) {
-        fprintf(stderr, "ENOMEM\n");
-        all_free();
-        exit(1);
-    }
+    U_slice s = malloc(sizeof(*s));
+    if (!s)
+        Uerror(-1, "run out of memory");
 
     s->ptr  = p;
     s->next = slices;
@@ -39,10 +36,10 @@ static void add_slice(void* p)
  * Public Functions
  ****************************************************************************/
 
-void all_free(void)
+void Ufree(void)
 {
     int cnt = 0;
-    slice tmp;
+    U_slice tmp;
 
     while(slices) {
         cnt++;
@@ -55,28 +52,33 @@ void all_free(void)
     printf("%d slices have been free\n", cnt);
 }
 
-void *try_malloc(int size)
+void *Ualloc(int size)
 {
     void *p = malloc(size);
-    if (!p) {
-        fprintf(stderr, "ENOMEM\n");
-        all_free();
-        exit(1);
-    }
+    if (!p)
+        Uerror(-1, "run out of memory");
 
-    add_slice(p);
+    Uadd(p);
     return p;
 }
 
-char *try_strdup(const char *s)
+char *Ustrdup(const char *s)
 {
     char *p = strdup(s);
-    if (!p) {
-        fprintf(stderr, "ENOMEM\n");
-        all_free();
-        exit(1);
-    }
+    if (!p)
+        Uerror(-1, "run out of memory");
 
-    add_slice(p);
+    Uadd(p);
     return p;
+}
+
+void Uerror(int pos, const char *msg)
+{
+    if (pos > 0)
+        printf("Error at %d: %s\n", pos, msg);
+    else
+        printf("Error: %s\n", msg);
+
+    Ufree();
+    exit(1);
 }

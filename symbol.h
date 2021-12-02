@@ -2,8 +2,8 @@
  * Definitions
  ********************************************************************************/
 
-typedef struct symbol_ *        symbol;
-typedef struct symbol_table_*   symbol_table;
+typedef struct S_symbol_ *S_symbol;
+typedef struct S_table_ *S_table;
 
 /********************************************************************************
  * Public Functions
@@ -15,20 +15,20 @@ typedef struct symbol_table_*   symbol_table;
  * @param[in] mame  symbol name
  * @return new symbol, cannot fail.
  */
-symbol sym_get(const char *name);
+S_symbol Sf_symbol(const char *name);
+
+/**
+ * Make a new empty symbol table.
+ * @return new symbol table, cannot fail.
+ */
+S_table Sf_table(void);
 
 /**
  * Get symbol name.
  * @param[in] s symbol
  * @return symbol name, cannot fail.
  */
-const char *sym_get_name(symbol s);
-
-/**
- * Make a new empty symbol table.
- * @return new symbol table, cannot fail.
- */
-symbol_table sym_table_new(void);
+const char *Sf_name(S_symbol s);
 
 /**
  * Add a new bind(symbol->value) to symbol table.
@@ -37,7 +37,7 @@ symbol_table sym_table_new(void);
  * @param[in] s     bind symbol
  * @param[in] v     bind value
  */
-void sym_table_add(symbol_table t, symbol s, void *v);
+void Sf_enter(S_table t, S_symbol s, void *v);
 
 /**
  * Get symbol's current value.
@@ -45,18 +45,18 @@ void sym_table_add(symbol_table t, symbol s, void *v);
  * @param[in] s     symbol
  * @return symbol value, cannot fail.
  */
-void *sym_table_get(symbol_table t, symbol s);
+void *Sf_look(S_table t, S_symbol s);
 
 /**
  * Begin of scope.
  * Push a begin sign into table.
  * @param[in] t     symbol table
  */
-void sym_table_begin(symbol_table t);
+void Sf_begin(S_table t);
 
 
 /**
  * End of scope.
  * @param[in] t     symbol table
  */
-void sym_table_end(symbol_table t);
+void Sf_end(S_table t);

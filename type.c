@@ -12,12 +12,12 @@
  ****************************************************************************/
 
 // basic types
-static struct ty_type_ ty_nil     = { kind_ty_nil };
-static struct ty_type_ ty_int     = { kind_ty_int };
-static struct ty_type_ ty_string  = { kind_ty_string };
-static struct ty_type_ ty_void    = { kind_ty_void };
+static struct T_type_ type_nil     = { Tk_nil };
+static struct T_type_ type_int     = { Tk_int };
+static struct T_type_ type_string  = { Tk_string };
+static struct T_type_ type_void    = { Tk_void };
 
-static const char *kind_ty[] =
+static const char *Tk[] =
 {
     "nil",
     "int",
@@ -32,81 +32,81 @@ static const char *kind_ty[] =
  * Public Functions
  ****************************************************************************/
 
-inline ty_type ty_mk_nil(void)
+inline T_type Tf_nil(void)
 {
-    return &ty_nil;
+    return &type_nil;
 }
 
-inline ty_type ty_mk_int(void)
+inline T_type Tf_int(void)
 {
-    return &ty_int;
+    return &type_int;
 }
 
-inline ty_type ty_mk_string(void)
+inline T_type Tf_string(void)
 {
-    return &ty_string;
+    return &type_string;
 }
 
-inline ty_type ty_mk_void(void)
+inline T_type Tf_void(void)
 {
-    return &ty_void;
+    return &type_void;
 }
 
-ty_type ty_mk_name(symbol name, ty_type type)
+T_type Tf_name(S_symbol symbol, T_type type)
 {
-    ty_type t = try_malloc(sizeof(*t));
+    T_type t = Ualloc(sizeof(*t));
 
-    t->kind         = kind_ty_name;
-    t->u.name.name  = name;
-    t->u.name.type  = type;
+    t->kind             = Tk_name;
+    t->u.name.symbol    = symbol;
+    t->u.name.type      = type;
 
     return t;
 }
 
-ty_type ty_mk_func(ty_type ret, ty_type_list args)
+T_type Tf_func(T_type ret, T_type_list args)
 {
-    ty_type t = try_malloc(sizeof(*t));
+    T_type t = Ualloc(sizeof(*t));
 
-    t->kind         = kind_ty_func;
+    t->kind         = Tk_func;
     t->u.func.ret   = ret;
     t->u.func.args  = args;
 
     return t;
 }
 
-ty_type ty_mk_array(ty_type type)
+T_type Tf_array(T_type type)
 {
-    ty_type t = try_malloc(sizeof(*t));
+    T_type t = Ualloc(sizeof(*t));
 
-    t->kind     = kind_ty_array;
+    t->kind     = Tk_array;
     t->u.array  = type;
 
     return t;
 }
 
-ty_type ty_mk_record(ty_rfield_list members)
+T_type Tf_record(T_field_list members)
 {
-    ty_type t = try_malloc(sizeof(*t));
+    T_type t = Ualloc(sizeof(*t));
 
-    t->kind     = kind_ty_record;
+    t->kind     = Tk_record;
     t->u.record = members;
 
     return t;
 }
 
-ty_rfield ty_mk_rfield(symbol name, ty_type type)
+T_field Tf_field(S_symbol field, T_type type)
 {
-    ty_rfield t = try_malloc(sizeof(*t));
+    T_field t = Ualloc(sizeof(*t));
 
-    t->name = name;
-    t->type = type;
+    t->field = field;
+    t->type  = type;
 
     return t;
 }
 
-ty_type_list ty_mk_type_list(ty_type head, ty_type_list tail)
+T_type_list Tf_type_list(T_type head, T_type_list tail)
 {
-    ty_type_list t = try_malloc(sizeof(*t));
+    T_type_list t = Ualloc(sizeof(*t));
 
     t->head = head;
     t->tail = tail;
@@ -114,9 +114,9 @@ ty_type_list ty_mk_type_list(ty_type head, ty_type_list tail)
     return t;
 }
 
-ty_rfield_list ty_mk_rfield_list(ty_rfield head, ty_rfield_list tail)
+T_field_list Tf_field_list(T_field head, T_field_list tail)
 {
-    ty_rfield_list t = try_malloc(sizeof(*t));
+    T_field_list t = Ualloc(sizeof(*t));
 
     t->head = head;
     t->tail = tail;
@@ -124,24 +124,24 @@ ty_rfield_list ty_mk_rfield_list(ty_rfield head, ty_rfield_list tail)
     return t;
 }
 
-void ty_pr_type(ty_type type)
+void Tp_type(T_type type)
 {
     if (type) {
-        printf("%s", kind_ty[type->kind]);
-        if (type->kind == kind_ty_name)
-            printf("(%s)", sym_get_name(type->u.name.name));
+        printf("%s", Tk[type->kind]);
+        if (type->kind == Tk_name)
+            printf("(%s)", sym_get_name(type->u.name.symbol));
     } else
         printf("_");
 }
 
-void ty_pr_type_list(ty_type_list types)
+void Tp_type_list(T_type_list types)
 {
     if (types) {
         printf("type_list(");
-        ty_pr_type(types->head);
+        T_pr_type(types->head);
         if (types->tail) {
             printf(",");
-            ty_pr_type_list(types->tail);
+            T_pr_type_list(types->tail);
         }
         printf(")");
     } else

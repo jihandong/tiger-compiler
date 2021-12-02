@@ -2,15 +2,22 @@
  * exit if running out of memory.
  * @param[in] size
  */
-void *try_malloc(int size);
+void *Ualloc(int size);
 
 /**
  * exit if running out of memory.
  * @param[in] s
  */
-char *try_strdup(const char *s);
+char *Ustrdup(const char *s);
 
 /**
- * free every slices malloced by functions in "util.h".
+ * free everything.
  */
-void all_free(void);
+void Ufree(void);
+
+/**
+ * free everything, print error and exit.
+ * @param[in] pos   error position.
+ * @param[in] msg   error message.
+ */
+void Uerror(int pos, const char *msg);

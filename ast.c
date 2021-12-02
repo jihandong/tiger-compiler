@@ -11,11 +11,11 @@
  * Public Functions: declares
  ****************************************************************************/
 
-ast_dec ast_mk_dec_var(ast_pos pos, symbol var, symbol type, ast_exp init)
+A_dec Am_dec_var(Apos pos, S_symbol var, S_symbol type, A_exp init)
 {
-    ast_dec p = try_malloc(sizeof(*p));
+    A_dec p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_dec_var;
+    p->kind         = Ak_dec_var;
     p->pos          = pos;
     p->u.var.var    = var;
     p->u.var.type   = type;
@@ -25,22 +25,22 @@ ast_dec ast_mk_dec_var(ast_pos pos, symbol var, symbol type, ast_exp init)
     return p;
 }
 
-ast_dec ast_mk_dec_type(symbol type_s, ast_type type)
+A_dec Am_dec_type(S_symbol type_s, A_type type)
 {
-    ast_dec p = try_malloc(sizeof(*p));
+    A_dec p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_dec_type;
+    p->kind             = Ak_dec_type;
     p->u.type.type_s    = type_s;
     p->u.type.type      = type;
 
     return p;
 }
 
-ast_dec ast_mk_dec_func(ast_pos pos, symbol func, ast_tfield_list params, symbol ret, ast_exp body)
+A_dec Am_dec_func(Apos pos, S_symbol func, A_para_list params, S_symbol ret, A_exp body)
 {
-    ast_dec p = try_malloc(sizeof(*p));
+    A_dec p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_dec_func;
+    p->kind             = Ak_dec_func;
     p->u.func.func      = func;
     p->u.func.params    = params;
     p->u.func.ret       = ret;
@@ -53,54 +53,54 @@ ast_dec ast_mk_dec_func(ast_pos pos, symbol func, ast_tfield_list params, symbol
  * Public Functions: expressions
  ****************************************************************************/
 
-ast_exp ast_mk_exp_var(ast_pos pos, ast_var var)
+A_exp Am_exp_var(Apos pos, A_var var)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_exp_var;
+    p->kind     = Ak_exp_var;
     p->pos      = pos;
     p->u.var    = var;
 
     return p;
 }
 
-ast_exp ast_mk_exp_nil(ast_pos pos)
+A_exp Am_exp_nil(Apos pos)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_exp_nil;
+    p->kind     = Ak_exp_nil;
     p->pos      = pos;
 
     return p;
 }
 
-ast_exp ast_mk_exp_int(ast_pos pos, int i)
+A_exp Am_exp_int(Apos pos, int i)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_exp_int;
+    p->kind     = Ak_exp_int;
     p->pos      = pos;
     p->u.int_   = i;
 
     return p;
 }
 
-ast_exp ast_mk_exp_string(ast_pos pos, const char *s)
+A_exp Am_exp_string(Apos pos, const char *s)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_string;
+    p->kind         = Ak_exp_string;
     p->pos          = pos;
     p->u.string_    = s;
 
     return p;
 }
 
-ast_exp ast_mk_exp_call(ast_pos pos, symbol func, ast_exp_list args)
+A_exp Am_exp_call(Apos pos, S_symbol func, A_exp_list args)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_call;
+    p->kind         = Ak_exp_call;
     p->pos          = pos;
     p->u.call.func  = func;
     p->u.call.args  = args;
@@ -108,24 +108,24 @@ ast_exp ast_mk_exp_call(ast_pos pos, symbol func, ast_exp_list args)
     return p;
 }
 
-ast_exp ast_mk_exp_op(ast_pos pos, ast_op op, ast_exp left, ast_exp right)
+A_exp Am_exp_op(Apos pos, Ak_op op, A_exp left, A_exp right)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_op;
+    p->kind         = Ak_exp_op;
     p->pos          = pos;
-    p->u.op.op      = op;
+    p->u.op.oper    = op;
     p->u.op.left    = left;
     p->u.op.right   = right;
 
     return p;
 }
 
-ast_exp ast_mk_exp_record(ast_pos pos, symbol record, ast_rfield_list members)
+A_exp Am_exp_record(Apos pos, S_symbol record, A_argu_list members)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_exp_record;
+    p->kind             = Ak_exp_record;
     p->pos              = pos;
     p->u.record.record  = record;
     p->u.record.members = members;
@@ -133,22 +133,22 @@ ast_exp ast_mk_exp_record(ast_pos pos, symbol record, ast_rfield_list members)
     return p;
 }
 
-ast_exp ast_mk_exp_seq(ast_pos pos, ast_exp_list seq)
+A_exp Am_exp_seq(Apos pos, A_exp_list seq)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_exp_seq;
+    p->kind     = Ak_exp_seq;
     p->pos      = pos;
     p->u.seq    = seq;
 
     return p;
 }
 
-ast_exp ast_mk_exp_assign(ast_pos pos, ast_var var, ast_exp exp)
+A_exp Am_exp_assign(Apos pos, A_var var, A_exp exp)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_assign;
+    p->kind         = Ak_exp_assign;
     p->pos          = pos;
     p->u.assign.var = var;
     p->u.assign.exp = exp;
@@ -156,11 +156,11 @@ ast_exp ast_mk_exp_assign(ast_pos pos, ast_var var, ast_exp exp)
     return p;
 }
 
-ast_exp ast_mk_exp_if(ast_pos pos, ast_exp cond, ast_exp then, ast_exp else_)
+A_exp Am_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_if;
+    p->kind         = Ak_exp_if;
     p->pos          = pos;
     p->u.if_.cond   = cond;
     p->u.if_.then   = then;
@@ -169,11 +169,11 @@ ast_exp ast_mk_exp_if(ast_pos pos, ast_exp cond, ast_exp then, ast_exp else_)
     return p;
 }
 
-ast_exp ast_mk_exp_while(ast_pos pos, ast_exp cond, ast_exp body)
+A_exp Am_exp_while(Apos pos, A_exp cond, A_exp body)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_exp_while;
+    p->kind             = Ak_exp_while;
     p->pos              = pos;
     p->u.while_.cond    = cond;
     p->u.while_.body    = body;
@@ -181,11 +181,11 @@ ast_exp ast_mk_exp_while(ast_pos pos, ast_exp cond, ast_exp body)
     return p;
 }
 
-ast_exp ast_mk_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp body)
+A_exp Am_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_exp_for;
+    p->kind             = Ak_exp_for;
     p->pos              = pos;
     p->u.for_.var       = var;
     p->u.for_.lo        = lo;
@@ -196,21 +196,21 @@ ast_exp ast_mk_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp 
     return p;
 }
 
-ast_exp ast_mk_exp_break(ast_pos pos)
+A_exp Am_exp_break(Apos pos)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind = kind_exp_break;
+    p->kind = Ak_exp_break;
     p->pos  = pos;
 
     return p;
 }
 
-ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body)
+A_exp Am_exp_let(Apos pos, A_dec_list decs, A_exp_list body)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind         = kind_exp_let;
+    p->kind         = Ak_exp_let;
     p->pos          = pos;
     p->u.let.decs   = decs;
     p->u.let.body   = body;
@@ -218,11 +218,11 @@ ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body)
     return p;
 }
 
-ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init)
+A_exp Am_exp_array(Apos pos, S_symbol array, A_exp size, A_exp init)
 {
-    ast_exp p = try_malloc(sizeof(*p));
+    A_exp p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_exp_array;
+    p->kind             = Ak_exp_array;
     p->pos              = pos;
     p->u.array.array    = array;
     p->u.array.size     = size;
@@ -235,11 +235,11 @@ ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init)
  * Public Functions: variables
  ****************************************************************************/
 
-ast_var ast_mk_var(ast_pos pos, symbol base, ast_var suffix)
+A_var Am_var(Apos pos, S_symbol base, A_var suffix)
 {
-    ast_var p = try_malloc(sizeof(*p));
+    A_var p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_var;
+    p->kind             = Ak_var;
     p->pos              = pos;
     p->u.base.base      = base;
     p->u.base.suffix    = suffix;
@@ -247,11 +247,11 @@ ast_var ast_mk_var(ast_pos pos, symbol base, ast_var suffix)
     return p;
 }
 
-ast_var ast_mk_var_slice(ast_pos pos, ast_exp exp, ast_var suffix)
+A_var Am_var_slice(Apos pos, A_exp exp, A_var suffix)
 {
-    ast_var p = try_malloc(sizeof(*p));
+    A_var p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_var_slice;
+    p->kind             = Ak_var_slice;
     p->pos              = pos;
     p->u.slice.exp      = exp;
     p->u.slice.suffix   = suffix;
@@ -259,11 +259,11 @@ ast_var ast_mk_var_slice(ast_pos pos, ast_exp exp, ast_var suffix)
     return p;
 }
 
-ast_var ast_mk_var_member(ast_pos pos, symbol member, ast_var suffix)
+A_var Am_var_member(Apos pos, S_symbol member, A_var suffix)
 {
-    ast_var p = try_malloc(sizeof(*p));
+    A_var p = Ualloc(sizeof(*p));
 
-    p->kind             = kind_var_member;
+    p->kind             = Ak_var_member;
     p->pos              = pos;
     p->u.member.member  = member;
     p->u.member.suffix  = suffix;
@@ -275,33 +275,33 @@ ast_var ast_mk_var_member(ast_pos pos, symbol member, ast_var suffix)
  * Public Functions: types
  ****************************************************************************/
 
-ast_type ast_mk_type_var(ast_pos pos, symbol var)
+A_type Am_type_var(Apos pos, S_symbol var)
 {
-    ast_type p = try_malloc(sizeof(*p));
+    A_type p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_type_var;
+    p->kind     = Ak_type_var;
     p->pos      = pos;
     p->u.var    = var;
 
     return p;
 }
 
-ast_type ast_mk_type_array(ast_pos pos, symbol array)
+A_type Am_type_array(Apos pos, S_symbol array)
 {
-    ast_type p = try_malloc(sizeof(*p));
+    A_type p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_type_array;
+    p->kind     = Ak_type_array;
     p->pos      = pos;
     p->u.array  = array;
 
     return p;
 }
 
-ast_type ast_mk_type_record(ast_pos pos, ast_tfield_list record)
+A_type Am_type_record(Apos pos, A_para_list record)
 {
-    ast_type p = try_malloc(sizeof(*p));
+    A_type p = Ualloc(sizeof(*p));
 
-    p->kind     = kind_type_record;
+    p->kind     = Ak_type_record;
     p->pos      = pos;
     p->u.record = record;
 
@@ -312,9 +312,9 @@ ast_type ast_mk_type_record(ast_pos pos, ast_tfield_list record)
  * Public Functions: link list
  ****************************************************************************/
 
-ast_dec_list ast_mk_dec_list(ast_dec head, ast_dec_list tail)
+A_dec_list Am_dec_list(A_dec head, A_dec_list tail)
 {
-    ast_dec_list p = try_malloc(sizeof(*p));
+    A_dec_list p = Ualloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -322,9 +322,9 @@ ast_dec_list ast_mk_dec_list(ast_dec head, ast_dec_list tail)
     return p;
 }
 
-ast_exp_list ast_mk_exp_list(ast_exp head, ast_exp_list tail)
+A_exp_list Am_exp_list(A_exp head, A_exp_list tail)
 {
-    ast_exp_list p = try_malloc(sizeof(*p));
+    A_exp_list p = Ualloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -332,9 +332,9 @@ ast_exp_list ast_mk_exp_list(ast_exp head, ast_exp_list tail)
     return p;
 }
 
-ast_tfield_list ast_mk_tfield_list(ast_tfield head, ast_tfield_list tail)
+A_para_list Am_para_list(A_para head, A_para_list tail)
 {
-    ast_tfield_list p = try_malloc(sizeof(*p));
+    A_para_list p = Ualloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -342,9 +342,9 @@ ast_tfield_list ast_mk_tfield_list(ast_tfield head, ast_tfield_list tail)
     return p;
 }
 
-ast_rfield_list ast_mk_rfield_list(ast_rfield head, ast_rfield_list tail)
+A_argu_list Am_argu_list(A_argu head, A_argu_list tail)
 {
-    ast_rfield_list p = try_malloc(sizeof(*p));
+    A_argu_list p = Ualloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -352,9 +352,9 @@ ast_rfield_list ast_mk_rfield_list(ast_rfield head, ast_rfield_list tail)
     return p;
 }
 
-ast_tfield ast_mk_tfield(ast_pos pos, symbol var, symbol type)
+A_para Am_para(Apos pos, S_symbol var, S_symbol type)
 {
-    ast_tfield p = try_malloc(sizeof(*p));
+    A_para p = Ualloc(sizeof(*p));
 
     p->pos      = pos;
     p->var      = var;
@@ -364,9 +364,9 @@ ast_tfield ast_mk_tfield(ast_pos pos, symbol var, symbol type)
     return p;
 }
 
-ast_rfield ast_mk_rfield(symbol var, ast_exp exp)
+A_argu Am_argu(S_symbol var, A_exp exp)
 {
-    ast_rfield p = try_malloc(sizeof(*p));
+    A_argu p = Ualloc(sizeof(*p));
 
     p->var = var;
     p->exp = exp;

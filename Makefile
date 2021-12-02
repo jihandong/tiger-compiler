@@ -1,5 +1,5 @@
-test: test.o y.tab.o lex.yy.o ast.o show.o symbol.o util.o
-	cc -g test.o y.tab.o lex.yy.o ast.o show.o symbol.o util.o
+test: test.o y.tab.o lex.yy.o ast.o astpr.o symbol.o util.o
+	cc -g test.o y.tab.o lex.yy.o ast.o astpr.o symbol.o util.o
 
 test.o: test.c ast.h util.h 
 	cc -g -c test.c
@@ -25,8 +25,8 @@ y.tab.h: y.tab.c
 ast.o: ast.c ast.h
 	cc -g -c ast.c
 
-show.o: show.c show.h ast.h
-	cc -g -c show.c -Wincompatible-pointer-types
+astpr.o: astpr.c ast.h
+	cc -g -c astpr.c -Wincompatible-pointer-types
 
 symbol.o: symbol.c util.h
 	cc -g -c symbol.c -Wincompatible-pointer-types -Wint-conversion

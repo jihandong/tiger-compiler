@@ -8,52 +8,55 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct ty_type_ *               ty_type;
-typedef struct ty_type_list_ *          ty_type_list;
-typedef struct ty_record_field_ *       ty_rfield;
-typedef struct ty_record_field_list_ *  ty_rfield_list;
+typedef struct T_type_ *       T_type;
+typedef struct T_type_list_ *  T_type_list;
+typedef struct T_field_ *      T_field;
+typedef struct T_field_list_ * T_field_list;
 
-struct ty_type_
+struct T_type_
 {
     enum
     {
-        kind_ty_nil,
-        kind_ty_int,
-        kind_ty_string,
-        kind_ty_array,
-        kind_ty_record,
-        kind_ty_name,
-        kind_ty_func,
-        kind_ty_void,
+        Tk_nil,
+        Tk_int,
+        Tk_string,
+        Tk_void,
+        Tk_name,
+        Tk_func,
+        Tk_array,
+        Tk_record,
     } kind;
 
     union
     {
-        struct { symbol name; ty_type type; }   name;
-        struct { ty_type ret; ty_type args; }   func;
-        ty_type                                 array;
-        ty_rfield_list                          record;
+        struct { S_symbol symbol; T_type type; }    name;
+        struct { T_type ret; T_type_list args; }    func;
+        T_type                                      array;
+        T_field_list                                record;
     } u;
 };
 
-struct ty_record_field_         { symbol name; ty_type type; };
-struct ty_type_list_            { ty_type head; ty_type_list tail; };
-struct ty_record_field_list_    { ty_rfield head; ty_rfield_list tail; };
+struct T_type_list_     { T_type head; T_type_list tail; };
+struct T_field_         { S_symbol field; T_type type; };
+struct T_field_list_    { T_field head; T_field_list tail; };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-ty_type ty_mk_nil(void);
-ty_type ty_mk_int(void);
-ty_type ty_mk_string(void);
-ty_type ty_mk_void(void);
+T_type Tm_nil(void);
+T_type Tm_int(void);
+T_type Tm_string(void);
+T_type Tm_void(void);
 
-ty_type ty_mk_name(symbol name, ty_type type);
-ty_type ty_mk_func(ty_type ret, ty_type_list args);
-ty_type ty_mk_array(ty_type type);
-ty_type ty_mk_record(ty_rfield_list members);
+T_type Tm_name(S_symbol name, T_type type);
+T_type Tm_func(T_type ret, T_type_list args);
+T_type Tm_array(T_type type);
+T_type Tm_record(T_field_list members);
 
-ty_rfield ty_mk_rfield(symbol name, ty_type type);
-ty_type_list ty_mk_type_list(ty_type head, ty_type_list tail);
-ty_rfield_list ty_mk_rfield_list(ty_rfield head, ty_rfield_list tail);
+T_field Tm_field(S_symbol name, T_type type);
+T_type_list Tm_type_list(T_type head, T_type_list tail);
+T_field_list Tm_field_list(T_field head, T_field_list tail);
+
+void Tp_type(T_type type);
+void Tp_type_list(T_type_list types);

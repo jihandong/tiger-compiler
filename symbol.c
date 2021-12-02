@@ -20,30 +20,30 @@ typedef struct bind_*   bind;
 
 struct bind_
 {
-    symbol  key;
+    S_symbol  key;
     void *  value;
     bind    next;       /*< next node in hash bucket */
-    symbol  prevtop;    /*< previous bound symbol */
+    S_symbol  prevtop;    /*< previous bound symbol */
 };
 
-struct symbol_
+struct S_symbol_
 {
     const char *name;
-    symbol      next;
+    S_symbol      next;
 };
 
-struct symbol_table_
+struct S_table_
 {
     bind binds[BIND_TABLE_SIZE];
-    symbol top;     /*< newest bound symbol */
+    S_symbol top;     /*< newest bound S_symbol */
 };
 
 /********************************************************************************
  * Private Data
  ********************************************************************************/
 
-static symbol hashtable[HASH_TABLE_SIZE];
-static symbol empty = 0x000000001;
+static S_symbol hashtable[HASH_TABLE_SIZE];
+static S_symbol empty = 0x000000001;
 
 /********************************************************************************
  * Private Functions
@@ -59,26 +59,26 @@ static inline unsigned BKDRhash(const char *s)
     return hash % HASH_TABLE_SIZE;
 }
 
-static inline unsigned ptrhash(symbol s)
+static inline unsigned ptrhash(S_symbol s)
 {
     unsigned hash = s;
 
     return hash % HASH_TABLE_SIZE;
 }
 
-static inline symbol sym_mk(const char *name, symbol head)
+static inline S_symbol Sf_symbol_(const char *name, S_symbol head)
 {
-    symbol s = try_malloc(sizeof(*s));
+    S_symbol s = Ualloc(sizeof(*s));
 
-    s->name = try_strdup(name);
+    s->name = Ustrdup(name);
     s->next = head;
 
     return s;
 }
 
-static inline bind bind_mk(symbol key, void *value, bind head, symbol top)
+static inline bind Sf_bind(S_symbol key, void *value, bind head, S_symbol top)
 {
-    bind b = try_malloc(sizeof(*b));
+    bind b = Ualloc(sizeof(*b));
 
     b->key      = key;
     b->value    = value;
@@ -92,45 +92,45 @@ static inline bind bind_mk(symbol key, void *value, bind head, symbol top)
  * Public Functions
  ********************************************************************************/
 
-symbol sym_get(const char *name)
+S_symbol Sf_symbol(const char *name)
 {
     unsigned index = BKDRhash(name);
-    symbol head = hashtable[index];
-    symbol node;
+    S_symbol head = hashtable[index];
+    S_symbol node;
 
     for(node = head; node; node = node->next) {
         if (!strcmp(node->name, name))
             return node;
     }
 
-    hashtable[index] = sym_mk(name, head);
+    hashtable[index] = Sf_symbol_(name, head);
     return hashtable[index];
 }
 
-const char *sym_get_name(symbol s)
+S_table Sf_table(void)
 {
-    return s->name;
-}
-
-symbol_table sym_table_new(void)
-{
-    symbol_table t = try_malloc(sizeof(*t));
+    S_table t = Ualloc(sizeof(*t));
 
     memset(t, 0, sizeof(*t));
 
     return t;
 }
 
-void sym_table_add(symbol_table t, symbol s, void *v)
+const char *Sf_name(S_symbol s)
+{
+    return s->name;
+}
+
+void Sf_enter(S_table t, S_symbol s, void *v)
 {
     unsigned index = ptrhash(s);
 
     assert(t && s);
-    t->binds[index] = bind_mk(s, v, t->binds[index], t->top);
+    t->binds[index] = Sf_bind(s, v, t->binds[index], t->top);
     t->top = s;
 }
 
-void *sym_table_get(symbol_table t, symbol s)
+void *Sf_look(S_table t, S_symbol s)
 {
     unsigned index = ptrhash(s);
     bind b;
@@ -144,13 +144,13 @@ void *sym_table_get(symbol_table t, symbol s)
     return NULL;
 }
 
-void sym_table_begin(symbol_table t)
+void Sf_begin(S_table t)
 {
     assert(t);
-    sym_table_add(t, empty, NULL); // sign of scope begin
+    Sf_enter(t, empty, NULL); // sign of scope begin
 }
 
-void sym_table_end(symbol_table t)
+void Sf_end(S_table t)
 {
     unsigned index;
     bind b;

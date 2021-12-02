@@ -9,171 +9,178 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct ast_dec_ *                   ast_dec;
-typedef struct ast_exp_ *                   ast_exp;
-typedef struct ast_var_ *                   ast_var;
-typedef struct ast_type_ *                  ast_type;
-typedef struct ast_dec_list_ *              ast_dec_list;
-typedef struct ast_exp_list_ *              ast_exp_list;
-typedef struct ast_type_field_ *            ast_tfield;
-typedef struct ast_type_field_list_ *       ast_tfield_list;
-typedef struct ast_record_field_ *          ast_rfield;
-typedef struct ast_record_field_list_ *     ast_rfield_list;
+typedef struct A_dec_ *         A_dec;
+typedef struct A_exp_ *         A_exp;
+typedef struct A_var_ *         A_var;
+typedef struct A_type_ *        A_type;
+typedef struct A_dec_list_ *    A_dec_list;
+typedef struct A_exp_list_ *    A_exp_list;
+typedef struct A_para_ *        A_para;
+typedef struct A_para_list_ *   A_para_list;
+typedef struct A_argu_ *        A_argu;
+typedef struct A_argu_list_ *   A_argu_list;
 
-typedef int ast_pos;
+typedef int Apos;
 
 typedef enum
 {
-    kind_op_plus,
-    kind_op_minus,
-    kind_op_times,
-    kind_op_divide,
-    kind_op_eq,
-    kind_op_neq,
-    kind_op_lt,
-    kind_op_le,
-    kind_op_gt,
-    kind_op_ge,
-} ast_op;
+    Ak_op_plus,
+    Ak_op_minus,
+    Ak_op_times,
+    Ak_op_divide,
+    Ak_op_eq,
+    Ak_op_neq,
+    Ak_op_lt,
+    Ak_op_le,
+    Ak_op_gt,
+    Ak_op_ge,
+} Ak_op;
 
-struct ast_dec_ {
-    ast_pos pos;
+struct A_dec_ {
+    Apos pos;
 
     enum
     {
-        kind_dec_var,
-        kind_dec_type,
-        kind_dec_func,
+        Ak_dec_var,
+        Ak_dec_type,
+        Ak_dec_func,
     } kind;
 
     union
     {
-        struct { symbol var, type; ast_exp init; bool escape; }                                 var;
-        struct { symbol type_s; ast_type type; }                                                type;
-        struct { ast_pos pos; symbol func; ast_tfield_list params; symbol ret; ast_exp body; }  func;
+        struct { S_symbol var, type; A_exp init; bool escape; }                              var;
+        struct { S_symbol type_s; A_type type; }                                             type;
+        struct { Apos pos; S_symbol func; A_para_list params; S_symbol ret; A_exp body; }    func;
     } u;
 };
 
-struct ast_exp_ {
-    ast_pos pos;
+struct A_exp_ {
+    Apos pos;
 
     enum
     {
-        kind_exp_var,
-        kind_exp_nil,
-        kind_exp_int,
-        kind_exp_string,
-        kind_exp_call,
-        kind_exp_op,
-        kind_exp_record,
-        kind_exp_seq,
-        kind_exp_assign,
-        kind_exp_if,
-        kind_exp_while,
-        kind_exp_for,
-        kind_exp_break,
-        kind_exp_let,
-        kind_exp_array,
+        Ak_exp_var,
+        Ak_exp_nil,
+        Ak_exp_int,
+        Ak_exp_string,
+        Ak_exp_call,
+        Ak_exp_op,
+        Ak_exp_record,
+        Ak_exp_seq,
+        Ak_exp_assign,
+        Ak_exp_if,
+        Ak_exp_while,
+        Ak_exp_for,
+        Ak_exp_break,
+        Ak_exp_let,
+        Ak_exp_array,
     } kind;
 
     union
     {
-        ast_var                                                     var;
+        A_var                                                     var;
         //                                                          nil;
         int                                                         int_;
         const char *                                                string_;
-        struct { symbol func; ast_exp_list args; }                  call;
-        struct { ast_op op; ast_exp left; ast_exp right; }          op;
-        struct { symbol record; ast_rfield_list members; }          record;
-        ast_exp_list                                                seq;
-        struct { ast_var var; ast_exp exp; }                        assign;
-        struct { ast_exp cond, then, else_; }                       if_;
-        struct { ast_exp cond, body;}                               while_;
-        struct { symbol var; ast_exp lo, hi, body; bool escape; }   for_;
+        struct { S_symbol func; A_exp_list args; }                  call;
+        struct { Ak_op oper; A_exp left; A_exp right; }          op;
+        struct { S_symbol record; A_argu_list members; }          record;
+        A_exp_list                                                seq;
+        struct { A_var var; A_exp exp; }                        assign;
+        struct { A_exp cond, then, else_; }                       if_;
+        struct { A_exp cond, body;}                               while_;
+        struct { S_symbol var; A_exp lo, hi, body; bool escape; }   for_;
         //                                                          break;
-        struct { ast_dec_list decs; ast_exp_list body; }            let;
-        struct { symbol array; ast_exp size, init; }                array;
+        struct { A_dec_list decs; A_exp_list body; }            let;
+        struct { S_symbol array; A_exp size, init; }                array;
     } u;
 };
 
-struct ast_var_ {
-    ast_pos pos;
+struct A_var_ {
+    Apos pos;
 
     enum
     {
-        kind_var,
-        kind_var_slice,  // array slice
-        kind_var_member, // record member
+        Ak_var,
+        Ak_var_slice,  // array slice
+        Ak_var_member, // record member
     } kind;
 
     union
     {
-        struct { symbol base; ast_var suffix; }     base;
-        struct { ast_exp exp; ast_var suffix; }     slice;
-        struct { symbol member; ast_var suffix; }   member;
+        struct { S_symbol base; A_var suffix; }     base;
+        struct { A_exp exp; A_var suffix; }     slice;
+        struct { S_symbol member; A_var suffix; }   member;
     } u;
 };
 
-struct ast_type_ {
-    ast_pos pos;
+struct A_type_ {
+    Apos pos;
 
     enum
     {
-        kind_type_var,
-        kind_type_array,
-        kind_type_record,
+        Ak_type_var,
+        Ak_type_array,
+        Ak_type_record,
     } kind;
 
     union
     {
-        symbol          var;
-        symbol          array;
-        ast_tfield_list record;
+        S_symbol          var;
+        S_symbol          array;
+        A_para_list record;
     } u;
 };
 
-struct ast_dec_list_            { ast_dec       head; ast_dec_list      tail; };
-struct ast_exp_list_            { ast_exp       head; ast_exp_list      tail; };
-struct ast_type_field_list_     { ast_tfield    head; ast_tfield_list   tail; };
-struct ast_record_field_list_   { ast_rfield    head; ast_rfield_list   tail; };
-struct ast_type_field_          { symbol var, type; ast_pos pos; bool escape; };
-struct ast_record_field_        { symbol var; ast_exp exp; };
+struct A_dec_list_            { A_dec       head; A_dec_list      tail; };
+struct A_exp_list_            { A_exp       head; A_exp_list      tail; };
+struct A_para_list_     { A_para    head; A_para_list   tail; };
+struct A_argu_list_   { A_argu    head; A_argu_list   tail; };
+struct A_para_          { S_symbol var, type; Apos pos; bool escape; };
+struct A_argu_        { S_symbol var; A_exp exp; };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-ast_dec ast_mk_dec_var(ast_pos pos, symbol var, symbol type, ast_exp init);
-ast_dec ast_mk_dec_type(symbol type_s, ast_type type);
-ast_dec ast_mk_dec_func(ast_pos pos, symbol func, ast_tfield_list params, symbol ret, ast_exp body);
+A_dec Am_dec_var(Apos pos, S_symbol var, S_symbol type, A_exp init);
+A_dec Am_dec_type(S_symbol type_s, A_type type);
+A_dec Am_dec_func(Apos pos, S_symbol func, A_para_list params, S_symbol ret, A_exp body);
 
-ast_exp ast_mk_exp_var(ast_pos pos, ast_var var);
-ast_exp ast_mk_exp_nil(ast_pos pos);
-ast_exp ast_mk_exp_int(ast_pos pos, int i);
-ast_exp ast_mk_exp_string(ast_pos pos, const char *s);
-ast_exp ast_mk_exp_call(ast_pos pos, symbol func, ast_exp_list args);
-ast_exp ast_mk_exp_op(ast_pos pos, ast_op oper, ast_exp left, ast_exp right);
-ast_exp ast_mk_exp_record(ast_pos pos, symbol record, ast_rfield_list members);
-ast_exp ast_mk_exp_seq(ast_pos pos, ast_exp_list seq);
-ast_exp ast_mk_exp_assign(ast_pos pos, ast_var var, ast_exp exp);
-ast_exp ast_mk_exp_if(ast_pos pos, ast_exp test, ast_exp then, ast_exp elsee);
-ast_exp ast_mk_exp_while(ast_pos pos, ast_exp test, ast_exp body);
-ast_exp ast_mk_exp_for(ast_pos pos, symbol var, ast_exp lo, ast_exp hi, ast_exp body);
-ast_exp ast_mk_exp_break(ast_pos pos);
-ast_exp ast_mk_exp_let(ast_pos pos, ast_dec_list decs, ast_exp_list body);
-ast_exp ast_mk_exp_array(ast_pos pos, symbol array, ast_exp size, ast_exp init);
+A_exp Am_exp_var(Apos pos, A_var var);
+A_exp Am_exp_nil(Apos pos);
+A_exp Am_exp_int(Apos pos, int i);
+A_exp Am_exp_string(Apos pos, const char *s);
+A_exp Am_exp_call(Apos pos, S_symbol func, A_exp_list args);
+A_exp Am_exp_op(Apos pos, Ak_op oper, A_exp left, A_exp right);
+A_exp Am_exp_record(Apos pos, S_symbol record, A_argu_list members);
+A_exp Am_exp_seq(Apos pos, A_exp_list seq);
+A_exp Am_exp_assign(Apos pos, A_var var, A_exp exp);
+A_exp Am_exp_if(Apos pos, A_exp test, A_exp then, A_exp else_);
+A_exp Am_exp_while(Apos pos, A_exp test, A_exp body);
+A_exp Am_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body);
+A_exp Am_exp_break(Apos pos);
+A_exp Am_exp_let(Apos pos, A_dec_list decs, A_exp_list body);
+A_exp Am_exp_array(Apos pos, S_symbol array, A_exp size, A_exp init);
 
-ast_var ast_mk_var(ast_pos pos, symbol base, ast_var suffix);
-ast_var ast_mk_var_slice(ast_pos pos, ast_exp exp, ast_var suffix);
-ast_var ast_mk_var_member(ast_pos pos, symbol member, ast_var suffix);
+A_var Am_var(Apos pos, S_symbol base, A_var suffix);
+A_var Am_var_slice(Apos pos, A_exp exp, A_var suffix);
+A_var Am_var_member(Apos pos, S_symbol member, A_var suffix);
 
-ast_type ast_mk_type_var(ast_pos pos, symbol name);
-ast_type ast_mk_type_array(ast_pos pos, symbol array);
-ast_type ast_mk_type_record(ast_pos pos, ast_tfield_list record);
+A_type Am_type_var(Apos pos, S_symbol name);
+A_type Am_type_array(Apos pos, S_symbol array);
+A_type Am_type_record(Apos pos, A_para_list record);
 
-ast_dec_list ast_mk_dec_list(ast_dec head, ast_dec_list tail);
-ast_exp_list ast_mk_exp_list(ast_exp head, ast_exp_list tail);
-ast_tfield_list ast_mk_tfield_list(ast_tfield head, ast_tfield_list tail);
-ast_rfield_list ast_mk_rfield_list(ast_rfield head, ast_rfield_list tail);
-ast_tfield ast_mk_tfield(ast_pos pos, symbol var, symbol type);
-ast_rfield ast_mk_rfield(symbol var, ast_exp exp);
+A_dec_list Am_dec_list(A_dec head, A_dec_list tail);
+A_exp_list Am_exp_list(A_exp head, A_exp_list tail);
+A_para_list Am_para_list(A_para head, A_para_list tail);
+A_argu_list Am_argu_list(A_argu head, A_argu_list tail);
+A_para Am_para(Apos pos, S_symbol var, S_symbol type);
+A_argu Am_argu(S_symbol var, A_exp exp);
+
+/**
+ * print abstract syntax tree.
+ * @param[in] out   output file(FILE *).
+ * @param[in] root  root node(A_exp).
+ */
+void Af_print(void *out, void *root);

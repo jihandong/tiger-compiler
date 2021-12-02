@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
-#include "show.h"
 #include "util.h"
 
-extern ast_exp ast_root;
+extern A_exp A_root;
 int parse(const char *);
 
 int main(int argc, char **argv) {
@@ -34,9 +33,9 @@ int main(int argc, char **argv) {
     fclose(fp);
 
     printf("\n%s\nStep 3. ast:\n", sep);
-    ast_pr(stdout, ast_root);
+    Af_print(stdout, A_root);
 
     printf("\n%s\nsuccess\n", sep);
-    all_free();
+    Ufree();
     return 0;
 }

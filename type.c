@@ -12,10 +12,10 @@
  ****************************************************************************/
 
 // basic types
-static struct T_type_ type_nil     = { T_kind_nil };
-static struct T_type_ type_int     = { T_kind_int };
-static struct T_type_ type_string  = { T_kind_string };
-static struct T_type_ type_void    = { T_kind_void };
+static struct T_type_ type_nil  = { T_kind_nil };
+static struct T_type_ type_int  = { T_kind_int };
+static struct T_type_ type_str  = { T_kind_str };
+static struct T_type_ type_void = { T_kind_void };
 
 static const char *T_kind[] =
 {

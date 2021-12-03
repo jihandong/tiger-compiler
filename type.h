@@ -28,34 +28,103 @@ struct T_type_
 
     union {
         struct { S_symbol symbol; T_type type; }    name; /*< type alias */
-        struct { T_type ret; T_type_list args; }    func;
+        struct { T_type ret; T_type_list paras; }   func;
         T_type                                      array;
         T_field_list                                record;
     } u;
 };
 
-struct T_type_list_     { T_type head; T_type_list tail; };
 struct T_field_         { S_symbol name; T_type type; };
 struct T_field_list_    { T_field head; T_field_list tail; };
+struct T_type_list_     { T_type head; T_type_list tail; };
 
 /****************************************************************************
- * Public Functions
+ * Public: basic type
  ****************************************************************************/
 
-T_type T_mk_nil(void);
-T_type T_mk_int(void);
-T_type T_mk_str(void);
-T_type T_mk_void(void);
+/**
+ * nil type.
+ * @return pre-defined type.
+ */
+T_type T_nil(void);
+/**
+ * integer type.
+ * @return pre-defined type.
+ */
+T_type T_int(void);
+/**
+ * string type.
+ * @return pre-defined type.
+ */
+T_type T_str(void);
+/**
+ * void type.
+ * @return pre-defined type.
+ */
+T_type T_void(void);
 
-T_type T_mk_name(S_symbol symbol, T_type type);
-T_type T_mk_func(T_type ret, T_type_list args);
-T_type T_mk_array(T_type type);
-T_type T_mk_record(T_field_list fields);
+/****************************************************************************
+ * Public: type constructor
+ ****************************************************************************/
 
+/**
+ * make type name.
+ * @return analysed type.
+ */
+T_type T_name(S_symbol symbol, T_type type);
+/**
+ * make functions type.
+ * @return analysed type.
+ */
+T_type T_func(T_type ret, T_type_list paras);
+/**
+ * make array type.
+ * @return analysed type.
+ */
+T_type T_array(T_type type);
+/**
+ * make record type.
+ * @return analysed type.
+ */
+T_type T_record(T_field_list fields);
+
+/****************************************************************************
+ * Public: parameter/argument constructor
+ ****************************************************************************/
+
+/**
+ * make record field.
+ * @param name  field name.
+ * @param type  field type.
+ * @return new field.
+ */
 T_field T_mk_field(S_symbol name, T_type type);
+/**
+ * make type list node.
+ * @param head
+ * @param tail
+ * @return new field
+ */
 T_type_list T_mk_type_list(T_type head, T_type_list tail);
+/**
+ * make record field list node.
+ * @param head
+ * @param tail
+ * @return new field list node.
+ */
 T_field_list T_mk_field_list(T_field head, T_field_list tail);
 
-void T_pr_type(T_type type);
-void T_pr_type_list(T_type_list types);
+/****************************************************************************
+ * Public: display functions
+ ****************************************************************************/
 
+/**
+ * display type definitions.
+ * @param type  type definitions.
+ */
+void T_pr_type(T_type type);
+/**
+ * display type list: function parameters or record fields.
+ * @param types     type list.
+ */
+void T_pr_type_list(T_type_list types);

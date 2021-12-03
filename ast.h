@@ -13,12 +13,12 @@ typedef struct A_dec_ *         A_dec;
 typedef struct A_exp_ *         A_exp;
 typedef struct A_var_ *         A_var;
 typedef struct A_type_ *        A_type;
+typedef struct A_para_ *        A_para; /* func def and record def */
+typedef struct A_para_list_ *   A_para_list;
+typedef struct A_arg_ *         A_arg; /* func call and record create */
+typedef struct A_arg_list_ *    A_arg_list;
 typedef struct A_dec_list_ *    A_dec_list;
 typedef struct A_exp_list_ *    A_exp_list;
-typedef struct A_para_ *        A_para;
-typedef struct A_para_list_ *   A_para_list;
-typedef struct A_argu_ *        A_argu;
-typedef struct A_argu_list_ *   A_argu_list;
 
 typedef int Apos;
 
@@ -49,7 +49,10 @@ struct A_dec_
         struct { S_symbol name, type; A_exp init; bool escape; }    var;
         struct { S_symbol name; A_type type; }                      type;
         struct {
-            Apos pos; S_symbol name; A_para_list paras; S_symbol ret; A_exp body;
+            Apos pos;
+            S_symbol name, ret;
+            A_para_list paras;
+            A_exp body;
         } func;
     } u;
 };
@@ -84,7 +87,7 @@ struct A_exp_
         struct { S_symbol func; A_exp_list args; }                  call;
         struct { A_kind_op oper; A_exp left; A_exp right; }         op;
         struct { S_symbol type; A_exp size, init; }                 array;
-        struct { S_symbol type; A_argu_list fields; }               record;
+        struct { S_symbol type; A_arg_list args; }                 record;
         A_exp_list                                                  seq;
         struct { A_var var; A_exp exp; }                            assign;
         struct { A_exp cond, then, else_; }                         if_;
@@ -101,14 +104,14 @@ struct A_var_
 
     enum {
         A_kind_var_base,
-        A_kind_var_slice, // array slice
-        A_kind_var_field, // record field
+        A_kind_var_index,
+        A_kind_var_field,
     } kind;
 
     union {
-        struct { S_symbol base; A_var suffix; }     base;
-        struct { A_exp exp; A_var suffix; }         slice;
-        struct { S_symbol field; A_var suffix; }    field;
+        struct { S_symbol name; A_var suffix; }     base;
+        struct { A_exp exp; A_var suffix; }         index; /*< array index */
+        struct { S_symbol name; A_var suffix; }     field; /*< record fields */
     } u;
 };
 
@@ -129,12 +132,12 @@ struct A_type_
     } u;
 };
 
+struct A_arg_           { S_symbol  name; A_exp exp; };
+struct A_arg_list_      { A_arg     head; A_arg_list    tail; };
+struct A_para_          { S_symbol  name, type; Apos pos; bool escape; };
+struct A_para_list_     { A_para    head; A_para_list   tail; };
 struct A_dec_list_      { A_dec     head; A_dec_list    tail; };
 struct A_exp_list_      { A_exp     head; A_exp_list    tail; };
-struct A_para_list_     { A_para    head; A_para_list   tail; };
-struct A_argu_list_     { A_argu    head; A_argu_list   tail; };
-struct A_para_          { S_symbol name, type; Apos pos; bool escape; };
-struct A_argu_          { S_symbol name; A_exp exp; };
 
 /****************************************************************************
  * Public: declaration constructor
@@ -204,47 +207,195 @@ A_exp A_mk_exp_str(Apos pos, const char *s);
  * make function calling astnode.
  * @param[in] pos
  * @param[in] func  function symbol.
- * @param[in] args  argument expression list.
+ * @param[in] args  argment expression list.
  * @return new astnode.
  */
 A_exp A_mk_exp_call(Apos pos, S_symbol func, A_exp_list args);
+/**
+ * make "op1 op op2" astnode.
+ * @param[in] pos
+ * @param[in] oper  operator type: + - * /.
+ * @param[in] left  left operand expression.
+ * @param[in] right right operand expression.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right);
-A_exp A_mk_exp_array(Apos pos, S_symbol name, A_exp size, A_exp init);
-A_exp A_mk_exp_record(Apos pos, S_symbol name, A_argu_list fields);
+/**
+ * make array creating astnode.
+ * @param[in] pos
+ * @param[in] type  array(element) type.
+ * @param[in] size  array size.
+ * @param[in] init  array element initial value.
+ * @return new astnode.
+ */
+A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init);
+/**
+ * make record creating astnode.
+ * @param[in] pos
+ * @param[in] type  record type.
+ * @param[in] args  field initialize.
+ * @return new astnode.
+ */
+A_exp A_mk_exp_record(Apos pos, S_symbol type, A_arg_list args);
+/**
+ * make expression sequence astnode.
+ * @param[in] pos
+ * @param[in] seq   expression sequence.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_seq(Apos pos, A_exp_list seq);
+/**
+ * make variable assignment astnode.
+ * @param[in] pos
+ * @param[in] var   left value.
+ * @param[in] exp   expression.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_assign(Apos pos, A_var var, A_exp exp);
+/**
+ * make if-then, if-then-else, and, or astnode.
+ * @param[in] pos
+ * @param[in] cond  condition.
+ * @param[in] then  expression for true condition.
+ * @param[in] else_ expression for false confition, can be null.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_);
+/**
+ * make while loop astnode.
+ * @param[in] pos
+ * @param[in] cond  condition.
+ * @param[in] body  loop body.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_while(Apos pos, A_exp cond, A_exp body);
+/**
+ * make for loop astnode.
+ * @param[in] pos
+ * @param[in] var   temp variable.
+ * @param[in] lo    lowest value.
+ * @param[in] hi    highest value.
+ * @param[in] body  loop body.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body);
+/**
+ * make break astnode.
+ * @param[in] pos
+ * @return new astnode.
+ */
 A_exp A_mk_exp_break(Apos pos);
+/**
+ * make let ... in ... astnode
+ * @param[in] pos
+ * @param[in] decs  declarations.
+ * @param[in] body  expression sequence.
+ * @return new astnode.
+ */
 A_exp A_mk_exp_let(Apos pos, A_dec_list decs, A_exp_list body);
 
 /****************************************************************************
  * Public: variables constructor
  ****************************************************************************/
 
-A_var A_mk_var_base(Apos pos, S_symbol base, A_var suffix);
-A_var A_mk_var_slice(Apos pos, A_exp exp, A_var suffix);
+/**
+ * make base left value astnode.
+ * @param[in] pos
+ * @param[in] name      left value bast address.
+ * @param[in] suffix    array index or record field.
+ * @return new astnode.
+ */
+A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix);
+/**
+ * make array index suffix astnode.
+ * @param[in] pos
+ * @param[in] exp       array index.
+ * @param[in] suffix    more array index or record field.
+ * @return new astnode.
+ */
+A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix);
+/**
+ * make field member suffix astnode.
+ * @param[in] pos
+ * @param[in] field     record field.
+ * @param[in] suffix    array index or record field.
+ * @return new astnode.
+ */
 A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix);
 
 /****************************************************************************
  * Public: type definition constructor
  ****************************************************************************/
 
-A_type A_mk_type_var(Apos pos, S_symbol name);
-A_type A_mk_type_array(Apos pos, S_symbol name);
+/**
+ * make type name definition astnode.
+ * @param[in] pos
+ * @param[in] name      type name.
+ * @return new astnode.
+ */
+A_type A_mk_type_name(Apos pos, S_symbol name);
+/**
+ * make array type name definition astnode.
+ * @param[in] pos
+ * @param[in] array     array(element) type name.
+ * @return new astnode.
+ */
+A_type A_mk_type_array(Apos pos, S_symbol array);
+/**
+ * make record definition astnode.
+ * @param[in] pos
+ * @param[in] fields    record fields' definition.
+ * @return new astnode.
+ */
 A_type A_mk_type_record(Apos pos, A_para_list fields);
 
 /****************************************************************************
  * Public: link list constructor
  ****************************************************************************/
 
+/**
+ * make declaration link list node.
+ * @param[in] head
+ * @param[in] tail
+ * @return new astnode.
+ */
 A_dec_list A_mk_dec_list(A_dec head, A_dec_list tail);
+/**
+ * make expression link list node.
+ * @param[in] head
+ * @param[in] tail
+ * @return new astnode.
+ */
 A_exp_list A_mk_exp_list(A_exp head, A_exp_list tail);
+/**
+ * make parameter link list node.
+ * @param[in] head
+ * @param[in] tail
+ * @return new astnode.
+ */
 A_para_list A_mk_para_list(A_para head, A_para_list tail);
-A_argu_list A_mk_argu_list(A_argu head, A_argu_list tail);
+/**
+ * make argument link list node.
+ * @param[in] head
+ * @param[in] tail
+ * @return new astnode.
+ */
+A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail);
+/**
+ * make parameter astnode.
+ * @param[in] pos
+ * @param[in] var 
+ * @param[in] type 
+ * @return new astnode.
+ */
 A_para A_mk_para(Apos pos, S_symbol var, S_symbol type);
-A_argu A_mk_argu(S_symbol var, A_exp exp);
+/**
+ * make argument astnode.
+ * @param[in] var 
+ * @param[in] exp 
+ * @return new astnode.
+ */
+A_arg A_mk_arg(S_symbol var, A_exp exp);
 
 /****************************************************************************
  * Public: display function

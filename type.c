@@ -22,77 +22,70 @@ static const char *T_kind[] =
     "nil",
     "int",
     "string",
+    "void",
     "array",
     "record",
     "name",
-    "void",
 };
 
 /****************************************************************************
- * Public Functions
+ * Public: basic type
  ****************************************************************************/
 
-inline T_type T_mk_nil(void)
-{
-    return &type_nil;
-}
+inline T_type T_nil(void)   { return &type_nil; }
+inline T_type T_int(void)   { return &type_int; }
+inline T_type T_str(void)   { return &type_str; }
+inline T_type T_void(void)  { return &type_void; }
 
-inline T_type T_mk_int(void)
-{
-    return &type_int;
-}
+/****************************************************************************
+ * Public: type constructor
+ ****************************************************************************/
 
-inline T_type T_mk_string(void)
-{
-    return &type_string;
-}
-
-inline T_type T_mk_void(void)
-{
-    return &type_void;
-}
-
-T_type T_mk_name(S_symbol symbol, T_type type)
+T_type T_name(S_symbol symbol, T_type type)
 {
     T_type t = U_alloc(sizeof(*t));
 
-    t->kind             = T_kind_name;
-    t->u.name.symbol    = symbol;
-    t->u.name.type      = type;
+    t->kind          = T_kind_name;
+    t->u.name.symbol = symbol;
+    t->u.name.type   = type;
 
     return t;
 }
 
-T_type T_mk_func(T_type ret, T_type_list args)
+T_type T_func(T_type ret, T_type_list paras)
 {
     T_type t = U_alloc(sizeof(*t));
 
     t->kind         = T_kind_func;
     t->u.func.ret   = ret;
-    t->u.func.args  = args;
+    t->u.func.paras = paras;
 
     return t;
 }
 
-T_type T_mk_array(T_type type)
+T_type T_array(T_type type)
 {
     T_type t = U_alloc(sizeof(*t));
 
-    t->kind     = T_kind_array;
-    t->u.array  = type;
+    t->kind    = T_kind_array;
+    t->u.array = type;
 
     return t;
 }
 
-T_type T_mk_record(T_field_list members)
+T_type T_record(T_field_list fields)
 {
     T_type t = U_alloc(sizeof(*t));
 
     t->kind     = T_kind_record;
-    t->u.record = members;
+    t->u.record = fields;
 
     return t;
 }
+
+/****************************************************************************
+ * Public: parameter/argument constructor
+ ****************************************************************************/
 
 T_field T_mk_field(S_symbol field, T_type type)
 {
@@ -124,12 +117,16 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail)
     return t;
 }
 
+/****************************************************************************
+ * Public: display functions
+ ****************************************************************************/
+
 void T_pr_type(T_type type)
 {
     if (type) {
         printf("%s", T_kind[type->kind]);
         if (type->kind == T_kind_name)
-            printf("(%s)", sym_get_name(type->u.name.symbol));
+            printf("(%s)", S_get_name(type->u.name.symbol));
     } else
         printf("_");
 }

@@ -27,7 +27,7 @@ struct T_type_
     } kind;
 
     union {
-        struct { S_symbol name; T_type type; }      type; /*< type alias */
+        struct { S_symbol symbol; T_type type; }    name; /*< type alias */
         struct { T_type ret; T_type_list args; }    func;
         T_type                                      array;
         T_field_list                                record;
@@ -42,15 +42,15 @@ struct T_field_list_    { T_field head; T_field_list tail; };
  * Public Functions
  ****************************************************************************/
 
-T_type T_nil(void);
-T_type T_int(void);
-T_type T_str(void);
-T_type T_void(void);
+T_type T_mk_nil(void);
+T_type T_mk_int(void);
+T_type T_mk_str(void);
+T_type T_mk_void(void);
 
-T_type T_mk_type(S_symbol name, T_type type);
+T_type T_mk_name(S_symbol symbol, T_type type);
 T_type T_mk_func(T_type ret, T_type_list args);
 T_type T_mk_array(T_type type);
-T_type T_mk_record(T_field_list members);
+T_type T_mk_record(T_field_list fields);
 
 T_field T_mk_field(S_symbol name, T_type type);
 T_type_list T_mk_type_list(T_type head, T_type_list tail);

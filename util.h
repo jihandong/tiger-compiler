@@ -18,6 +18,7 @@ void U_free(void);
 /**
  * free everything, print error and exit.
  * @param[in] pos   error position.
- * @param[in] msg   error message.
+ * @param[in] msg   formatted error message.
+ * @param[in] ...   formatted args.
  */
-void U_error(int pos, const char *msg);
+void U_error(int pos, const char *fmt, ...);

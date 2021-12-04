@@ -1,7 +1,7 @@
-test: test.o y.tab.o lex.yy.o ast.o astpr.o symbol.o util.o
+test: test.o y.tab.o lex.yy.o semant.o ast.o astpr.o symbol.o util.o
 	cc -g test.o y.tab.o lex.yy.o ast.o astpr.o symbol.o util.o
 
-test.o: test.c ast.h util.h
+test.o: test.c
 	cc -g -c test.c
 
 # lexer
@@ -12,29 +12,33 @@ lex.yy.c: tiger.lex
 	lex tiger.lex
 
 # parser
-y.tab.o: y.tab.c ast.h symbol.h util.h
+y.tab.o: y.tab.c
 	cc -g -c y.tab.c
 
-y.tab.c: tiger.y ast.h symbol.h
+y.tab.c: tiger.y
 	yacc -dv tiger.y
 
 y.tab.h: y.tab.c
 	echo "y.tab.h was created at the same time as y.tab.c"
 
+# analyser
+semant.o: semant.c
+	cc -g -c semant.c
+
 # common
-ast.o: ast.c ast.h
+ast.o: ast.c
 	cc -g -c ast.c
 
-astpr.o: astpr.c ast.h
+astpr.o: astpr.c
 	cc -g -c astpr.c -Wincompatible-pointer-types
 
-symbol.o: symbol.c util.h
+symbol.o: symbol.c
 	cc -g -c symbol.c -Wincompatible-pointer-types -Wint-conversion
 
-type.o: type.c symbol.h util.h
+type.o: type.c
 	cc -g -c type.c
 
-util.o: util.c util.h
+util.o: util.c
 	cc -g -c util.c
 
 # clean

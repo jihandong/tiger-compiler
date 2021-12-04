@@ -2,6 +2,7 @@
  * Include Files
  ****************************************************************************/
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,7 +30,7 @@ static void U_add(void* p)
 {
     U_slice s = malloc(sizeof(*s));
     if (!s)
-        U_error(-1, "run out of memory");
+        U_error(0, "run out of memory");
 
     s->ptr  = p;
     s->next = slices;
@@ -76,13 +77,20 @@ char *U_strdup(const char *s)
     return p;
 }
 
-void U_error(int pos, const char *msg)
+void U_error(int pos, const char *fmt, ...)
 {
+    va_list ap;
+
     if (pos > 0)
-        printf("Error at %d: %s\n", pos, msg);
+        printf("Error at %d:");
     else
-        printf("Error: %s\n", msg);
+        printf("Error:");
+
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
 
     U_free();
     exit(1);
 }
+

@@ -150,7 +150,7 @@ exp
 exp_value
 : NIL       { $$ = A_mk_exp_nil(0); }
 | INT       { $$ = A_mk_exp_int(0, $1); }
-| STRING    { $$ = A_mk_exp_string(0, $1); }
+| STRING    { $$ = A_mk_exp_str(0, $1); }
 | lvalue    { $$ = A_mk_exp_var(0, $1); }
 
 exp_seq
@@ -208,8 +208,8 @@ exp_let
  ****************************************************************************/
 
 lvalue
-: ID         { $$ = A_mk_base(0, S_mk_symbol($1), NULL); }
-| ID suffix  { $$ = A_mk_base(0, S_mk_symbol($1), $2); }
+: ID         { $$ = A_mk_var_base(0, S_mk_symbol($1), NULL); }
+| ID suffix  { $$ = A_mk_var_base(0, S_mk_symbol($1), $2); }
 
 suffix
 : /* spsilon */    { $$ = NULL; }

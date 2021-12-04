@@ -36,7 +36,7 @@ A_dec A_mk_dec_type(S_symbol name, A_type type)
     return p;
 }
 
-A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list params, S_symbol ret, A_exp body)
+A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list paras, S_symbol ret, A_exp body)
 {
     A_dec p = U_alloc(sizeof(*p));
 
@@ -134,7 +134,7 @@ A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init)
     return p;
 }
 
-A_exp A_mk_exp_record(Apos pos, S_symbol type, A_argu_list args)
+A_exp A_mk_exp_record(Apos pos, S_symbol type, A_arg_list args)
 {
     A_exp p = U_alloc(sizeof(*p));
 
@@ -239,7 +239,7 @@ A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix)
 {
     A_var p = U_alloc(sizeof(*p));
 
-    p->kind          = A_kind_var;
+    p->kind          = A_kind_var_base;
     p->pos           = pos;
     p->u.base.name   = name;
     p->u.base.suffix = suffix;
@@ -251,7 +251,7 @@ A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix)
 {
     A_var p = U_alloc(sizeof(*p));
 
-    p->kind           = A_kind_var_slice;
+    p->kind           = A_kind_var_index;
     p->pos            = pos;
     p->u.index.exp    = exp;
     p->u.index.suffix = suffix;
@@ -263,7 +263,7 @@ A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix)
 {
     A_var p = U_alloc(sizeof(*p));
 
-    p->kind           = A_kind_var_member;
+    p->kind           = A_kind_var_field;
     p->pos            = pos;
     p->u.field.name   = field;
     p->u.field.suffix = suffix;
@@ -275,13 +275,13 @@ A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix)
  * Public: type definition constructor
  ****************************************************************************/
 
-A_type A_mk_type_var(Apos pos, S_symbol var)
+A_type A_mk_type_name(Apos pos, S_symbol name)
 {
     A_type p = U_alloc(sizeof(*p));
 
-    p->kind     = A_kind_type_var;
+    p->kind     = A_kind_type_name;
     p->pos      = pos;
-    p->u.var    = var;
+    p->u.name   = name;
 
     return p;
 }
@@ -297,13 +297,13 @@ A_type A_mk_type_array(Apos pos, S_symbol array)
     return p;
 }
 
-A_type A_mk_type_record(Apos pos, A_para_list record)
+A_type A_mk_type_record(Apos pos, A_para_list fields)
 {
     A_type p = U_alloc(sizeof(*p));
 
     p->kind     = A_kind_type_record;
     p->pos      = pos;
-    p->u.record = record;
+    p->u.record = fields;
 
     return p;
 }
@@ -342,9 +342,9 @@ A_para_list A_mk_para_list(A_para head, A_para_list tail)
     return p;
 }
 
-A_arg_list A_mk_argu_list(A_argu head, A_argu_list tail)
+A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail)
 {
-    A_argu_list p = U_alloc(sizeof(*p));
+    A_arg_list p = U_alloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -352,24 +352,25 @@ A_arg_list A_mk_argu_list(A_argu head, A_argu_list tail)
     return p;
 }
 
-A_para A_mk_para(Apos pos, S_symbol var, S_symbol type)
+A_para A_mk_para(Apos pos, S_symbol name, S_symbol type)
 {
     A_para p = U_alloc(sizeof(*p));
 
     p->pos      = pos;
-    p->var      = var;
+    p->name     = name;
     p->type     = type;
     p->escape   = true;
 
     return p;
 }
 
-A_arg A_mk_argu(S_symbol var, A_exp exp)
+A_arg A_mk_arg(S_symbol name, A_exp exp)
 {
-    A_argu p = U_alloc(sizeof(*p));
+    A_arg p = U_alloc(sizeof(*p));
 
-    p->var = var;
-    p->exp = exp;
+    p->name = name;
+    p->exp  = exp;
 
     return p;
 }
+

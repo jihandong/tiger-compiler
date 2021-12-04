@@ -8,7 +8,7 @@
 #include "util.h"
 
 /********************************************************************************
- * Definitions
+ * Definition
  ********************************************************************************/
 
 typedef void *I_ir; /*< ir not implemented yet */
@@ -21,7 +21,7 @@ struct T_tyir_ {
 };
 
 /********************************************************************************
- * Privates
+ * Privat
  ********************************************************************************/
 
 static T_tyir T_mk_tyir(I_ir expir, T_type type)
@@ -35,7 +35,7 @@ static T_tyir T_mk_tyir(I_ir expir, T_type type)
 }
 
 /********************************************************************************
- * Publics
+ * Public
  ********************************************************************************/
 
 void T_trans_dec(S_table venv, S_table tenv, A_var n)
@@ -48,6 +48,7 @@ void T_trans_dec(S_table venv, S_table tenv, A_var n)
             T_type   type_ty;
             T_tyir   init_tyir;
 
+            // check variable init.
             init_tyir = T_trans_exp(venv, tenv, init);
             if (type) {
                 type_ty = S_look(tenv, type);
@@ -81,7 +82,7 @@ void T_trans_dec(S_table venv, S_table tenv, A_var n)
             T_tyir      body_tyir;
 
             T_type_list p;
-            int i;
+            int i       i;
 
             // check return type.
             ret_ty = S_look(ret);
@@ -137,49 +138,55 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             return T_trans_var(venv, tenv, n->u.var);
 
         case A_kind_exp_nil:
-            return T_mk_tyir(NULL, T_mk_nil());
+            return T_mk_tyir(NULL, T_nil());
 
         case A_kind_exp_int:
-            return T_mk_tyir(NULL, T_mk_int());
+            return T_mk_tyir(NULL, T_int());
 
         case A_kind_exp_str:
-            return T_mk_tyir(NULL, T_mk_str());
+            return T_mk_tyir(NULL, T_str());
 
         case A_kind_exp_call: {
-            S_symbol   func = n->u.call.func;
-            A_exp_list args = n->u.call.args;
-            T_type func_ty, ret_ty;
+            S_symbol    func = n->u.call.func;
+            A_exp_list  args = n->u.call.args;
+
+            T_type      func_ty, ret_ty;
             T_type_list para_tys;
 
+            // check funtion.
             func_ty = S_look(venv, func);
             if (!func_ty)
-                U_error(n->pos, "function not decalred");
+                U_error(n->pos, "function not exist");
 
-            ret_ty   = func_ty->u.func.ret;
+            ret_ty = func_ty->u.func.ret;
 
+            // check parameter type.
             para_tys = func_ty->u.func.paras;
-            for(; args && para_tys; args = args->tail, para_tys = para_tys->tail) {
+            for(; args && para_tys; args     = args->tail,
+                                    para_tys = para_tys->tail) {
                 A_exp  arg     = args->head;
                 T_type para_ty = para_tys->head;
                 T_tyir arg_tyir;
 
                 arg_tyir = T_trans_exp(venv, tenv, arg);
                 if (arg_tyir.type != para_ty)
-                    U_error(n->pos, "para and arg have different types");
+                    U_error(n->pos, "type of para and arg not match");
             }
 
             return T_mk_tyir(NULL, ret_ty);
         }
 
         case A_kind_exp_op: {
-            A_exp     left  = n->u.op.left;
-            A_exp     right = n->u.op.right;
+            A_exp  left  = n->u.op.left;
+            A_exp  right = n->u.op.right;
             T_tyir left_tyir, right_tyir;
 
+            // check left operand
             left_tyir = T_trans_exp(venv, tenv, left);
             if (left_tyir.type->kind != T_kind_int)
                 U_error(left->pos, "left operand is not integer type");
 
+            // check right operand
             right_tyir = T_trans_exp(venv, tenv, right);
             if (right_tyir.type->kind != T_kind_int)
                 U_error(right->pos, "right operand is not integer type");
@@ -188,51 +195,58 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
         }
 
         case A_kind_exp_array: {
-            S_symbol  type = n->u.array.type;
-            A_exp     size = n->u.array.size;
-            A_exp     init = n->u.array.init;
-            T_type type_ty;
-            T_tyir size_tyir, init_tyir;
+            S_symbol type = n->u.array.type;
+            A_exp    size = n->u.array.size;
+            A_exp    init = n->u.array.init;
+            T_type   array_ty;
+            T_tyir   size_tyir, init_tyir;
 
-            type_ty = S_look(tenv, type);
-            if (!type_ty)
-                U_error(right->pos, "type in array create not exist");
+            // check array type.
+            array_ty = S_look(tenv, type);
+            if (!array_ty)
+                U_error(n->pos, "array type not exist");
+            if (array_ty->kind != T_kind_array)
+                U_error(n->pos, "array type is not array");
 
+            // check array size.
             size_tyir = T_trans_exp(venv, tenv, size);
             if (size_tyir.type != T_kind_int)
-                U_error(right->pos, "size in array create is not integer");
+                U_error(right->pos, "array size is not integer");
 
+            // check array init.
             init_tyir = T_trans_exp(venv, tenv, init);
-            if (init_tyir.type != type)
-                U_error(right->pos, "type and init not match in array create");
+            if (init_tyir.type != array_ty->u.array)
+                U_error(right->pos, "type of init and array not match");
 
-            return T_mk_tyir(NULL, T_mk_array(type_ty));
+            return T_mk_tyir(NULL, array_ty);
         }
 
         case A_kind_exp_record: {
-            S_symbol    type = n->u.record.type;
-            A_argu_list args = n->u.record.args;
-            T_type record_ty;
+            S_symbol     type = n->u.record.type;
+            A_argu_list  args = n->u.record.args;
+            T_type       record_ty;
             T_field_list fields;
 
+            // check record type.
             record_ty = S_look(tenv, type);
             if (!record_ty)
                 U_error(->pos, "record type not exist");
             fields = record_ty->u.record;
 
+            // check fields type.
             for(; args && fields; args = args->tail, fields = fields->tail) {
                 S_symbol name1 = args->head->name;
                 A_exp    exp   = args->head->exp;
                 S_symbol name2 = fields->head->symbol;
                 T_type   type  = fields->head->type;
-                T_tyir exp_tyir;
+                T_tyir   exp_tyir;
 
                 if (name1 != name2)
-                    U_error(->pos, "record type not exist");
+                    U_error(->pos, "field name not match");
 
                 exp_tyir = T_trans_exp(venv, tenv, exp);
                 if (exp_tyir.type != type)
-                    U_error(->pos, "field exp type not match");
+                    U_error(->pos, "field type not match");
             }
 
             return T_mk_tyir(NULL, record_ty);
@@ -240,7 +254,7 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
         case A_kind_exp_seq: {
             A_exp_list seq = n->u.seq;
-            T_tyir exp_tyir;
+            T_tyir     exp_tyir;
 
             for(; seq; seq = seq->tail)
                 exp_tyir = T_trans_exp(venv, tenv, seq->head);
@@ -249,41 +263,45 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
         }
 
         case A_kind_exp_assign: {
-            A_var var = n->u.assign.var;
-            A_exp exp = n->u.assign.exp;
+            A_var  var = n->u.assign.var;
+            A_exp  exp = n->u.assign.exp;
             T_tyir var_tyir, exp_tyir;
 
+            // check type match.
             var_tyir = T_trans_var(venv, tenv, var);
             exp_tyir = T_trans_exp(venv, tenv, exp);
             if (var_tyir.type != exp_tyir.typ)
-                U_error(->pos, "var and type not match in assign");
+                U_error(->pos, "type of var and val not match");
 
             return T_mk_tyir(NULL, var_tyir.type);
         }
 
         case A_kind_exp_if:
-            A_exp cond  = n->u.if_.cond;
-            A_exp then  = n->u.if_.then;
-            A_exp else_ = n->u.if_.else_;
+            A_exp  cond  = n->u.if_.cond;
+            A_exp  then  = n->u.if_.then;
+            A_exp  else_ = n->u.if_.else_;
             T_tyir cond_tyir, then_tyir, else_tyir;
 
+            // check condition type.
             cond_tyir = T_trans_exp(venv, tenv, cond);
             if (cond_tyir.type.kind != T_kind_int)
-                U_error(cond->pos, "if condition is not integer type");
+                U_error(cond->pos, "cond type is not integer");
 
+            // check branches type.
             then_tyir = T_trans_exp(venv, tenv, then);
             else_tyir = T_trans_exp(venv, tenv, else_);
             if (then_tyir.type != else_tyir.type)
-                U_error(cond->pos, "if branches are not the same type");
+                U_error(cond->pos, "branches type are not the same");
 
             return T_mk_tyir(NULL, then_tyir.type);
         }
 
         case A_kind_exp_while: {
-            A_exp cond = n->u.while_.cond;
-            A_exp body = n->u.while_.body;
+            A_exp  cond = n->u.while_.cond;
+            A_exp  body = n->u.while_.body;
             T_tyir cond_tyir, body_tyir;
 
+            // check condition type.
             cond_tyir = T_trans_exp(venv, tenv, cond);
             if (cond_tyir.type.kind != T_kind_int)
                 U_error(cond->pos, "while condition is not integer type");
@@ -300,18 +318,20 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             A_exp    lo   = n->u.for_.lo;
             A_exp    hi   = n->u.for_.hi;
             A_exp    body = n->u.for_.body;
-            T_tyir lo_tyir, hi_tyir, body_tyir;
+            T_tyir   lo_tyir, hi_tyir, body_tyir;
 
+            // check lowest exp type.
             lo_tyir = T_trans_exp(venv, tenv, lo);
             if (lo_tyir.type.kind != T_kind_int)
                 U_error(n->pos, "for lo is not integer type");
 
+            // check highest exp type.
             hi_tyir = T_trnas_exp(venv, tenv, hi);
             if (hi_tyir.type.kind != T_kind_int)
                 U_error(n->pos, "for hi is not integer type");
 
             S_begin(venv);
-            S_enter(venv, var, T_mk_int());
+            S_enter(venv, var, T_int());
 
             body_tyir = T_trans_exp(venv, tenv, body);
 
@@ -321,7 +341,7 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
         }
 
         case A_kind_exp_break:
-            return T_mk_tyir(NULL, T_mk_void());
+            return T_mk_tyir(NULL, T_void());
 
         case A_kind_exp_let: {
             A_dec_list decs = n->u.let.decs;
@@ -404,6 +424,7 @@ T_type T_tyir T_trans_type(S_table tenv, A_type n)
             S_symbol name = n->u.name;
             T_type name_ty;
 
+            // check type name.
             name_ty = S_look(tenv, name);
             if(!name_ty)
                 U_error(n->pos, "type not exist");
@@ -415,6 +436,7 @@ T_type T_tyir T_trans_type(S_table tenv, A_type n)
             S_symbol array = n->u.array;
             T_type array_ty;
 
+            // check element type name.
             array_ty = S_look(tenv, array);
             if(!array_ty)
                 U_error(n->pos, "array type not exist");

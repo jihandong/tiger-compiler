@@ -223,7 +223,7 @@ A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right);
 /**
  * make array creating astnode.
  * @param[in] pos
- * @param[in] type  array(element) type.
+ * @param[in] type  array type (not element).
  * @param[in] size  array size.
  * @param[in] init  array element initial value.
  * @return new astnode.
@@ -337,7 +337,7 @@ A_type A_mk_type_name(Apos pos, S_symbol name);
 /**
  * make array type name definition astnode.
  * @param[in] pos
- * @param[in] array     array(element) type name.
+ * @param[in] array     array element type name.
  * @return new astnode.
  */
 A_type A_mk_type_array(Apos pos, S_symbol array);

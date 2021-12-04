@@ -68,22 +68,28 @@ T_type T_void(void);
  ****************************************************************************/
 
 /**
- * make type name.
+ * make new type name.
+ * @param[in] symbol    type name.
+ * @param[in] type      type definition.
  * @return analysed type.
  */
 T_type T_name(S_symbol symbol, T_type type);
 /**
  * make functions type.
+ * @param[in] ret   return value type.
+ * @param[in] paras parameter types.
  * @return analysed type.
  */
 T_type T_func(T_type ret, T_type_list paras);
 /**
  * make array type.
+ * @param[in] type  array element type.
  * @return analysed type.
  */
 T_type T_array(T_type type);
 /**
  * make record type.
+ * @param[in] fields    each field has name and type.
  * @return analysed type.
  */
 T_type T_record(T_field_list fields);
@@ -128,3 +134,4 @@ void T_pr_type(T_type type);
  * @param types     type list.
  */
 void T_pr_type_list(T_type_list types);
+

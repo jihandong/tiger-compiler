@@ -6,13 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
 #include "symbol.h"
+#include "util.h"
 
 /********************************************************************************
  * Definitions
  ********************************************************************************/
 
+#define DEBUG
 #define HASH_TABLE_SIZE 109
 #define BIND_TABLE_SIZE 109
 
@@ -21,15 +22,15 @@ typedef struct bind_*   bind;
 struct bind_
 {
     S_symbol  key;
-    void *  value;
-    bind    next;       /*< next node in hash bucket */
+    void *    value;
+    bind      next;       /*< next node in hash bucket */
     S_symbol  prevtop;    /*< previous bound symbol */
 };
 
 struct S_symbol_
 {
     const char *name;
-    S_symbol      next;
+    S_symbol    next;
 };
 
 struct S_table_
@@ -43,7 +44,6 @@ struct S_table_
  ********************************************************************************/
 
 static S_symbol hashtable[HASH_TABLE_SIZE];
-static S_symbol empty = 0x000000001;
 
 /********************************************************************************
  * Private Functions
@@ -76,7 +76,7 @@ static inline S_symbol S_mk_symbol_(const char *name, S_symbol head)
     return s;
 }
 
-static inline bind S_bind(S_symbol key, void *value, bind head, S_symbol top)
+static inline bind S_mk_bind_(S_symbol key, void *value, bind head, S_symbol top)
 {
     bind b = U_alloc(sizeof(*b));
 
@@ -86,6 +86,51 @@ static inline bind S_bind(S_symbol key, void *value, bind head, S_symbol top)
     b->prevtop  = top;
 
     return b;
+}
+
+static void S_pop(S_table t)
+{
+    int index;
+    bind b;
+
+    index           = ptrhash(t->top);
+    b               = t->binds[index];
+    t->binds[index] = b->next;
+    t->top          = b->prevtop;
+}
+
+static void S_dump(S_table t)
+{
+    S_symbol s;
+    bind b;
+    int i;
+
+    if (!t)
+        U_error(-1, "dump fail");
+
+    printf("-- symbol table --\n");
+    for(i = 0; i < HASH_TABLE_SIZE; i++) {
+        if (hashtable[i])
+            printf("  ");
+
+        for (s = hashtable[i]; s; s = s->next)
+            printf("(%s)", s->name);
+
+        if (hashtable[i])
+            printf("\n");
+    }
+
+    printf("-- bind table --\n");
+    for (i = 0; i < BIND_TABLE_SIZE; i++) {
+        if (t->binds[i])
+            printf("  ");
+
+        for (b = t->binds[i]; b; b = b->next)
+            printf("(%s)", b->key->name);
+
+        if (t->binds[i])
+            printf("\n");
+    }
 }
 
 /********************************************************************************
@@ -125,9 +170,12 @@ void S_enter(S_table t, S_symbol s, void *v)
 {
     unsigned index = ptrhash(s);
 
-    assert(t && s);
-    t->binds[index] = S_bind(s, v, t->binds[index], t->top);
+    if (!t || !s)
+        U_error(-1, "enter fail");
+
+    t->binds[index] = S_mk_bind_(s, v, t->binds[index], t->top);
     t->top = s;
+
 }
 
 void *S_look(S_table t, S_symbol s)
@@ -135,19 +183,29 @@ void *S_look(S_table t, S_symbol s)
     unsigned index = ptrhash(s);
     bind b;
 
-    assert(t && s);
+    if (!t || !s)
+        U_error(-1, "look fail");
+
     for(b = t->binds[index]; b; b = b->next) {
         if (b->key == s)
             return b->value;
     }
 
+    S_dump(t);
     return NULL;
 }
 
-void S_begin(S_table t)
+void S_begin(S_table t, const char *name)
 {
-    assert(t);
-    S_enter(t, empty, NULL); // sign of scope begin
+    char buf[64];
+
+    if (!t)
+        U_error(-1, "begin fail");
+
+    // scope sign start with "!".
+    snprintf(buf, sizeof(buf), "!%s", name);
+
+    S_enter(t, S_mk_symbol(buf), NULL);
 }
 
 void S_end(S_table t)
@@ -155,11 +213,13 @@ void S_end(S_table t)
     unsigned index;
     bind b;
 
-    assert(t);
-    while(t->top != empty) {
-        index           = ptrhash(t->top);
-        b               = t->binds[index];
-        t->binds[index] = b->next;
-        t->top          = b->prevtop;
-    }
+    if (!t)
+        U_error(-1, "end fail");
+
+    // pop till scope sign.
+    while (strncmp(S_get_name(t->top), "!", 1))
+        S_pop(t);
+
+    if (t->top) 
+        S_pop(t);
 }

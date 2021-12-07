@@ -73,9 +73,11 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec n)
             T_type_list t;
 
             // check return type.
-            ret_ty = S_look(tenv, ret);
-            if (!ret_ty)
-                U_error(n->pos, "return type not exist in func dec");
+            if (ret) {
+                ret_ty = S_look(tenv, ret);
+                if (!ret_ty)
+                    U_error(n->pos, "return type not exist in func dec");
+            }
 
             // check parameter type.
             for (p = paras, t = NULL; p; p = p->tail, t = t->tail) {
@@ -96,7 +98,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec n)
 
             // check function body.
             S_enter(venv, fname, T_func(ret_ty, para_tys));
-            S_begin(venv);
+            S_begin(venv, S_get_name(fname));
 
             for(p = paras, t = para_tys; p && t; p = p->tail, t = t->tail) {
                 S_symbol name = p->head->name;
@@ -141,7 +143,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             // check funtion.
             func_ty = S_look(venv, func);
             if (!func_ty)
-                U_error(n->pos, "function not exist");
+                U_error(n->pos, "function(%s) not exist", S_get_name(func));
 
             ret_ty = func_ty->u.func.ret;
 
@@ -291,7 +293,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             if (cond_tyir.type->kind != T_kind_int)
                 U_error(cond->pos, "while condition is not integer type");
 
-            S_begin(venv);
+            S_begin(venv, "while");
             body_tyir = T_trans_exp(venv, tenv, body);
             S_end(venv);
 
@@ -315,7 +317,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             if (hi_tyir.type->kind != T_kind_int)
                 U_error(n->pos, "for hi is not integer type");
 
-            S_begin(venv);
+            S_begin(venv, "for");
             S_enter(venv, var, T_int());
 
             body_tyir = T_trans_exp(venv, tenv, body);
@@ -333,8 +335,8 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             A_exp_list body = n->u.let.body;
             T_tyir     body_tyir;
 
-            S_begin(venv);
-            S_begin(tenv);
+            S_begin(venv, "let");
+            S_begin(tenv, "let");
 
             for(; decs; decs = decs->tail)
                 T_trans_dec(venv, tenv, decs->head);
@@ -446,15 +448,15 @@ static T_type T_trans_type(S_table tenv, A_type n)
         }
 
         case A_kind_type_array: {
-            S_symbol array = n->u.array;
-            T_type   array_ty;
+            S_symbol element = n->u.array;
+            T_type   element_ty;
 
             // check element type name.
-            array_ty = S_look(tenv, array);
-            if(!array_ty)
+            element_ty = S_look(tenv, element);
+            if(!element_ty)
                 U_error(n->pos, "element type not exist");
 
-            return T_array(array_ty);
+            return T_array(element_ty);
         }
 
         case A_kind_type_record: {
@@ -503,6 +505,6 @@ T_tyir T_trans(A_exp root) {
     S_enter(tenv, S_mk_symbol("int"), T_int());
     S_enter(tenv, S_mk_symbol("string"), T_str());
 
-    return T_trans_exp(tenv, venv, root);
+    return T_trans_exp(venv, tenv, root);
 }
 

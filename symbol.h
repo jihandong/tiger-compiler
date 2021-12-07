@@ -53,8 +53,9 @@ void *S_look(S_table t, S_symbol s);
  * Begin of scope.
  * Push a begin sign into table.
  * @param[in] t     symbol table
+ * @param[in] name  scope name
  */
-void S_begin(S_table t);
+void S_begin(S_table t, const char *name);
 
 
 /**

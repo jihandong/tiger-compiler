@@ -1,5 +1,5 @@
-test: test.o y.tab.o lex.yy.o semant.o ast.o astpr.o symbol.o util.o
-	cc -g test.o y.tab.o lex.yy.o ast.o astpr.o symbol.o util.o
+test: test.o y.tab.o lex.yy.o ast.o astpr.o semant.o symbol.o type.o util.o
+	cc -g *.o
 
 test.o: test.c
 	cc -g -c test.c

@@ -1,8 +1,12 @@
+#pragma once
+
 /****************************************************************************
  * Includes
  ****************************************************************************/
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "symbol.h"
 
 /****************************************************************************
@@ -403,7 +407,8 @@ A_arg A_mk_arg(S_symbol var, A_exp exp);
 
 /**
  * print abstract syntax tree.
- * @param[in] out   output file(FILE *).
- * @param[in] root  root node(A_exp).
+ * @param[in] out   output file.
+ * @param[in] root  root node.
  */
-void A_pr_print(void *out, void *root);
+void A_print(FILE *out, A_exp root);
+

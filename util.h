@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * exit if running out of memory.
  * @param[in] size

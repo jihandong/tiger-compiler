@@ -3,32 +3,18 @@
  ****************************************************************************/
 
 #include <stddef.h>
-#include "ast.h"
+#include "semant.h"
 #include "symbol.h"
-#include "type.h"
 #include "util.h"
-
-/****************************************************************************
- * Definition
- ****************************************************************************/
-
-typedef void *I_ir; /*< ir not implemented yet */
-
-typedef struct T_tyir_ T_tyir; /*< ir with type */
-
-struct T_tyir_ {
-    I_ir    ir;
-    T_type  type;
-};
-
-void T_trans_dec(S_table venv, S_table tenv, A_dec n);
-T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n);
-T_tyir T_trans_var(S_table venv, S_table tenv, A_var n);
-T_type T_trans_type(S_table tenv, A_type n);
 
 /****************************************************************************
  * Private
  ****************************************************************************/
+
+static void T_trans_dec(S_table venv, S_table tenv, A_dec n);
+static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n);
+static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n);
+static T_type T_trans_type(S_table tenv, A_type n);
 
 static T_tyir T_mk_tyir(I_ir ir, T_type type)
 {
@@ -40,11 +26,7 @@ static T_tyir T_mk_tyir(I_ir ir, T_type type)
     return e;
 }
 
-/****************************************************************************
- * Public
- ****************************************************************************/
-
-void T_trans_dec(S_table venv, S_table tenv, A_dec n)
+static void T_trans_dec(S_table venv, S_table tenv, A_dec n)
 {
     switch(n->kind) {
         case A_kind_dec_var: {
@@ -134,7 +116,7 @@ void T_trans_dec(S_table venv, S_table tenv, A_dec n)
     }
 }
 
-T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
+static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 {
     switch(n->kind) {
         case A_kind_exp_var:
@@ -370,7 +352,7 @@ T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
     }
 }
 
-T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
+static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
 {
     S_symbol base;
     A_var    suffix;
@@ -448,7 +430,7 @@ T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
     return T_mk_tyir(NULL, t);
 }
 
-T_type T_trans_type(S_table tenv, A_type n)
+static T_type T_trans_type(S_table tenv, A_type n)
 {
     switch(n->kind) {
         case A_kind_type_name: {
@@ -465,12 +447,12 @@ T_type T_trans_type(S_table tenv, A_type n)
 
         case A_kind_type_array: {
             S_symbol array = n->u.array;
-            T_type array_ty;
+            T_type   array_ty;
 
             // check element type name.
             array_ty = S_look(tenv, array);
             if(!array_ty)
-                U_error(n->pos, "array type not exist");
+                U_error(n->pos, "element type not exist");
 
             return T_array(array_ty);
         }
@@ -508,5 +490,19 @@ T_type T_trans_type(S_table tenv, A_type n)
         default:
             U_error(n->pos, "unkown type definition");
     }
+}
+
+/****************************************************************************
+ * Public
+ ****************************************************************************/
+
+T_tyir T_trans(A_exp root) {
+    S_table venv = S_mk_table();
+    S_table tenv = S_mk_table();
+
+    S_enter(tenv, S_mk_symbol("int"), T_int());
+    S_enter(tenv, S_mk_symbol("string"), T_str());
+
+    return T_trans_exp(tenv, venv, root);
 }
 

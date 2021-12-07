@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "semant.h"
 #include "util.h"
 
 extern A_exp A_root;
@@ -17,23 +18,22 @@ int main(int argc, char **argv) {
     }
 
     printf("\n%s\nStep 1. parsing:\n", sep);
-    if (parse(argv[1]) != 0) {
-        fprintf(stderr, "parse error\n");
-        exit(1);
-    }
+    if (parse(argv[1]) != 0)
+        U_error(-1, "parse fail");
 
     printf("\n%s\nStep 2. contrast:\n", sep);
     fp = fopen(argv[1], "r");
-    if (!fp) {
-        fprintf(stderr, "open error?\n");
-        exit(1);
-    }
+    if (!fp)
+        U_error(-1, "open fail");
     while((ch = fgetc(fp)) != EOF)
         putchar(ch);
     fclose(fp);
 
-    printf("\n%s\nStep 3. ast:\n", sep);
-    A_pr_print(stdout, A_root);
+    printf("\n%s\nStep 3. display ast:\n", sep);
+    A_print(stdout, A_root);
+
+    printf("\n%s\nStep 4. semantic check:\n", sep);
+    T_trans(A_root);
 
     printf("\n%s\nsuccess\n", sep);
     U_free();

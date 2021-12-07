@@ -90,6 +90,8 @@ void U_error(int pos, const char *fmt, ...)
     vprintf(fmt, ap);
     va_end(ap);
 
+    printf("\n");
+
     U_free();
     exit(1);
 }

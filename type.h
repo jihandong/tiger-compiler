@@ -1,3 +1,5 @@
+#pragma once
+
 /****************************************************************************
  * Include Files
  ****************************************************************************/
@@ -20,7 +22,7 @@ struct T_type_
         T_kind_int,
         T_kind_str,
         T_kind_void,
-        T_kind_type,
+        T_kind_name,
         T_kind_func,
         T_kind_array,
         T_kind_record,

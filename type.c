@@ -87,12 +87,12 @@ T_type T_record(T_field_list fields)
  * Public: parameter/argument constructor
  ****************************************************************************/
 
-T_field T_mk_field(S_symbol field, T_type type)
+T_field T_mk_field(S_symbol name, T_type type)
 {
     T_field t = U_alloc(sizeof(*t));
 
-    t->field = field;
-    t->type  = type;
+    t->name = name;
+    t->type = type;
 
     return t;
 }

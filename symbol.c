@@ -13,8 +13,7 @@
  * Definitions
  ********************************************************************************/
 
-#define DEBUG
-#define HASH_TABLE_SIZE 109
+#define SYM_TABLE_SIZE 109
 #define BIND_TABLE_SIZE 109
 
 typedef struct bind_*   bind;
@@ -43,7 +42,7 @@ struct S_table_
  * Private Data
  ********************************************************************************/
 
-static S_symbol hashtable[HASH_TABLE_SIZE];
+static S_symbol symtable[SYM_TABLE_SIZE];
 
 /********************************************************************************
  * Private Functions
@@ -56,39 +55,17 @@ static inline unsigned BKDRhash(const char *s)
     while (*s)
         hash = hash * seed + (*s++);
 
-    return hash % HASH_TABLE_SIZE;
+    return hash % SYM_TABLE_SIZE;
 }
 
 static inline unsigned ptrhash(S_symbol s)
 {
     unsigned hash = s;
 
-    return hash % HASH_TABLE_SIZE;
+    return hash % SYM_TABLE_SIZE;
 }
 
-static inline S_symbol S_mk_symbol_(const char *name, S_symbol head)
-{
-    S_symbol s = U_alloc(sizeof(*s));
-
-    s->name = U_strdup(name);
-    s->next = head;
-
-    return s;
-}
-
-static inline bind S_mk_bind_(S_symbol key, void *value, bind head, S_symbol top)
-{
-    bind b = U_alloc(sizeof(*b));
-
-    b->key      = key;
-    b->value    = value;
-    b->next     = head;
-    b->prevtop  = top;
-
-    return b;
-}
-
-static void S_pop(S_table t)
+static inline void S_pop(S_table t)
 {
     int index;
     bind b;
@@ -109,14 +86,14 @@ static void S_dump(S_table t)
         U_error(-1, "dump fail");
 
     printf("-- symbol table --\n");
-    for(i = 0; i < HASH_TABLE_SIZE; i++) {
-        if (hashtable[i])
+    for(i = 0; i < SYM_TABLE_SIZE; i++) {
+        if (symtable[i])
             printf("  ");
 
-        for (s = hashtable[i]; s; s = s->next)
+        for (s = symtable[i]; s; s = s->next)
             printf("(%s)", s->name);
 
-        if (hashtable[i])
+        if (symtable[i])
             printf("\n");
     }
 
@@ -140,16 +117,20 @@ static void S_dump(S_table t)
 S_symbol S_mk_symbol(const char *name)
 {
     unsigned index = BKDRhash(name);
-    S_symbol head = hashtable[index];
-    S_symbol node;
+    S_symbol head = symtable[index];
+    S_symbol s;
 
-    for(node = head; node; node = node->next) {
-        if (!strcmp(node->name, name))
-            return node;
+    for(s = head; s; s = s->next) {
+        if (!strcmp(s->name, name))
+            return s;
     }
 
-    hashtable[index] = S_mk_symbol_(name, head);
-    return hashtable[index];
+    s = U_alloc(sizeof(*s));
+    s->name = U_strdup(name);
+    s->next = head;
+
+    symtable[index] = s;
+    return symtable[index];
 }
 
 S_table S_mk_table(void)
@@ -169,13 +150,19 @@ const char *S_get_name(S_symbol s)
 void S_enter(S_table t, S_symbol s, void *v)
 {
     unsigned index = ptrhash(s);
+    bind b;
 
     if (!t || !s)
         U_error(-1, "enter fail");
 
-    t->binds[index] = S_mk_bind_(s, v, t->binds[index], t->top);
-    t->top = s;
+    b = U_alloc(sizeof(*b));
+    b->key      = s;
+    b->value    = v;
+    b->next     = t->binds[index];
+    b->prevtop  = t->top;
 
+    t->binds[index] = b;
+    t->top = s;
 }
 
 void *S_look(S_table t, S_symbol s)
@@ -220,6 +207,6 @@ void S_end(S_table t)
     while (strncmp(S_get_name(t->top), "!", 1))
         S_pop(t);
 
-    if (t->top) 
+    if (t->top)
         S_pop(t);
 }

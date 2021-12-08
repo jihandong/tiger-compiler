@@ -82,7 +82,7 @@ void U_error(int pos, const char *fmt, ...)
     va_list ap;
 
     if (pos > 0)
-        printf("Error at %d:");
+        printf("Error at %d:", pos);
     else
         printf("Error:");
 

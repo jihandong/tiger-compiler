@@ -8,34 +8,53 @@
 #include "util.h"
 
 /****************************************************************************
- * Private Variables
+ * Private 
  ****************************************************************************/
 
-// basic types
-static struct T_type_ type_nil  = { T_kind_nil };
-static struct T_type_ type_int  = { T_kind_int };
-static struct T_type_ type_str  = { T_kind_str };
-static struct T_type_ type_void = { T_kind_void };
-
-static const char *T_kind[] =
+static const char *T_type_name[] =
 {
     "nil",
     "int",
-    "string",
+    "str",
     "void",
+    "name",
+    "func",
     "array",
     "record",
-    "name",
 };
 
 /****************************************************************************
  * Public: basic type
  ****************************************************************************/
 
-inline T_type T_nil(void)   { return &type_nil; }
-inline T_type T_int(void)   { return &type_int; }
-inline T_type T_str(void)   { return &type_str; }
-inline T_type T_void(void)  { return &type_void; }
+T_type T_nil(void)
+{
+    static struct T_type_ type_nil  = { T_kind_nil };
+
+    return &type_nil;
+}
+
+T_type T_int(void)
+{
+    static struct T_type_ type_int  = { T_kind_int };
+
+    return &type_int;
+}
+
+T_type T_str(void)
+{
+    static struct T_type_ type_str  = { T_kind_str };
+
+    return &type_str;
+}
+
+T_type T_void(void)
+{
+    static struct T_type_ type_void = { T_kind_void };
+
+    return &type_void;
+}
+
 
 /****************************************************************************
  * Public: type constructor
@@ -121,26 +140,22 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail)
  * Public: display functions
  ****************************************************************************/
 
-void T_pr_type(T_type type)
+const char *T_get_name(T_type t)
 {
-    if (type) {
-        printf("%s", T_kind[type->kind]);
-        if (type->kind == T_kind_name)
-            printf("(%s)", S_get_name(type->u.name.symbol));
-    } else
-        printf("_");
-}
+    switch(t->kind) {
+        case T_kind_nil:
+        case T_kind_int:
+        case T_kind_str:
+        case T_kind_void:
+        case T_kind_func:
+        case T_kind_array:
+        case T_kind_record:
+            return T_type_name[t->kind];
 
-void T_pr_type_list(T_type_list types)
-{
-    if (types) {
-        printf("type_list(");
-        T_pr_type(types->head);
-        if (types->tail) {
-            printf(",");
-            T_pr_type_list(types->tail);
-        }
-        printf(")");
-    } else
-        printf("_");
+        case T_kind_name:
+            return T_get_name(t->u.name.type);
+
+        default:
+            U_error(-1, "unkown type");
+    }
 }

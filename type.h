@@ -102,22 +102,22 @@ T_type T_record(T_field_list fields);
 
 /**
  * make record field.
- * @param name  field name.
- * @param type  field type.
+ * @param[in] name  field name.
+ * @param[in] type  field type.
  * @return new field.
  */
 T_field T_mk_field(S_symbol name, T_type type);
 /**
  * make type list node.
- * @param head
- * @param tail
+ * @param[in] head
+ * @param[in] tail
  * @return new field
  */
 T_type_list T_mk_type_list(T_type head, T_type_list tail);
 /**
  * make record field list node.
- * @param head
- * @param tail
+ * @param[in] head
+ * @param[in] tail
  * @return new field list node.
  */
 T_field_list T_mk_field_list(T_field head, T_field_list tail);
@@ -127,13 +127,7 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail);
  ****************************************************************************/
 
 /**
- * display type definitions.
- * @param type  type definitions.
+ * get type name.
+ * @param[in] type  type definitions.
  */
-void T_pr_type(T_type type);
-/**
- * display type list: function parameters or record fields.
- * @param types     type list.
- */
-void T_pr_type_list(T_type_list types);
-
+const char *T_get_name(T_type type);

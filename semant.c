@@ -26,6 +26,41 @@ static T_tyir T_mk_tyir(I_ir ir, T_type type)
     return e;
 }
 
+static void dummy_T_trans_dec(S_table venv, S_stable tenv, A_dec_list n)
+{
+/*
+    1. 记录所有需要定义的类型，T_name是一个临时类型
+    while() { 首先遍历整个 dec_list
+        case 对于变量定义，把未定义的类型，加入 v -> T_name(v)
+        case 对于类型定义，先把这个类型加入 t -> T_name(t)
+        case 对于函数定义，把为定义的类型加入，加入 f -> T_name(f)
+    }
+
+    2. 按照定义覆盖旧类型，可检测重复定义
+    while() { 再度遍历整个 dec_list
+        case 对于变量定义，直接跳过
+        case 对于类型定义，用解析出来的类覆盖 t -> T_trans_type(...)
+        case 对于函数定义，直接跳过
+    }
+
+    3. 递归解析类型定义，并检测循环定义
+    while() { 遍历 unkown
+        while() {
+            对每个类型溯源，如果发现成环就 error
+            没有成环，就用正确的类型覆盖原本的类型
+        }
+    }
+
+    4 变量和函数定义，后面会在此步骤生成中间代码
+    while() { 再度遍历整个 dec_list
+        case 对于变量定义，解析内容，加入venv
+        case 对于类型定义，直接跳过
+        case 对于函数定义，函数定义，加入venv
+    }
+
+*/
+}
+
 static void T_trans_dec(S_table venv, S_table tenv, A_dec n)
 {
     switch(n->kind) {

@@ -1,4 +1,4 @@
-test: test.o y.tab.o lex.yy.o ast.o astpr.o semant.o symbol.o type.o util.o
+test: test.o y.tab.o lex.yy.o ast.o print.o semant.o symbol.o type.o util.o
 	cc -g *.o
 
 test.o: test.c
@@ -29,8 +29,8 @@ semant.o: semant.c
 ast.o: ast.c
 	cc -g -c ast.c
 
-astpr.o: astpr.c
-	cc -g -c astpr.c -Wincompatible-pointer-types
+print.o: print.c
+	cc -g -c print.c -Wincompatible-pointer-types
 
 symbol.o: symbol.c
 	cc -g -c symbol.c -Wincompatible-pointer-types -Wint-conversion

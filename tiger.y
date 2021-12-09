@@ -49,19 +49,19 @@ int parse(const char *filename)
 
 %union
 {
-    int                         pos;
-    int                         ival;
-    const char *                sval;
-    A_dec                     dec;
-    A_exp                     exp;
-    A_var                     var;
-    A_type                    type;
-    A_dec_list                decs;
-    A_exp_list                exps;
-    A_para                  para;
-    A_para_list             paras;
-    A_arg                  arg;
-    A_arg_list             args;
+    int             pos;
+    int             ival;
+    const char *    sval;
+    A_dec           dec;
+    A_exp           exp;
+    A_var           var;
+    A_type          type;
+    A_dec_list      decs;
+    A_exp_list      exps;
+    A_para          para;
+    A_para_list     paras;
+    A_arg           arg;
+    A_arg_list      args;
 }
 
 %token <ival>   INT
@@ -110,9 +110,12 @@ dec
 | dec_func { $$ = $1; }
 
 dec_var
-: VAR ID ASSIGN exp          { $$ = A_mk_dec_var(0, S_mk_symbol($2), NULL, $4); }
-| VAR ID COLON ID ASSIGN exp { $$ = A_mk_dec_var(0, S_mk_symbol($2),
-                                                 S_mk_symbol($4), $6); }
+: VAR ID ASSIGN exp {
+    $$ = A_mk_dec_var(0, S_mk_symbol($2), NULL, $4);
+}
+| VAR ID COLON ID ASSIGN exp {
+    $$ = A_mk_dec_var(0, S_mk_symbol($2), S_mk_symbol($4), $6);
+}
 
 dec_type
 : TYPE ID EQ type { $$ = A_mk_dec_type(S_mk_symbol($2), $4); }

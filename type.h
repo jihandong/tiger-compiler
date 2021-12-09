@@ -76,26 +76,26 @@ T_type T_void(void);
  * @param[in] type      type definition.
  * @return analysed type.
  */
-T_type T_name(S_symbol symbol, T_type type);
+T_type T_mk_name(S_symbol symbol, T_type type);
 /**
  * make functions type.
  * @param[in] ret   return value type.
  * @param[in] paras parameter types.
  * @return analysed type.
  */
-T_type T_func(T_type ret, T_type_list paras);
+T_type T_mk_func(T_type ret, T_type_list paras);
 /**
  * make array type.
  * @param[in] type  array element type.
  * @return analysed type.
  */
-T_type T_array(T_type type);
+T_type T_mk_array(T_type type);
 /**
  * make record type.
  * @param[in] fields    each field has name and type.
  * @return analysed type.
  */
-T_type T_record(T_field_list fields);
+T_type T_mk_record(T_field_list fields);
 
 /****************************************************************************
  * Public: parameter/argument constructor
@@ -128,11 +128,11 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail);
  ****************************************************************************/
 
 /**
- * get type name.
+ * print type definitions.
+ * @param[in] out   print target.
  * @param[in] type  type definitions.
- * @return type name.
  */
-const char *T_get_name(T_type type);
+void T_print(FILE *out, T_type type);
 
 /**
  * get type kind(skip T_kind_name).

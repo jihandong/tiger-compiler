@@ -60,7 +60,7 @@ T_type T_void(void)
  * Public: type constructor
  ****************************************************************************/
 
-T_type T_name(S_symbol symbol, T_type type)
+T_type T_mk_name(S_symbol symbol, T_type type)
 {
     T_type t = U_alloc(sizeof(*t));
 
@@ -71,7 +71,7 @@ T_type T_name(S_symbol symbol, T_type type)
     return t;
 }
 
-T_type T_func(T_type ret, T_type_list paras)
+T_type T_mk_func(T_type ret, T_type_list paras)
 {
     T_type t = U_alloc(sizeof(*t));
 
@@ -82,7 +82,7 @@ T_type T_func(T_type ret, T_type_list paras)
     return t;
 }
 
-T_type T_array(T_type type)
+T_type T_mk_array(T_type type)
 {
     T_type t = U_alloc(sizeof(*t));
 
@@ -92,7 +92,7 @@ T_type T_array(T_type type)
     return t;
 }
 
-T_type T_record(T_field_list fields)
+T_type T_mk_record(T_field_list fields)
 {
     T_type t = U_alloc(sizeof(*t));
 
@@ -139,26 +139,6 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail)
 /****************************************************************************
  * Public: display functions
  ****************************************************************************/
-
-const char *T_get_name(T_type t)
-{
-    switch(t->kind) {
-        case T_kind_nil:
-        case T_kind_int:
-        case T_kind_str:
-        case T_kind_void:
-        case T_kind_func:
-        case T_kind_array:
-        case T_kind_record:
-            return T_type_name[t->kind];
-
-        case T_kind_name:
-            return T_get_name(t->u.name.type);
-
-        default:
-            U_error(-1, "unkown type");
-    }
-}
 
 inline int T_get_kind(T_type t)
 {

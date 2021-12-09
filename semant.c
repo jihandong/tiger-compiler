@@ -33,7 +33,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
     T_type_list t;
 
     // advertise type.
-    for(p = decs, t = NULL; p; p = p->tail, t = t->tail) {
+    for(p = decs, dummys = NULL; p; p = p->tail) {
         A_dec dec = p->head;
 
         switch(dec->kind) {
@@ -44,9 +44,13 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 // advertise type but no definiton yet.
                 S_enter(tenv, name, dummy);
 
-                t = T_mk_type_list(dummy, NULL);
-                if (p == decs)
+                if (!dummys) {
+                    t = T_mk_type_list(dummy, NULL);
                     dummys = t;
+                } else {
+                    t->tail = T_mk_type_list(dummy, NULL);
+                    t = t->tail;
+                }
                 break;
             }
 
@@ -55,7 +59,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 break;
 
             default:
-                U_error(-1, "XXX");
+                U_error(-1, "X1");
         }
     }
 
@@ -78,7 +82,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 break;
 
             default:
-                U_error(-1, "XXX");
+                U_error(-1, "X2");
         }
     }
 
@@ -128,7 +132,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 }
 
                 S_enter(venv, name, init_tyir.type);
-                return;
+                break;
             }
 
             case A_kind_dec_type:
@@ -157,8 +161,8 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                     ret_ty = T_void();
 
                 // check parameter type.
-                for (p = paras, t = NULL; p; p = p->tail, t = t->tail) {
-                    S_symbol type = paras->head->type;
+                for (p = paras, para_tys = NULL; p; p = p->tail) {
+                    S_symbol type = p->head->type;
                     T_type para_ty;
 
                     para_ty = S_look(tenv, type);
@@ -167,16 +171,21 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                                 S_get_name(type));
 
                     // make parameter list.
-                    t = T_mk_type_list(para_ty, NULL);
-                    if (p == paras) // keep head.
+                    if (!para_tys) {
+                        t = T_mk_type_list(para_ty, NULL);
                         para_tys = t;
+                    } else {
+                        t->tail = T_mk_type_list(para_ty, NULL);
+                        t = t->tail;
+                    }
                 }
 
                 S_enter(venv, fname, T_func(ret_ty, para_tys));
+                break;
             }
 
             default:
-                U_error(-1, "XXX");
+                U_error(-1, "X3");
         }
     }
 
@@ -212,10 +221,12 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 body_tyir = T_trans_exp(venv, tenv, body);
 
                 S_end(venv);
+
+                break;
             }
 
             default:
-                U_error(-1, "XXX");
+                U_error(-1, "X4");
         }
     }
 }
@@ -245,7 +256,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             // check funtion.
             func_ty = S_look(venv, func);
             if (!func_ty)
-                U_error(n->pos, "function(%s) not exist", S_get_name(func));
+                U_error(n->pos, "func(%s) not exist", S_get_name(func));
 
             ret_ty = func_ty->u.func.ret;
 
@@ -259,8 +270,10 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
                 arg_tyir = T_trans_exp(venv, tenv, arg);
                 if (arg_tyir.type != para_ty)
-                    U_error(n->pos, "parameter type(%s), argument type(%s)",
-                            T_get_name(para_ty), T_get_name(arg_tyir.type));
+                    U_error(n->pos, "func(%s), para(%s), arg(%s)",
+                            S_get_name(func),
+                            T_get_name(para_ty),
+                            T_get_name(arg_tyir.type));
             }
 
             return T_mk_tyir(NULL, ret_ty);
@@ -273,13 +286,13 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
             // check left operand
             left_tyir = T_trans_exp(venv, tenv, left);
-            if (!T_is(left_tyir.type, T_kind_int))
+            if (T_get_kind(left_tyir.type) != T_kind_int)
                 U_error(left->pos, "left operand has type(%s)",
                         T_get_name(left_tyir.type));
 
             // check right operand
             right_tyir = T_trans_exp(venv, tenv, right);
-            if (!T_is(right_tyir.type, T_kind_int))
+            if (T_get_kind(right_tyir.type) != T_kind_int)
                 U_error(right->pos, "right operand has type(%s)",
                         T_get_name(right_tyir.type));
 
@@ -297,13 +310,13 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
             array_ty = S_look(tenv, type);
             if (!array_ty)
                 U_error(n->pos, "array type not exist");
-            if (!T_is(array_ty, T_kind_array))
+            if (T_get_kind(array_ty) != T_kind_array)
                 U_error(n->pos, "type(%s) is not array",
                         T_get_name(array_ty));
 
             // check array size.
             size_tyir = T_trans_exp(venv, tenv, size);
-            if (!T_is(size_tyir.type, T_kind_int))
+            if (T_get_kind(size_tyir.type) != T_kind_int)
                 U_error(size->pos, "array size has type(%s)",
                         T_get_name(size_tyir.type));
 
@@ -384,7 +397,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
             // check condition type.
             cond_tyir = T_trans_exp(venv, tenv, cond);
-            if (!T_is(cond_tyir.type, T_kind_int))
+            if (T_get_kind(cond_tyir.type) != T_kind_int)
                 U_error(cond->pos, "if-cond has type(%s)",
                         T_get_name(cond_tyir.type));
 
@@ -408,7 +421,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
             // check condition type.
             cond_tyir = T_trans_exp(venv, tenv, cond);
-            if (!T_is(cond_tyir.type, T_kind_int))
+            if (T_get_kind(cond_tyir.type) != T_kind_int)
                 U_error(cond->pos, "while-cond has type(%s)",
                         T_get_name(cond_tyir.type));
 
@@ -428,15 +441,15 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n)
 
             // check lowest exp type.
             lo_tyir = T_trans_exp(venv, tenv, lo);
-            if (!T_is(lo_tyir.type, T_kind_int))
+            if (T_get_kind(lo_tyir.type) != T_kind_int)
                 U_error(n->pos, "for-lo has type(%s)",
                         T_get_name(lo_tyir.type));
 
             // check highest exp type.
             hi_tyir = T_trans_exp(venv, tenv, hi);
-            if (!T_is(hi_tyir.type, T_kind_int))
+            if (T_get_kind(hi_tyir.type) != T_kind_int)
                 U_error(n->pos, "for-hi has type(%s)",
-                        T_get_name(lo_tyir.type));
+                        T_get_name(hi_tyir.type));
 
             S_begin(venv, "for");
             S_enter(venv, var, T_int());
@@ -502,12 +515,12 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
                 T_tyir exp_tyir = T_trans_exp(venv, tenv, exp);
 
                 // check array type.
-                if (!T_is(t, T_kind_array))
+                if (T_get_kind(t) != T_kind_array)
                     U_error(suffix->pos, "lvalue is not array, but type(%s)",
                             T_get_name(t));
 
                 // check index type.
-                if (!T_is(exp_tyir.type, T_kind_int))
+                if (T_get_kind(exp_tyir.type) != T_kind_int)
                     U_error(exp->pos, "lvalue array index has type(%s)",
                             T_get_name(exp_tyir.type));
 
@@ -524,7 +537,7 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
                 T_field      field;
 
                 // check record type.
-                if (!T_is(t, T_kind_record))
+                if (T_get_kind(t) != T_kind_record)
                     U_error(suffix->pos, "lvalue is not record, but type(%s)",
                             T_get_name(t));
 
@@ -587,13 +600,13 @@ static T_type T_trans_type(S_table tenv, A_type n)
 
         case A_kind_type_record: {
             A_para_list  record = n->u.record;
-            T_field_list fields = NULL;
+            T_field_list fields;
 
             A_para_list  p;
             T_field_list f;
 
             // make field list.
-            for(p = record, f = NULL; p; p = p->tail, f = f->tail) {
+            for(p = record, fields = NULL; p; p = p->tail) {
                 S_symbol name = p->head->name;
                 S_symbol type = p->head->type;
                 T_type   type_ty;
@@ -605,9 +618,13 @@ static T_type T_trans_type(S_table tenv, A_type n)
                             S_get_name(type));
 
                 field = T_mk_field(name, type_ty);
-                f = T_mk_field_list(field, f);
-                if (p == record)
+                if (!fields) {
+                    f = T_mk_field_list(field, NULL);
                     fields = f;
+                } else {
+                    f->tail = T_mk_field_list(field, NULL);
+                    f = f->tail;
+                }
             }
 
             return T_record(fields);

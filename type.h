@@ -130,12 +130,14 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail);
 /**
  * get type name.
  * @param[in] type  type definitions.
+ * @return type name.
  */
 const char *T_get_name(T_type type);
 
 /**
- * judge type kind.
+ * get type kind(skip T_kind_name).
  * @param[in] type  type definitions.
  * @param[in] kind  type kind.
+ * @return type kind
  */
-bool T_is(T_type type, int kind);
+int T_get_kind(T_type type);

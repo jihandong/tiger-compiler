@@ -160,13 +160,12 @@ const char *T_get_name(T_type t)
     }
 }
 
-inline bool T_is(T_type t, int k)
+inline int T_get_kind(T_type t)
 {
     if (!t)
-        U_error(-1, "empty type definition");
-
-    if (t->kind == T_kind_name)
-        return T_is(t->u.name.type, k);
+        return -1;
+    else if (t->kind == T_kind_name)
+        return t->u.name.type->kind;
     else
-        return t->kind == k;
+        return t->kind;
 }

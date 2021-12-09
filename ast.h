@@ -17,9 +17,9 @@ typedef struct A_dec_ *         A_dec;
 typedef struct A_exp_ *         A_exp;
 typedef struct A_var_ *         A_var;
 typedef struct A_type_ *        A_type;
-typedef struct A_para_ *        A_para; /* func def and record def */
+typedef struct A_para_ *        A_para; /*< func def and record def */
 typedef struct A_para_list_ *   A_para_list;
-typedef struct A_arg_ *         A_arg; /* func call and record create */
+typedef struct A_arg_ *         A_arg; /*< func call and record create */
 typedef struct A_arg_list_ *    A_arg_list;
 typedef struct A_dec_list_ *    A_dec_list;
 typedef struct A_exp_list_ *    A_exp_list;
@@ -115,7 +115,7 @@ struct A_var_
     union {
         struct { S_symbol name; A_var suffix; }     base;
         struct { A_exp exp; A_var suffix; }         index; /*< array index */
-        struct { S_symbol name; A_var suffix; }     field; /*< record fields */
+        struct { S_symbol name; A_var suffix; }     field; /*< record field */
     } u;
 };
 

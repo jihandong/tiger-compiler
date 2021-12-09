@@ -159,3 +159,14 @@ const char *T_get_name(T_type t)
             U_error(-1, "unkown type");
     }
 }
+
+inline bool T_is(T_type t, int k)
+{
+    if (!t)
+        U_error(-1, "empty type definition");
+
+    if (t->kind == T_kind_name)
+        return T_is(t->u.name.type, k);
+    else
+        return t->kind == k;
+}

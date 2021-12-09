@@ -4,6 +4,7 @@
  * Include Files
  ****************************************************************************/
 
+#include <stdbool.h>
 #include "symbol.h"
 
 /****************************************************************************
@@ -131,3 +132,10 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail);
  * @param[in] type  type definitions.
  */
 const char *T_get_name(T_type type);
+
+/**
+ * judge type kind.
+ * @param[in] type  type definitions.
+ * @param[in] kind  type kind.
+ */
+bool T_is(T_type type, int kind);

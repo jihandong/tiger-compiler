@@ -13,9 +13,39 @@
 
 #define printt(x,y) ({ printf("%s\t", x); T_print(stdout, y); printf("\n"); })
 
+/**
+ * @brief Translate declarations.
+ * can detect loop type definitions; support recursive definitions.
+ * @param[in] venv  value environment for variables and functions.
+ * @param[in] tenv  type environment for types.
+ * @param[in] n     astnode.
+ */
 static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n);
+/**
+ * @brief Translate expressions.
+ * support break validity.
+ * @param[in] venv  value environment for variables and functions.
+ * @param[in] tenv  type environment for types.
+ * @param[in] n     astnode.
+ * @param[in] loop  loop layer counter.
+ * @return T_tyir   translated ir with type.
+ */
 static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop);
+/**
+ * @brief Translate variables(lvalue).
+ * @param[in] venv  value environment for variables and functions.
+ * @param[in] tenv  type environment for types.
+ * @param[in] n     astnode.
+ * @return T_tyir   translated ir with type.
+ */
 static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n);
+/**
+ * @brief Translate types.
+ * @param[in] tenv  type environment for types.
+ * @param[in] n     astnode.
+ * @return T_type   translated ir with type.
+ * @note won't look into T_name(name, ...) as it might not be defined yet.
+ */
 static T_type T_trans_type(S_table tenv, A_type n);
 
 /****************************************************************************
@@ -120,7 +150,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
         S_enter(tenv, name, type_ty);
     }
 
-    // replace dummy type with translated  definitions
+    // replace dummy type with translated definitions
     for (d = dummys; d; d = d->tail) {
         T_type   dummy  = d->head;
         S_symbol symbol = dummy->u.name.symbol;

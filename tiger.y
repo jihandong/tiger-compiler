@@ -153,7 +153,8 @@ exp_value
 | lvalue    { $$ = A_mk_exp_var(0, $1); }
 
 exp_seq
-: LP sequence RP { $$ = A_mk_exp_seq(0, $2); }
+: LP RP          { $$ = A_mk_exp_seq(0, NULL); }
+| LP sequence RP { $$ = A_mk_exp_seq(0, $2); }
 
 exp_op
 : exp PLUS exp           { $$ = A_mk_exp_op(0, A_kind_op_plus,   $1, $3); }
@@ -200,7 +201,8 @@ exp_break
 : BREAK { $$ = A_mk_exp_break(0); }
 
 exp_let
-: LET decs IN sequence END { $$ = A_mk_exp_let(0, $2, $4); }
+: LET decs IN END          { $$ = A_mk_exp_let(0, $2, NULL); }
+| LET decs IN sequence END { $$ = A_mk_exp_let(0, $2, $4); }
 
 /****************************************************************************
  * variables

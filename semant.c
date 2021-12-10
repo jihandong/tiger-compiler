@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "semant.h"
 #include "symbol.h"
+#include "type.h"
 #include "util.h"
 
 /****************************************************************************
@@ -12,6 +13,14 @@
  ****************************************************************************/
 
 #define printt(x,y) ({ printf("%s\t", x); T_print(stdout, y); printf("\n"); })
+
+typedef void *I_ir;             /*< ir not implemented yet */
+typedef struct T_tyir_ T_tyir;  /*< ir with type */
+
+struct T_tyir_ {
+    I_ir    ir;
+    T_type  type;
+};
 
 /**
  * @brief Translate declarations.
@@ -438,11 +447,12 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
         case A_kind_exp_seq: {
             A_exp_list seq = n->u.seq;
             T_tyir     exp_tyir;
+            A_exp_list s;
 
-            for (; seq; seq = seq->tail)
-                exp_tyir = T_trans_exp(venv, tenv, seq->head, loop);
+            for (s = seq; s; s = s->tail)
+                exp_tyir = T_trans_exp(venv, tenv, s->head, loop);
 
-            return T_mk_tyir(NULL, exp_tyir.type);
+            return T_mk_tyir(NULL, seq ? exp_tyir.type : T_void());
         }
 
         case A_kind_exp_assign: {
@@ -551,18 +561,19 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             A_dec_list decs = n->u.let.decs;
             A_exp_list body = n->u.let.body;
             T_tyir     body_tyir;
+            A_exp_list b;
 
             S_begin(venv, "let");
             S_begin(tenv, "let");
 
             T_trans_dec(venv, tenv, decs);
-            for (; body; body = body->tail)
-                body_tyir = T_trans_exp(venv, tenv, body->head, loop);
+            for (b = body; b; b = b->tail)
+                body_tyir = T_trans_exp(venv, tenv, b->head, loop);
 
             S_end(tenv);
             S_end(venv);
 
-            return T_mk_tyir(NULL, body_tyir.type);
+            return T_mk_tyir(NULL, body? body_tyir.type : T_void());
         }
 
         default:
@@ -728,12 +739,12 @@ static T_type T_trans_type(S_table tenv, A_type n)
  * Public
  ****************************************************************************/
 
-T_tyir T_trans(A_exp root) {
+void T_trans(A_exp root) {
     S_table venv = S_mk_table();
     S_table tenv = S_mk_table();
 
     S_enter(tenv, S_mk_symbol("int"), T_int());
     S_enter(tenv, S_mk_symbol("string"), T_str());
 
-    return T_trans_exp(venv, tenv, root, 0);
+    T_trans_exp(venv, tenv, root, 0);
 }

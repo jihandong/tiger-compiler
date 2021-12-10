@@ -86,7 +86,7 @@ static void S_dump(S_table t)
         U_error(-1, "dump fail");
 
     printf("-- symbol table --\n");
-    for(i = 0; i < SYM_TABLE_SIZE; i++) {
+    for (i = 0; i < SYM_TABLE_SIZE; i++) {
         if (symtable[i])
             printf("  ");
 
@@ -120,7 +120,7 @@ S_symbol S_mk_symbol(const char *name)
     S_symbol head = symtable[index];
     S_symbol s;
 
-    for(s = head; s; s = s->next) {
+    for (s = head; s; s = s->next) {
         if (!strcmp(s->name, name))
             return s;
     }
@@ -173,7 +173,7 @@ void *S_look(S_table t, S_symbol s)
     if (!t || !s)
         U_error(-1, "look fail");
 
-    for(b = t->binds[index]; b; b = b->next) {
+    for (b = t->binds[index]; b; b = b->next) {
         if (b->key == s)
             return b->value;
     }

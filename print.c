@@ -12,7 +12,7 @@
  ****************************************************************************/
 
 // print white spaces
-#define WHITE(x) ({ int i; for(i = 0; i <= x; i++) fprintf(out, ".   "); })
+#define WHITE(x) ({ int i; for (i = 0; i <= x; i++) fprintf(out, ".   "); })
 
 static const char *str_op[] =
 {

@@ -32,69 +32,94 @@ static inline T_tyir T_mk_tyir(I_ir ir, T_type type)
     return e;
 }
 
-static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
+static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
 {
+    A_dec_list  vars;
+    A_dec_list  types;
+    A_dec_list  funcs;
     T_type_list dummys;
-    A_dec_list  p;
-    T_type_list t;
+    A_dec_list  p, v, t, f;
+    T_type_list d;
 
-    // advertise type.
-    for(p = decs, dummys = NULL; p; p = p->tail) {
+    //////////////////////////////////////////////////////////////////////////
+    // Declarations Separation
+    //////////////////////////////////////////////////////////////////////////
+
+    // separate decs into 3 list: variables, types, functions.
+    for (p = n, vars = NULL, types = NULL, funcs = NULL; p; p = p->tail) {
         A_dec dec = p->head;
 
         switch(dec->kind) {
+            case A_kind_dec_var: {
+                if (!vars) {
+                    v = A_mk_dec_list(dec, NULL);
+                    vars = v;
+                } else {
+                    v->tail = A_mk_dec_list(dec, NULL);
+                    v = v->tail;
+                }
+                break;
+            }
+
             case A_kind_dec_type: {
                 S_symbol name  = dec->u.type.name;
                 T_type   dummy = T_mk_name(name, NULL);
 
-                // advertise type but no definiton yet.
+                // advertise dummy type: T -> T_name(T, NULL)
                 S_enter(tenv, name, dummy);
 
                 if (!dummys) {
-                    t = T_mk_type_list(dummy, NULL);
-                    dummys = t;
+                    d = T_mk_type_list(dummy, NULL);
+                    dummys = d;
                 } else {
-                    t->tail = T_mk_type_list(dummy, NULL);
+                    d->tail = T_mk_type_list(dummy, NULL);
+                    d = d->tail;
+                }
+
+                if (!types) {
+                    t = A_mk_dec_list(dec, NULL);
+                    types = t;
+                } else {
+                    t->tail = A_mk_dec_list(dec, NULL);
                     t = t->tail;
                 }
                 break;
             }
 
-            case A_kind_dec_var:
-            case A_kind_dec_func:
+            case A_kind_dec_func: {
+                if (!funcs) {
+                    f = A_mk_dec_list(dec, NULL);
+                    funcs = f;
+                } else {
+                    f->tail = A_mk_dec_list(dec, NULL);
+                    f = f->tail;
+                }
                 break;
-
-            default:
-                U_error(-1, "X1");
-        }
-    }
-
-    // parse type defitnions
-    for(p = decs; p; p = p->tail) {
-        A_dec dec = p->head;
-
-        switch(dec->kind) {
-            case A_kind_dec_type: {
-                S_symbol name = dec->u.type.name;
-                A_type   type = dec->u.type.type;
-                T_type   type_ty = T_trans_type(tenv, type);
-
-                // cover dummy with raw definitions
-                S_enter(tenv, name, type_ty);
             }
 
-            case A_kind_dec_var:
-            case A_kind_dec_func:
-                break;
-
             default:
-                U_error(-1, "X2");
+                U_error(dec->pos, "unkown declaration");
         }
     }
 
-    // replace dummys with true definitons
-    for(t = dummys; t; t = t->tail) {
-        T_type   dummy  = t->head;
+    //////////////////////////////////////////////////////////////////////////
+    // Type Declarations
+    //////////////////////////////////////////////////////////////////////////
+
+    // translate type definitions
+    for (t = types; t; t = t->tail) {
+        A_dec    dec  = t->head;
+        S_symbol name = dec->u.type.name;
+        A_type   type = dec->u.type.type;
+        T_type   type_ty = T_trans_type(tenv, type);
+
+        // cover dummy with raw definitions
+        S_enter(tenv, name, type_ty);
+    }
+
+    // replace dummy type with translated  definitions
+    for (d = dummys; d; d = d->tail) {
+        T_type   dummy  = d->head;
         S_symbol symbol = dummy->u.name.symbol;
         S_symbol s      = symbol;
 
@@ -105,6 +130,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
                 S_symbol lsymbol = look->u.name.symbol;
                 T_type   ltype   = look->u.name.type;
 
+                // detect illegal loop definition
                 if (lsymbol == symbol)
                     U_error(-1, "LOOP");
 
@@ -116,125 +142,109 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list decs)
         }
     }
 
-    // parse var definition and func definitions
-    for(p = decs; p; p = p->tail) {
-        A_dec dec = p->head;
+    //////////////////////////////////////////////////////////////////////////
+    // Vatiable Declarations
+    //////////////////////////////////////////////////////////////////////////
 
-        switch(dec->kind) {
-            case A_kind_dec_var: {
-                S_symbol name = dec->u.var.name;
-                S_symbol type = dec->u.var.type;
-                A_exp    init = dec->u.var.init;
-                T_type   type_ty;
-                T_tyir   init_tyir;
+    // translate variable definitions
+    for (v = vars; v; v = v->tail) {
+        A_dec    dec  = v->head;
+        S_symbol name = dec->u.var.name;
+        S_symbol type = dec->u.var.type;
+        A_exp    init = dec->u.var.init;
+        T_type   type_ty;
+        T_tyir   init_tyir;
 
-                // check variable init.
-                init_tyir = T_trans_exp(venv, tenv, init, 0);
-                if (type) {
-                    type_ty = S_look(tenv, type);
-                    if (init_tyir.type != type_ty) {
-                        printt("type", type_ty);
-                        printt("init", init_tyir.type);
-                        U_error(dec->pos, "dec var(%s), type not match\n",
-                                S_get_name(name));
-                    }
-                }
-
-                S_enter(venv, name, init_tyir.type);
-                break;
+        // check variable init.
+        init_tyir = T_trans_exp(venv, tenv, init, 0);
+        if (type) {
+            type_ty = S_look(tenv, type);
+            if (init_tyir.type != type_ty) {
+                printt("type", type_ty);
+                printt("init", init_tyir.type);
+                U_error(dec->pos, "dec var(%s), type not match\n",
+                        S_get_name(name));
             }
-
-            case A_kind_dec_type:
-                break;
-
-            case A_kind_dec_func: {
-                S_symbol    fname = dec->u.func.name;
-                A_para_list paras = dec->u.func.paras;
-                S_symbol    ret   = dec->u.func.ret;
-                A_exp       body  = dec->u.func.body;
-
-                T_type_list para_tys;
-                T_type      ret_ty;
-                T_tyir      body_tyir;
-
-                A_para_list p;
-                T_type_list t;
-
-                // check return type.
-                ret_ty = ret ? S_look(tenv, ret) : T_void();
-                if (!ret_ty)
-                    U_error(dec->pos, "dec fuc(%s), ret(%s) not defined",
-                            S_get_name(fname), S_get_name(ret));
-
-
-                // check parameter type.
-                for (p = paras, para_tys = NULL; p; p = p->tail) {
-                    S_symbol type = p->head->type;
-                    T_type para_ty;
-
-                    para_ty = S_look(tenv, type);
-                    if (!para_ty)
-                        U_error(dec->pos, "dec func(%s), para(%s) not defined",
-                                S_get_name(fname), S_get_name(type));
-
-                    // make parameter list.
-                    if (!para_tys) {
-                        t = T_mk_type_list(para_ty, NULL);
-                        para_tys = t;
-                    } else {
-                        t->tail = T_mk_type_list(para_ty, NULL);
-                        t = t->tail;
-                    }
-                }
-
-                S_enter(venv, fname, T_mk_func(ret_ty, para_tys));
-                break;
-            }
-
-            default:
-                U_error(-1, "X3");
         }
+
+        S_enter(venv, name, init_tyir.type);
     }
 
-    // parse func bodies
-    for(p = decs; p; p = p->tail) {
-        A_dec dec = p->head;
+    //////////////////////////////////////////////////////////////////////////
+    // Function Declarations
+    //////////////////////////////////////////////////////////////////////////
 
-        switch(dec->kind) {
-            case A_kind_dec_var:
-            case A_kind_dec_type:
-                break;
+    // advertise function heads (paras -> ret)
+    for (f = funcs; f; f = f->tail) {
+        A_dec       dec   = f->head;
+        S_symbol    fname = dec->u.func.name;
+        A_para_list paras = dec->u.func.paras;
+        S_symbol    ret   = dec->u.func.ret;
+        A_exp       body  = dec->u.func.body;
 
-            case A_kind_dec_func: {
-                S_symbol    fname = dec->u.func.name;
-                A_para_list paras = dec->u.func.paras;
-                A_exp       body  = dec->u.func.body;
+        T_type_list para_tys;
+        T_type      ret_ty;
+        T_tyir      body_tyir;
 
-                T_type      func     = S_look(venv, fname);
-                T_type_list para_tys = func->u.func.paras;
-                T_tyir      body_tyir;
+        A_para_list p;
+        T_type_list t;
 
-                A_para_list p;
-                T_type_list t;
+        // check return type.
+        ret_ty = ret ? S_look(tenv, ret) : T_void();
+        if (!ret_ty) {
+            U_error(dec->pos, "dec fuc(%s), ret(%s) not defined",
+                    S_get_name(fname), S_get_name(ret));
+        }
 
-                S_begin(venv, S_get_name(fname));
+        // check parameter type.
+        for (p = paras, para_tys = NULL; p; p = p->tail) {
+            S_symbol type = p->head->type;
+            T_type para_ty;
 
-                for(p = paras, t = para_tys; p && t; p = p->tail, t = t->tail) {
-                    S_symbol name = p->head->name;
-                    T_type   type = t->head;
-
-                    S_enter(venv, name, type);
-                }
-                body_tyir = T_trans_exp(venv, tenv, body, 0);
-
-                S_end(venv);
-
-                break;
+            para_ty = S_look(tenv, type);
+            if (!para_ty) {
+                U_error(dec->pos, "dec func(%s), para(%s) not defined",
+                        S_get_name(fname), S_get_name(type));
             }
 
-            default:
-                U_error(-1, "X4");
+            // make parameter list.
+            if (!para_tys) {
+                t = T_mk_type_list(para_ty, NULL);
+                para_tys = t;
+            } else {
+                t->tail = T_mk_type_list(para_ty, NULL);
+                t = t->tail;
+            }
         }
+
+        S_enter(venv, fname, T_mk_func(ret_ty, para_tys));
+    }
+
+    // translate function bodies
+    for (f = funcs; f; f = f->tail) {
+        A_dec       dec   = f->head;
+        S_symbol    fname = dec->u.func.name;
+        A_para_list paras = dec->u.func.paras;
+        A_exp       body  = dec->u.func.body;
+
+        T_type      func     = S_look(venv, fname);
+        T_type_list para_tys = func->u.func.paras;
+        T_tyir      body_tyir;
+
+        A_para_list p;
+        T_type_list t;
+
+        S_begin(venv, S_get_name(fname));
+
+        for (p = paras, t = para_tys; p && t; p = p->tail, t = t->tail) {
+            S_symbol name = p->head->name;
+            T_type   type = t->head;
+
+            S_enter(venv, name, type);
+        }
+        body_tyir = T_trans_exp(venv, tenv, body, 0); // do nothing
+
+        S_end(venv);
     }
 }
 
@@ -271,7 +281,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
 
             // check parameter type.
             para_tys = func_ty->u.func.paras;
-            for(; args && para_tys; args     = args->tail,
+            for (; args && para_tys; args     = args->tail,
                                     para_tys = para_tys->tail) {
                 A_exp  arg     = args->head;
                 T_type para_ty = para_tys->head;
@@ -314,8 +324,8 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
 
         case A_kind_exp_array: {
             S_symbol array = n->u.array.type;
-            A_exp    size = n->u.array.size;
-            A_exp    init = n->u.array.init;
+            A_exp    size  = n->u.array.size;
+            A_exp    init  = n->u.array.init;
             T_type   array_ty;
             T_tyir   size_tyir, init_tyir;
 
@@ -367,7 +377,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             fields = record_ty->u.record;
 
             // check fields type.
-            for(; args && fields; args = args->tail, fields = fields->tail) {
+            for (; args && fields; args = args->tail, fields = fields->tail) {
                 S_symbol name1 = args->head->name;
                 A_exp    exp   = args->head->exp;
                 S_symbol name2 = fields->head->name;
@@ -396,7 +406,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             A_exp_list seq = n->u.seq;
             T_tyir     exp_tyir;
 
-            for(; seq; seq = seq->tail)
+            for (; seq; seq = seq->tail)
                 exp_tyir = T_trans_exp(venv, tenv, seq->head, loop);
 
             return T_mk_tyir(NULL, exp_tyir.type);
@@ -416,7 +426,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
                 U_error(n->pos, "exp assign, type not match");
             }
 
-            return T_mk_tyir(NULL, var_tyir.type);
+            return T_mk_tyir(NULL, T_void());
         }
 
         case A_kind_exp_if: {
@@ -432,15 +442,17 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
                 U_error(cond->pos, "exp if, cond is not integer");
             }
 
-            // check branches type.
+            // if-then
             then_tyir = T_trans_exp(venv, tenv, then, loop);
-            if (else_) {
-                else_tyir = T_trans_exp(venv, tenv, else_, loop);
-                if (then_tyir.type != else_tyir.type) {
-                    printt("then", then_tyir.type);
-                    printt("else", else_tyir.type);
-                    U_error(n->pos, "exp if, branches type not match");
-                }
+            if (!else_)
+                return T_mk_tyir(NULL, T_void());
+
+            // if-then-else, check branches type.
+            else_tyir = T_trans_exp(venv, tenv, else_, loop);
+            if (then_tyir.type != else_tyir.type) {
+                printt("then", then_tyir.type);
+                printt("else", else_tyir.type);
+                U_error(n->pos, "exp if, branches type not match");
             }
 
             return T_mk_tyir(NULL, then_tyir.type);
@@ -462,7 +474,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             body_tyir = T_trans_exp(venv, tenv, body, loop + 1);
             S_end(venv);
 
-            return T_mk_tyir(NULL, body_tyir.type);
+            return T_mk_tyir(NULL, T_void());
         }
 
         case A_kind_exp_for: {
@@ -511,7 +523,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             S_begin(tenv, "let");
 
             T_trans_dec(venv, tenv, decs);
-            for(; body; body = body->tail)
+            for (; body; body = body->tail)
                 body_tyir = T_trans_exp(venv, tenv, body->head, loop);
 
             S_end(tenv);
@@ -545,7 +557,7 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
     if (!base_ty)
         U_error(n->pos, "lvalue, base(%s) not defined", S_get_name(base));
 
-    for(p = suffix, t = base_ty; p;) {
+    for (p = suffix, t = base_ty; p;) {
         switch(suffix->kind) {
             case A_kind_var_index: {
                 A_exp  exp      = p->u.index.exp;
@@ -584,7 +596,7 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
 
                 // check field name.
                 fields = t->u.record;
-                for(field = NULL; fields; fields = fields->tail) {
+                for (field = NULL; fields; fields = fields->tail) {
                     if (fields->head->name == name) {
                         field = fields->head;
                         break;
@@ -650,7 +662,7 @@ static T_type T_trans_type(S_table tenv, A_type n)
             T_field_list f;
 
             // make field list.
-            for(p = record, fields = NULL; p; p = p->tail) {
+            for (p = record, fields = NULL; p; p = p->tail) {
                 S_symbol name = p->head->name;
                 S_symbol type = p->head->type;
                 T_type   type_ty;

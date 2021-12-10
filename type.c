@@ -149,3 +149,15 @@ inline int T_get_kind(T_type t)
     else
         return t->kind;
 }
+
+
+inline bool T_match(T_type left, T_type right)
+{
+    if (left == right)
+        return true;
+
+    if (T_get_kind(left) == T_kind_record && T_get_kind(right) == T_kind_nil)
+        return true;
+
+    return false;
+}

@@ -201,7 +201,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
         init_tyir = T_trans_exp(venv, tenv, init, 0);
         if (type) {
             type_ty = S_look(tenv, type);
-            if (init_tyir.type != type_ty) {
+            if (!T_match(init_tyir.type, type_ty)) {
                 printt("type", type_ty);
                 printt("init", init_tyir.type);
                 U_error(dec->pos, "dec var(%s), type not match\n",
@@ -330,7 +330,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
                 T_tyir arg_tyir;
 
                 arg_tyir = T_trans_exp(venv, tenv, arg, loop);
-                if (arg_tyir.type != para_ty) {
+                if (!T_match(para_ty, arg_tyir.type)) {
                     printt("para", para_ty);
                     printt("arg", arg_tyir.type);
                     U_error(n->pos,
@@ -433,7 +433,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
                 }
 
                 exp_tyir = T_trans_exp(venv, tenv, exp, loop);
-                if (exp_tyir.type != type) {
+                if (!T_match(type, exp_tyir.type)) {
                     printt("give", exp_tyir.type);
                     printt("need", type);
                     U_error(exp->pos, "exp record(%s), type not match",
@@ -463,7 +463,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop)
             // check type match.
             var_tyir = T_trans_var(venv, tenv, var);
             exp_tyir = T_trans_exp(venv, tenv, exp, loop);
-            if (var_tyir.type != exp_tyir.type) {
+            if (!T_match(var_tyir.type, exp_tyir.type)) {
                 printt("var", var_tyir.type);
                 printt("exp", exp_tyir.type);
                 U_error(n->pos, "exp assign, type not match");

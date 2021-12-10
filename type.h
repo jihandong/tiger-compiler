@@ -135,6 +135,13 @@ T_field_list T_mk_field_list(T_field head, T_field_list tail);
 void T_print(FILE *out, T_type type);
 
 /**
+ * test type match.
+ * @param[in] left  left part type.
+ * @param[in] right right part type.
+ */
+bool T_match(T_type left, T_type right);
+
+/**
  * get type kind(skip T_kind_name).
  * @param[in] type  type definitions.
  * @param[in] kind  type kind.

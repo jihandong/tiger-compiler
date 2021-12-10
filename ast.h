@@ -91,7 +91,7 @@ struct A_exp_
         struct { S_symbol func; A_exp_list args; }                  call;
         struct { A_kind_op oper; A_exp left; A_exp right; }         op;
         struct { S_symbol type; A_exp size, init; }                 array;
-        struct { S_symbol type; A_arg_list args; }                 record;
+        struct { S_symbol type; A_arg_list args; }                  record;
         A_exp_list                                                  seq;
         struct { A_var var; A_exp exp; }                            assign;
         struct { A_exp cond, then, else_; }                         if_;

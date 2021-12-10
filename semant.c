@@ -51,6 +51,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
 
         switch(dec->kind) {
             case A_kind_dec_var: {
+                // make variable declaratoin list
                 if (!vars) {
                     v = A_mk_dec_list(dec, NULL);
                     vars = v;
@@ -65,7 +66,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
                 S_symbol name  = dec->u.type.name;
                 T_type   dummy = T_mk_name(name, NULL);
 
-                // advertise dummy type: T -> T_name(T, NULL)
+                // advertise dummy type
                 S_enter(tenv, name, dummy);
 
                 if (!dummys) {
@@ -76,6 +77,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
                     d = d->tail;
                 }
 
+                // make type declaratoin list
                 if (!types) {
                     t = A_mk_dec_list(dec, NULL);
                     types = t;
@@ -87,6 +89,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n)
             }
 
             case A_kind_dec_func: {
+                // make function declaratoin list
                 if (!funcs) {
                     f = A_mk_dec_list(dec, NULL);
                     funcs = f;
@@ -546,7 +549,6 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
     A_var    p;
     T_type   t;
 
-    // check base.
     if (n->kind != A_kind_var_base)
         U_error(n->pos, "lvalue, emtpy");
 
@@ -559,6 +561,9 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
 
     for (p = suffix, t = base_ty; p;) {
         switch(suffix->kind) {
+            case A_kind_var_base:
+                U_error(suffix->pos, "lvalue, two bases?");
+
             case A_kind_var_index: {
                 A_exp  exp      = p->u.index.exp;
                 A_var  suffix   = p->u.index.suffix;
@@ -611,9 +616,6 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n)
                 t = field->type;
                 break;
             }
-
-            case A_kind_var_base:
-                U_error(suffix->pos, "lvalue, two bases?");
 
             default :
                 U_error(n->pos, "unkown lvalue");

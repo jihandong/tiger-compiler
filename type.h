@@ -5,6 +5,7 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+#include "ast.h"
 #include "symbol.h"
 
 /****************************************************************************
@@ -124,7 +125,18 @@ T_type_list T_mk_type_list(T_type head, T_type_list tail);
 T_field_list T_mk_field_list(T_field head, T_field_list tail);
 
 /****************************************************************************
- * Public: display functions
+ * Public: semantic check fucntions
+ ****************************************************************************/
+
+/**
+ * semantic check on ast.
+ * @param[in] root  ast root node.
+ * @return check result.
+ */
+void T_trans(A_exp root);
+
+/****************************************************************************
+ * Public: tool functions
  ****************************************************************************/
 
 /**

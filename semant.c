@@ -3,7 +3,6 @@
  ****************************************************************************/
 
 #include <stdbool.h>
-#include "semant.h"
 #include "symbol.h"
 #include "type.h"
 #include "util.h"

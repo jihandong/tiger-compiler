@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
-#include "semant.h"
+#include "type.h"
 #include "util.h"
 
 extern A_exp A_root;

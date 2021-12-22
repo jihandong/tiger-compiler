@@ -30,6 +30,7 @@ struct T_tyir_ {
  * @param[in] n     astnode.
  */
 static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n);
+
 /**
  * @brief Translate expressions.
  * support break validity.
@@ -40,6 +41,7 @@ static void T_trans_dec(S_table venv, S_table tenv, A_dec_list n);
  * @return T_tyir   translated ir with type.
  */
 static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop);
+
 /**
  * @brief Translate variables(lvalue).
  * @param[in] venv  value environment for variables and functions.
@@ -48,6 +50,7 @@ static T_tyir T_trans_exp(S_table venv, S_table tenv, A_exp n, int loop);
  * @return T_tyir   translated ir with type.
  */
 static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n);
+
 /**
  * @brief Translate types.
  * @param[in] tenv  type environment for types.
@@ -56,6 +59,14 @@ static T_tyir T_trans_var(S_table venv, S_table tenv, A_var n);
  * @note won't look into T_name(name, ...) as it might not be defined yet.
  */
 static T_type T_trans_type(S_table tenv, A_type n);
+
+/**
+ * @brief Initialize transition.
+ * add language inner symbols into symbol table.
+ * @param venv  value symbol table.
+ * @param tenv  type symbol table.
+ */
+static void T_trans_init(S_table venv, S_table tenv);
 
 /****************************************************************************
  * Private
@@ -735,16 +746,27 @@ static T_type T_trans_type(S_table tenv, A_type n)
     }
 }
 
+static void T_trans_init(S_table venv, S_table tenv)
+{
+    // inner types.
+    S_enter(tenv, S_mk_symbol("int"), T_int());
+    S_enter(tenv, S_mk_symbol("string"), T_str());
+
+    // inner variables.
+
+    // inner functions.
+}
+
 /****************************************************************************
  * Public
  ****************************************************************************/
 
-void T_trans(A_exp root) {
+void T_trans(A_exp root)
+{
     S_table venv = S_mk_table();
     S_table tenv = S_mk_table();
 
-    S_enter(tenv, S_mk_symbol("int"), T_int());
-    S_enter(tenv, S_mk_symbol("string"), T_str());
+    T_trans_init(venv, tenv);
 
     T_trans_exp(venv, tenv, root, 0);
 }

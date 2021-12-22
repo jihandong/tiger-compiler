@@ -76,36 +76,20 @@ static inline void S_pop(S_table t)
     t->top          = b->prevtop;
 }
 
-static void S_dump(S_table t)
+static void S_dump(void)
 {
     S_symbol s;
-    bind b;
     int i;
 
-    if (!t)
-        U_error(-1, "dump fail");
-
-    printf("-- symbol table --\n");
+    printf("--- dump symbol table ---\n");
     for (i = 0; i < SYM_TABLE_SIZE; i++) {
         if (symtable[i])
-            printf("  ");
+            printf("  %3d: ", i);
 
         for (s = symtable[i]; s; s = s->next)
             printf("(%s)", s->name);
 
         if (symtable[i])
-            printf("\n");
-    }
-
-    printf("-- bind table --\n");
-    for (i = 0; i < BIND_TABLE_SIZE; i++) {
-        if (t->binds[i])
-            printf("  ");
-
-        for (b = t->binds[i]; b; b = b->next)
-            printf("(%s)", b->key->name);
-
-        if (t->binds[i])
             printf("\n");
     }
 }
@@ -178,7 +162,8 @@ void *S_look(S_table t, S_symbol s)
             return b->value;
     }
 
-    S_dump(t);
+    S_dump();
+    S_show(t);
     return NULL;
 }
 
@@ -209,4 +194,25 @@ void S_end(S_table t)
 
     if (t->top)
         S_pop(t);
+}
+
+void S_show(S_table t)
+{
+    bind b;
+    int i;
+
+    if (!t)
+        U_error(-1, "bind table not exists");
+
+    printf("--- show bind table ---\n");
+    for (i = 0; i < BIND_TABLE_SIZE; i++) {
+        if (t->binds[i])
+            printf("  %3d: ", i);
+
+        for (b = t->binds[i]; b; b = b->next)
+            printf("(%s)", b->key->name);
+
+        if (t->binds[i])
+            printf("\n");
+    }
 }

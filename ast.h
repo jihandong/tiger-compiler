@@ -402,7 +402,7 @@ A_para A_mk_para(Apos pos, S_symbol var, S_symbol type);
 A_arg A_mk_arg(S_symbol var, A_exp exp);
 
 /****************************************************************************
- * Public: display function
+ * Public: tool function
  ****************************************************************************/
 
 /**
@@ -411,4 +411,3 @@ A_arg A_mk_arg(S_symbol var, A_exp exp);
  * @param[in] root  root node.
  */
 void A_print(FILE *out, A_exp root);
-

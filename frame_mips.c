@@ -17,7 +17,7 @@ struct FRM_access_
 
     union {
         int     offset;
-        T_temp  reg;
+        TYP_temp  reg;
     } u;
 }
 
@@ -30,7 +30,7 @@ static FRM_access FRM_in_frame(int offset)
     
 }
 
-static FRM_access FRM_in_reg(T_temp reg)
+static FRM_access FRM_in_reg(TYP_temp reg)
 {
     
 }
@@ -39,13 +39,13 @@ static FRM_access FRM_in_reg(T_temp reg)
  * Public Functions
  ****************************************************************************/
 
-FRM_frame FRM_mk_frame(T_lable name, FRM_escapes paras)
+FRM_frame FRM_mk_frame(TYP_lable name, FRM_escapes paras)
 {
 
 }
 
 
-T_lable FRM_get_name(FRM_frame f)
+TYP_lable FRM_get_name(FRM_frame f)
 {
 
 }

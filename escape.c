@@ -15,7 +15,7 @@
  * @param depth Function call layers.
  * @param d     Declaration astnode.
  */
-static void ESC_find_escape_dec(S_table env, int depth, A_dec d);
+static void ESC_find_escape_dec(SYM_table env, int depth, AST_dec d);
 
 /**
  * @brief Find escape variables in expression astnode.
@@ -24,7 +24,7 @@ static void ESC_find_escape_dec(S_table env, int depth, A_dec d);
  * @param depth Function call layers.
  * @param e     Dxpression astnode.
  */
-static void ESC_find_escape_exp(S_table env, int depth, A_exp e);
+static void ESC_find_escape_exp(SYM_table env, int depth, AST_exp e);
 
 /**
  * @brief Find escape variables in variable astnode.
@@ -33,23 +33,23 @@ static void ESC_find_escape_exp(S_table env, int depth, A_exp e);
  * @param depth Function call layers.
  * @param v     Dariable astnode.
  */
-static void ESC_find_escape_var(S_table env, int depth, A_var v);
+static void ESC_find_escape_var(SYM_table env, int depth, AST_var v);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void ESC_find_escape_dec(S_table env, int depth, A_dec d)
+static void ESC_find_escape_dec(SYM_table env, int depth, AST_dec d)
 {
 
 }
 
-static void ESC_find_escape_exp(S_table env, int depth, A_exp e)
+static void ESC_find_escape_exp(SYM_table env, int depth, AST_exp e)
 {
 
 }
 
-static void ESC_find_escape_var(S_table env, int depth, A_var v);
+static void ESC_find_escape_var(SYM_table env, int depth, AST_var v);
 {
 
 }
@@ -59,7 +59,7 @@ static void ESC_find_escape_var(S_table env, int depth, A_var v);
  * Public Functions
  ****************************************************************************/
 
-void ESC_find_escape(A_exp root)
+void ESC_find_escape(AST_exp root)
 {
 
 }

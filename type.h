@@ -12,35 +12,35 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct T_type_ *        T_type;
-typedef struct T_type_list_ *   T_type_list;
-typedef struct T_field_ *       T_field;
-typedef struct T_field_list_ *  T_field_list;
+typedef struct TYP_type_ *        TYP_type;
+typedef struct TYP_type_list_ *   TYP_type_list;
+typedef struct TYP_field_ *       TYP_field;
+typedef struct TYP_field_list_ *  TYP_field_list;
 
-struct T_type_
+struct TYP_type_
 {
     enum {
-        T_kind_nil,
-        T_kind_int,
-        T_kind_str,
-        T_kind_void,
-        T_kind_name,
-        T_kind_func,
-        T_kind_array,
-        T_kind_record,
+        TYP_kind_nil,
+        TYP_kind_int,
+        TYP_kind_str,
+        TYP_kind_void,
+        TYP_kind_name,
+        TYP_kind_func,
+        TYP_kind_array,
+        TYP_kind_record,
     } kind;
 
     union {
-        struct { S_symbol symbol; T_type type; }    name; /*< type alias */
-        struct { T_type ret; T_type_list paras; }   func;
-        T_type                                      array;
-        T_field_list                                record;
+        struct { SYM_symbol symbol; TYP_type type; }  name; /*< type alias */
+        struct { TYP_type ret; TYP_type_list paras; } func;
+        TYP_type                                      array;
+        TYP_field_list                                record;
     } u;
 };
 
-struct T_field_         { S_symbol name; T_type type; };
-struct T_field_list_    { T_field head; T_field_list tail; };
-struct T_type_list_     { T_type head; T_type_list tail; };
+struct TYP_field_      { SYM_symbol name; TYP_type type; };
+struct TYP_field_list_ { TYP_field head; TYP_field_list tail; };
+struct TYP_type_list_  { TYP_type head; TYP_type_list tail; };
 
 /****************************************************************************
  * Public: basic type
@@ -50,22 +50,22 @@ struct T_type_list_     { T_type head; T_type_list tail; };
  * nil type.
  * @return pre-defined type.
  */
-T_type T_nil(void);
+TYP_type TYP_nil(void);
 /**
  * integer type.
  * @return pre-defined type.
  */
-T_type T_int(void);
+TYP_type TYP_int(void);
 /**
  * string type.
  * @return pre-defined type.
  */
-T_type T_str(void);
+TYP_type TYP_str(void);
 /**
  * void type.
  * @return pre-defined type.
  */
-T_type T_void(void);
+TYP_type TYP_void(void);
 
 /****************************************************************************
  * Public: type constructor
@@ -77,26 +77,26 @@ T_type T_void(void);
  * @param[in] type      type definition.
  * @return analysed type.
  */
-T_type T_mk_name(S_symbol symbol, T_type type);
+TYP_type TYP_mk_name(SYM_symbol symbol, TYP_type type);
 /**
  * make functions type.
  * @param[in] ret   return value type.
  * @param[in] paras parameter types.
  * @return analysed type.
  */
-T_type T_mk_func(T_type ret, T_type_list paras);
+TYP_type TYP_mk_func(TYP_type ret, TYP_type_list paras);
 /**
  * make array type.
  * @param[in] type  array element type.
  * @return analysed type.
  */
-T_type T_mk_array(T_type type);
+TYP_type TYP_mk_array(TYP_type type);
 /**
  * make record type.
  * @param[in] fields    each field has name and type.
  * @return analysed type.
  */
-T_type T_mk_record(T_field_list fields);
+TYP_type TYP_mk_record(TYP_field_list fields);
 
 /****************************************************************************
  * Public: parameter/argument constructor
@@ -108,32 +108,21 @@ T_type T_mk_record(T_field_list fields);
  * @param[in] type  field type.
  * @return new field.
  */
-T_field T_mk_field(S_symbol name, T_type type);
+TYP_field TYP_mk_field(SYM_symbol name, TYP_type type);
 /**
  * make type list node.
  * @param[in] head
  * @param[in] tail
  * @return new field
  */
-T_type_list T_mk_type_list(T_type head, T_type_list tail);
+TYP_type_list TYP_mk_type_list(TYP_type head, TYP_type_list tail);
 /**
  * make record field list node.
  * @param[in] head
  * @param[in] tail
  * @return new field list node.
  */
-T_field_list T_mk_field_list(T_field head, T_field_list tail);
-
-/****************************************************************************
- * Public: semantic check fucntions
- ****************************************************************************/
-
-/**
- * semantic check on ast.
- * @param[in] root  ast root node.
- * @return check result.
- */
-void T_trans(A_exp root);
+TYP_field_list TYP_mk_field_list(TYP_field head, TYP_field_list tail);
 
 /****************************************************************************
  * Public: tool functions
@@ -144,19 +133,19 @@ void T_trans(A_exp root);
  * @param[in] out   print target.
  * @param[in] type  type definitions.
  */
-void T_print(FILE *out, T_type type);
+void TYP_print(FILE *out, TYP_type type);
 
 /**
  * test type match.
  * @param[in] left  left part type.
  * @param[in] right right part type.
  */
-bool T_match(T_type left, T_type right);
+bool TYP_match(TYP_type left, TYP_type right);
 
 /**
- * get type kind(skip T_kind_name).
+ * get type kind(skip TYP_kind_name).
  * @param[in] type  type definitions.
  * @param[in] kind  type kind.
  * @return type kind
  */
-int T_get_kind(T_type type);
+int TYP_get_kind(TYP_type type);

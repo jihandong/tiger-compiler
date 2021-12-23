@@ -11,11 +11,11 @@
  * Public: declaration constructor
  ****************************************************************************/
 
-A_dec A_mk_dec_var(Apos pos, S_symbol name, S_symbol type, A_exp init)
+AST_dec AST_mk_dec_var(Apos pos, SYM_symbol name, SYM_symbol type, AST_exp init)
 {
-    A_dec p = U_alloc(sizeof(*p));
+    AST_dec p = UTL_alloc(sizeof(*p));
 
-    p->kind         = A_kind_dec_var;
+    p->kind         = AST_kind_dec_var;
     p->pos          = pos;
     p->u.var.name   = name;
     p->u.var.type   = type;
@@ -25,22 +25,23 @@ A_dec A_mk_dec_var(Apos pos, S_symbol name, S_symbol type, A_exp init)
     return p;
 }
 
-A_dec A_mk_dec_type(S_symbol name, A_type type)
+AST_dec AST_mk_dec_type(SYM_symbol name, AST_type type)
 {
-    A_dec p = U_alloc(sizeof(*p));
+    AST_dec p = UTL_alloc(sizeof(*p));
 
-    p->kind        = A_kind_dec_type;
+    p->kind        = AST_kind_dec_type;
     p->u.type.name = name;
     p->u.type.type = type;
 
     return p;
 }
 
-A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list paras, S_symbol ret, A_exp body)
+AST_dec AST_mk_dec_func(Apos pos, SYM_symbol name, AST_para_list paras,
+                        SYM_symbol ret, AST_exp body)
 {
-    A_dec p = U_alloc(sizeof(*p));
+    AST_dec p = UTL_alloc(sizeof(*p));
 
-    p->kind         = A_kind_dec_func;
+    p->kind         = AST_kind_dec_func;
     p->u.func.name  = name;
     p->u.func.paras = paras;
     p->u.func.ret   = ret;
@@ -53,54 +54,54 @@ A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list paras, S_symbol ret, A_
  * Public: expression constructor
  ****************************************************************************/
 
-A_exp A_mk_exp_var(Apos pos, A_var var)
+AST_exp AST_mk_exp_var(Apos pos, AST_var var)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind  = A_kind_exp_var;
+    p->kind  = AST_kind_exp_var;
     p->pos   = pos;
     p->u.var = var;
 
     return p;
 }
 
-A_exp A_mk_exp_nil(Apos pos)
+AST_exp AST_mk_exp_nil(Apos pos)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind = A_kind_exp_nil;
+    p->kind = AST_kind_exp_nil;
     p->pos  = pos;
 
     return p;
 }
 
-A_exp A_mk_exp_int(Apos pos, int i)
+AST_exp AST_mk_exp_int(Apos pos, int i)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind   = A_kind_exp_int;
+    p->kind   = AST_kind_exp_int;
     p->pos    = pos;
     p->u.int_ = i;
 
     return p;
 }
 
-A_exp A_mk_exp_str(Apos pos, const char *s)
+AST_exp AST_mk_exp_str(Apos pos, const char *s)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind   = A_kind_exp_str;
+    p->kind   = AST_kind_exp_str;
     p->pos    = pos;
     p->u.str_ = s;
 
     return p;
 }
 
-A_exp A_mk_exp_call(Apos pos, S_symbol func, A_exp_list args)
+AST_exp AST_mk_exp_call(Apos pos, SYM_symbol func, AST_exp_list args)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind        = A_kind_exp_call;
+    p->kind        = AST_kind_exp_call;
     p->pos         = pos;
     p->u.call.func = func;
     p->u.call.args = args;
@@ -108,11 +109,12 @@ A_exp A_mk_exp_call(Apos pos, S_symbol func, A_exp_list args)
     return p;
 }
 
-A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right)
+AST_exp AST_mk_exp_op(Apos pos, AST_kind_op oper,
+                      AST_exp left, AST_exp right)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind       = A_kind_exp_op;
+    p->kind       = AST_kind_exp_op;
     p->pos        = pos;
     p->u.op.oper  = oper;
     p->u.op.left  = left;
@@ -121,11 +123,12 @@ A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right)
     return p;
 }
 
-A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init)
+AST_exp AST_mk_exp_array(Apos pos, SYM_symbol type, AST_exp size,
+                         AST_exp init)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind         = A_kind_exp_array;
+    p->kind         = AST_kind_exp_array;
     p->pos          = pos;
     p->u.array.type = type;
     p->u.array.size = size;
@@ -134,11 +137,11 @@ A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init)
     return p;
 }
 
-A_exp A_mk_exp_record(Apos pos, S_symbol type, A_arg_list args)
+AST_exp AST_mk_exp_record(Apos pos, SYM_symbol type, AST_arg_list args)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind          = A_kind_exp_record;
+    p->kind          = AST_kind_exp_record;
     p->pos           = pos;
     p->u.record.type = type;
     p->u.record.args = args;
@@ -146,22 +149,22 @@ A_exp A_mk_exp_record(Apos pos, S_symbol type, A_arg_list args)
     return p;
 }
 
-A_exp A_mk_exp_seq(Apos pos, A_exp_list seq)
+AST_exp AST_mk_exp_seq(Apos pos, AST_exp_list seq)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind  = A_kind_exp_seq;
+    p->kind  = AST_kind_exp_seq;
     p->pos   = pos;
     p->u.seq = seq;
 
     return p;
 }
 
-A_exp A_mk_exp_assign(Apos pos, A_var var, A_exp exp)
+AST_exp AST_mk_exp_assign(Apos pos, AST_var var, AST_exp exp)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind         = A_kind_exp_assign;
+    p->kind         = AST_kind_exp_assign;
     p->pos          = pos;
     p->u.assign.var = var;
     p->u.assign.exp = exp;
@@ -169,11 +172,11 @@ A_exp A_mk_exp_assign(Apos pos, A_var var, A_exp exp)
     return p;
 }
 
-A_exp A_mk_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_)
+AST_exp AST_mk_exp_if(Apos pos, AST_exp cond, AST_exp then, AST_exp else_)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind        = A_kind_exp_if;
+    p->kind        = AST_kind_exp_if;
     p->pos         = pos;
     p->u.if_.cond  = cond;
     p->u.if_.then  = then;
@@ -182,11 +185,11 @@ A_exp A_mk_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_)
     return p;
 }
 
-A_exp A_mk_exp_while(Apos pos, A_exp cond, A_exp body)
+AST_exp AST_mk_exp_while(Apos pos, AST_exp cond, AST_exp body)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind          = A_kind_exp_while;
+    p->kind          = AST_kind_exp_while;
     p->pos           = pos;
     p->u.while_.cond = cond;
     p->u.while_.body = body;
@@ -194,11 +197,12 @@ A_exp A_mk_exp_while(Apos pos, A_exp cond, A_exp body)
     return p;
 }
 
-A_exp A_mk_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body)
+AST_exp AST_mk_exp_for(Apos pos, SYM_symbol var, AST_exp lo, AST_exp hi,
+                       AST_exp body)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind          = A_kind_exp_for;
+    p->kind          = AST_kind_exp_for;
     p->pos           = pos;
     p->u.for_.var    = var;
     p->u.for_.lo     = lo;
@@ -209,21 +213,21 @@ A_exp A_mk_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body)
     return p;
 }
 
-A_exp A_mk_exp_break(Apos pos)
+AST_exp AST_mk_exp_break(Apos pos)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind = A_kind_exp_break;
+    p->kind = AST_kind_exp_break;
     p->pos  = pos;
 
     return p;
 }
 
-A_exp A_mk_exp_let(Apos pos, A_dec_list decs, A_exp_list body)
+AST_exp AST_mk_exp_let(Apos pos, AST_dec_list decs, AST_exp_list body)
 {
-    A_exp p = U_alloc(sizeof(*p));
+    AST_exp p = UTL_alloc(sizeof(*p));
 
-    p->kind       = A_kind_exp_let;
+    p->kind       = AST_kind_exp_let;
     p->pos        = pos;
     p->u.let.decs = decs;
     p->u.let.body = body;
@@ -235,11 +239,11 @@ A_exp A_mk_exp_let(Apos pos, A_dec_list decs, A_exp_list body)
  * Public: variables constructor
  ****************************************************************************/
 
-A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix)
+AST_var AST_mk_var_base(Apos pos, SYM_symbol name, AST_var suffix)
 {
-    A_var p = U_alloc(sizeof(*p));
+    AST_var p = UTL_alloc(sizeof(*p));
 
-    p->kind          = A_kind_var_base;
+    p->kind          = AST_kind_var_base;
     p->pos           = pos;
     p->u.base.name   = name;
     p->u.base.suffix = suffix;
@@ -247,11 +251,11 @@ A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix)
     return p;
 }
 
-A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix)
+AST_var AST_mk_var_index(Apos pos, AST_exp exp, AST_var suffix)
 {
-    A_var p = U_alloc(sizeof(*p));
+    AST_var p = UTL_alloc(sizeof(*p));
 
-    p->kind           = A_kind_var_index;
+    p->kind           = AST_kind_var_index;
     p->pos            = pos;
     p->u.index.exp    = exp;
     p->u.index.suffix = suffix;
@@ -259,11 +263,11 @@ A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix)
     return p;
 }
 
-A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix)
+AST_var AST_mk_var_field(Apos pos, SYM_symbol field, AST_var suffix)
 {
-    A_var p = U_alloc(sizeof(*p));
+    AST_var p = UTL_alloc(sizeof(*p));
 
-    p->kind           = A_kind_var_field;
+    p->kind           = AST_kind_var_field;
     p->pos            = pos;
     p->u.field.name   = field;
     p->u.field.suffix = suffix;
@@ -275,33 +279,33 @@ A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix)
  * Public: type definition constructor
  ****************************************************************************/
 
-A_type A_mk_type_name(Apos pos, S_symbol name)
+AST_type AST_mk_type_name(Apos pos, SYM_symbol name)
 {
-    A_type p = U_alloc(sizeof(*p));
+    AST_type p = UTL_alloc(sizeof(*p));
 
-    p->kind     = A_kind_type_name;
+    p->kind     = AST_kind_type_name;
     p->pos      = pos;
     p->u.name   = name;
 
     return p;
 }
 
-A_type A_mk_type_array(Apos pos, S_symbol array)
+AST_type AST_mk_type_array(Apos pos, SYM_symbol array)
 {
-    A_type p = U_alloc(sizeof(*p));
+    AST_type p = UTL_alloc(sizeof(*p));
 
-    p->kind     = A_kind_type_array;
+    p->kind     = AST_kind_type_array;
     p->pos      = pos;
     p->u.array  = array;
 
     return p;
 }
 
-A_type A_mk_type_record(Apos pos, A_para_list fields)
+AST_type AST_mk_type_record(Apos pos, AST_para_list fields)
 {
-    A_type p = U_alloc(sizeof(*p));
+    AST_type p = UTL_alloc(sizeof(*p));
 
-    p->kind     = A_kind_type_record;
+    p->kind     = AST_kind_type_record;
     p->pos      = pos;
     p->u.record = fields;
 
@@ -312,9 +316,9 @@ A_type A_mk_type_record(Apos pos, A_para_list fields)
  * Public: link list constructor
  ****************************************************************************/
 
-A_dec_list A_mk_dec_list(A_dec head, A_dec_list tail)
+AST_dec_list AST_mk_dec_list(AST_dec head, AST_dec_list tail)
 {
-    A_dec_list p = U_alloc(sizeof(*p));
+    AST_dec_list p = UTL_alloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -322,9 +326,9 @@ A_dec_list A_mk_dec_list(A_dec head, A_dec_list tail)
     return p;
 }
 
-A_exp_list A_mk_exp_list(A_exp head, A_exp_list tail)
+AST_exp_list AST_mk_exp_list(AST_exp head, AST_exp_list tail)
 {
-    A_exp_list p = U_alloc(sizeof(*p));
+    AST_exp_list p = UTL_alloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -332,9 +336,9 @@ A_exp_list A_mk_exp_list(A_exp head, A_exp_list tail)
     return p;
 }
 
-A_para_list A_mk_para_list(A_para head, A_para_list tail)
+AST_para_list AST_mk_para_list(AST_para head, AST_para_list tail)
 {
-    A_para_list p = U_alloc(sizeof(*p));
+    AST_para_list p = UTL_alloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -342,9 +346,9 @@ A_para_list A_mk_para_list(A_para head, A_para_list tail)
     return p;
 }
 
-A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail)
+AST_arg_list AST_mk_arg_list(AST_arg head, AST_arg_list tail)
 {
-    A_arg_list p = U_alloc(sizeof(*p));
+    AST_arg_list p = UTL_alloc(sizeof(*p));
 
     p->head = head;
     p->tail = tail;
@@ -352,9 +356,9 @@ A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail)
     return p;
 }
 
-A_para A_mk_para(Apos pos, S_symbol name, S_symbol type)
+AST_para AST_mk_para(Apos pos, SYM_symbol name, SYM_symbol type)
 {
-    A_para p = U_alloc(sizeof(*p));
+    AST_para p = UTL_alloc(sizeof(*p));
 
     p->pos      = pos;
     p->name     = name;
@@ -364,9 +368,9 @@ A_para A_mk_para(Apos pos, S_symbol name, S_symbol type)
     return p;
 }
 
-A_arg A_mk_arg(S_symbol name, A_exp exp)
+AST_arg AST_mk_arg(SYM_symbol name, AST_exp exp)
 {
-    A_arg p = U_alloc(sizeof(*p));
+    AST_arg p = UTL_alloc(sizeof(*p));
 
     p->name = name;
     p->exp  = exp;

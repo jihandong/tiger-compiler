@@ -1,18 +1,18 @@
 #pragma once
 
 /****************************************************************************
- * Includes
+ * Include Files
  ****************************************************************************/
 
 #include "ast.h"
 
 /****************************************************************************
- * Public Function
+ * Public: semantic check fucntions
  ****************************************************************************/
 
 /**
- * @brief Find escape variables in tree.
- *
- * @param[in] exp   Root node.
+ * semantic check on ast.
+ * @param[in] root  ast root node.
+ * @return check result.
  */
-void ESC_find_escape(AST_exp root);
+void SMT_trans(AST_exp root);

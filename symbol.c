@@ -20,29 +20,29 @@ typedef struct bind_*   bind;
 
 struct bind_
 {
-    S_symbol  key;
+    SYM_symbol  key;
     void *    value;
     bind      next;       /*< next node in hash bucket */
-    S_symbol  prevtop;    /*< previous bound symbol */
+    SYM_symbol  prevtop;    /*< previous bound symbol */
 };
 
-struct S_symbol_
+struct SYM_symbol_
 {
     const char *name;
-    S_symbol    next;
+    SYM_symbol    next;
 };
 
-struct S_table_
+struct SYM_table_
 {
     bind binds[BIND_TABLE_SIZE];
-    S_symbol top;     /*< newest bound S_symbol */
+    SYM_symbol top;     /*< newest bound SYM_symbol */
 };
 
 /********************************************************************************
  * Private Data
  ********************************************************************************/
 
-static S_symbol symtable[SYM_TABLE_SIZE];
+static SYM_symbol symtable[SYM_TABLE_SIZE];
 
 /********************************************************************************
  * Private Functions
@@ -58,14 +58,14 @@ static inline unsigned BKDRhash(const char *s)
     return hash % SYM_TABLE_SIZE;
 }
 
-static inline unsigned ptrhash(S_symbol s)
+static inline unsigned ptrhash(SYM_symbol s)
 {
     unsigned hash = s;
 
     return hash % SYM_TABLE_SIZE;
 }
 
-static inline void S_pop(S_table t)
+static inline void SYM_pop(SYM_table t)
 {
     int index;
     bind b;
@@ -76,9 +76,9 @@ static inline void S_pop(S_table t)
     t->top          = b->prevtop;
 }
 
-static void S_dump(void)
+static void SYM_dump(void)
 {
-    S_symbol s;
+    SYM_symbol s;
     int i;
 
     printf("--- dump symbol table ---\n");
@@ -98,48 +98,48 @@ static void S_dump(void)
  * Public Functions
  ********************************************************************************/
 
-S_symbol S_mk_symbol(const char *name)
+SYM_symbol SYM_mk_symbol(const char *name)
 {
     unsigned index = BKDRhash(name);
-    S_symbol head = symtable[index];
-    S_symbol s;
+    SYM_symbol head = symtable[index];
+    SYM_symbol s;
 
     for (s = head; s; s = s->next) {
         if (!strcmp(s->name, name))
             return s;
     }
 
-    s = U_alloc(sizeof(*s));
-    s->name = U_strdup(name);
+    s = UTL_alloc(sizeof(*s));
+    s->name = UTL_strdup(name);
     s->next = head;
 
     symtable[index] = s;
     return symtable[index];
 }
 
-S_table S_mk_table(void)
+SYM_table SYM_mk_table(void)
 {
-    S_table t = U_alloc(sizeof(*t));
+    SYM_table t = UTL_alloc(sizeof(*t));
 
     memset(t, 0, sizeof(*t));
 
     return t;
 }
 
-const char *S_get_name(S_symbol s)
+const char *SYM_get_name(SYM_symbol s)
 {
     return s->name;
 }
 
-void S_enter(S_table t, S_symbol s, void *v)
+void SYM_enter(SYM_table t, SYM_symbol s, void *v)
 {
     unsigned index = ptrhash(s);
     bind b;
 
     if (!t || !s)
-        U_error(-1, "enter fail");
+        UTL_error(-1, "enter fail");
 
-    b = U_alloc(sizeof(*b));
+    b = UTL_alloc(sizeof(*b));
     b->key      = s;
     b->value    = v;
     b->next     = t->binds[index];
@@ -149,60 +149,60 @@ void S_enter(S_table t, S_symbol s, void *v)
     t->top = s;
 }
 
-void *S_look(S_table t, S_symbol s)
+void *SYM_look(SYM_table t, SYM_symbol s)
 {
     unsigned index = ptrhash(s);
     bind b;
 
     if (!t || !s)
-        U_error(-1, "look fail");
+        UTL_error(-1, "look fail");
 
     for (b = t->binds[index]; b; b = b->next) {
         if (b->key == s)
             return b->value;
     }
 
-    S_dump();
-    S_show(t);
+    SYM_dump();
+    SYM_show(t);
     return NULL;
 }
 
-void S_begin(S_table t, const char *name)
+void SYM_begin(SYM_table t, const char *name)
 {
     char buf[64];
 
     if (!t)
-        U_error(-1, "begin fail");
+        UTL_error(-1, "begin fail");
 
     // scope sign start with "!".
     snprintf(buf, sizeof(buf), "!%s", name);
 
-    S_enter(t, S_mk_symbol(buf), NULL);
+    SYM_enter(t, SYM_mk_symbol(buf), NULL);
 }
 
-void S_end(S_table t)
+void SYM_end(SYM_table t)
 {
     unsigned index;
     bind b;
 
     if (!t)
-        U_error(-1, "end fail");
+        UTL_error(-1, "end fail");
 
     // pop till scope sign.
-    while (strncmp(S_get_name(t->top), "!", 1))
-        S_pop(t);
+    while (strncmp(SYM_get_name(t->top), "!", 1))
+        SYM_pop(t);
 
     if (t->top)
-        S_pop(t);
+        SYM_pop(t);
 }
 
-void S_show(S_table t)
+void SYM_show(SYM_table t)
 {
     bind b;
     int i;
 
     if (!t)
-        U_error(-1, "bind table not exists");
+        UTL_error(-1, "bind table not exists");
 
     printf("--- show bind table ---\n");
     for (i = 0; i < BIND_TABLE_SIZE; i++) {

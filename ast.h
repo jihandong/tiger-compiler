@@ -13,135 +13,135 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct A_dec_ *         A_dec;
-typedef struct A_exp_ *         A_exp;
-typedef struct A_var_ *         A_var;
-typedef struct A_type_ *        A_type;
-typedef struct A_para_ *        A_para; /* func def and record def */
-typedef struct A_para_list_ *   A_para_list;
-typedef struct A_arg_ *         A_arg; /* func call and record create */
-typedef struct A_arg_list_ *    A_arg_list;
-typedef struct A_dec_list_ *    A_dec_list;
-typedef struct A_exp_list_ *    A_exp_list;
+typedef struct AST_dec_ *       AST_dec;
+typedef struct AST_exp_ *       AST_exp;
+typedef struct AST_var_ *       AST_var;
+typedef struct AST_type_ *      AST_type;
+typedef struct AST_para_ *      AST_para; /* func def and record def */
+typedef struct AST_para_list_ * AST_para_list;
+typedef struct AST_arg_ *       AST_arg; /* func call and record create */
+typedef struct AST_arg_list_ *  AST_arg_list;
+typedef struct AST_dec_list_ *  AST_dec_list;
+typedef struct AST_exp_list_ *  AST_exp_list;
 
 typedef int Apos;
 
 typedef enum {
-    A_kind_op_plus,
-    A_kind_op_minus,
-    A_kind_op_times,
-    A_kind_op_divide,
-    A_kind_op_eq,
-    A_kind_op_neq,
-    A_kind_op_lt,
-    A_kind_op_le,
-    A_kind_op_gt,
-    A_kind_op_ge,
-} A_kind_op;
+    AST_kind_op_plus,
+    AST_kind_op_minus,
+    AST_kind_op_times,
+    AST_kind_op_divide,
+    AST_kind_op_eq,
+    AST_kind_op_neq,
+    AST_kind_op_lt,
+    AST_kind_op_le,
+    AST_kind_op_gt,
+    AST_kind_op_ge,
+} AST_kind_op;
 
-struct A_dec_
+struct AST_dec_
 {
     Apos pos;
 
     enum {
-        A_kind_dec_var,
-        A_kind_dec_type,
-        A_kind_dec_func,
+        AST_kind_dec_var,
+        AST_kind_dec_type,
+        AST_kind_dec_func,
     } kind;
 
     union {
-        struct { S_symbol name, type; A_exp init; bool escape; }    var;
-        struct { S_symbol name; A_type type; }                      type;
+        struct { SYM_symbol name, type; AST_exp init; bool escape; }  var;
+        struct { SYM_symbol name; AST_type type; }                    type;
         struct {
             Apos pos;
-            S_symbol name, ret;
-            A_para_list paras;
-            A_exp body;
+            SYM_symbol name, ret;
+            AST_para_list paras;
+            AST_exp body;
         } func;
     } u;
 };
 
-struct A_exp_
+struct AST_exp_
 {
     Apos pos;
 
     enum {
-        A_kind_exp_var,
-        A_kind_exp_nil,
-        A_kind_exp_int,
-        A_kind_exp_str,
-        A_kind_exp_call,
-        A_kind_exp_op,
-        A_kind_exp_array,
-        A_kind_exp_record,
-        A_kind_exp_seq,
-        A_kind_exp_assign,
-        A_kind_exp_if,
-        A_kind_exp_while,
-        A_kind_exp_for,
-        A_kind_exp_break,
-        A_kind_exp_let,
+        AST_kind_exp_var,
+        AST_kind_exp_nil,
+        AST_kind_exp_int,
+        AST_kind_exp_str,
+        AST_kind_exp_call,
+        AST_kind_exp_op,
+        AST_kind_exp_array,
+        AST_kind_exp_record,
+        AST_kind_exp_seq,
+        AST_kind_exp_assign,
+        AST_kind_exp_if,
+        AST_kind_exp_while,
+        AST_kind_exp_for,
+        AST_kind_exp_break,
+        AST_kind_exp_let,
     } kind;
 
     union {
-        A_var                                                       var;
+        AST_var                                                     var;
         //                                                          nil;
         int                                                         int_;
         const char *                                                str_;
-        struct { S_symbol func; A_exp_list args; }                  call;
-        struct { A_kind_op oper; A_exp left; A_exp right; }         op;
-        struct { S_symbol type; A_exp size, init; }                 array;
-        struct { S_symbol type; A_arg_list args; }                  record;
-        A_exp_list                                                  seq;
-        struct { A_var var; A_exp exp; }                            assign;
-        struct { A_exp cond, then, else_; }                         if_;
-        struct { A_exp cond, body;}                                 while_;
-        struct { S_symbol var; A_exp lo, hi, body; bool escape; }   for_;
+        struct { SYM_symbol func; AST_exp_list args; }              call;
+        struct { AST_kind_op oper; AST_exp left; AST_exp right; }   op;
+        struct { SYM_symbol type; AST_exp size, init; }             array;
+        struct { SYM_symbol type; AST_arg_list args; }              record;
+        AST_exp_list                                                seq;
+        struct { AST_var var; AST_exp exp; }                        assign;
+        struct { AST_exp cond, then, else_; }                       if_;
+        struct { AST_exp cond, body;}                               while_;
+        struct { SYM_symbol var; AST_exp lo, hi, body; bool escape; } for_;
         //                                                          break;
-        struct { A_dec_list decs; A_exp_list body; }                let;
+        struct { AST_dec_list decs; AST_exp_list body; }            let;
     } u;
 };
 
-struct A_var_
+struct AST_var_
 {
     Apos pos;
 
     enum {
-        A_kind_var_base,
-        A_kind_var_index,
-        A_kind_var_field,
+        AST_kind_var_base,
+        AST_kind_var_index,
+        AST_kind_var_field,
     } kind;
 
     union {
-        struct { S_symbol name; A_var suffix; }     base;
-        struct { A_exp exp; A_var suffix; }         index; /*< array index */
-        struct { S_symbol name; A_var suffix; }     field; /*< record fields */
+        struct { SYM_symbol name; AST_var suffix; } base;
+        struct { AST_exp exp; AST_var suffix; }     index; /*< array index */
+        struct { SYM_symbol name; AST_var suffix; } field; /*< record fields */
     } u;
 };
 
-struct A_type_
+struct AST_type_
 {
     Apos pos;
 
     enum {
-        A_kind_type_name,
-        A_kind_type_array,
-        A_kind_type_record,
+        AST_kind_type_name,
+        AST_kind_type_array,
+        AST_kind_type_record,
     } kind;
 
     union {
-        S_symbol    name;
-        S_symbol    array;
-        A_para_list record;
+        SYM_symbol    name;
+        SYM_symbol    array;
+        AST_para_list record;
     } u;
 };
 
-struct A_arg_           { S_symbol  name; A_exp exp; };
-struct A_arg_list_      { A_arg     head; A_arg_list    tail; };
-struct A_para_          { S_symbol  name, type; Apos pos; bool escape; };
-struct A_para_list_     { A_para    head; A_para_list   tail; };
-struct A_dec_list_      { A_dec     head; A_dec_list    tail; };
-struct A_exp_list_      { A_exp     head; A_exp_list    tail; };
+struct AST_arg_         { SYM_symbol name; AST_exp exp; };
+struct AST_arg_list_    { AST_arg    head; AST_arg_list    tail; };
+struct AST_para_        { SYM_symbol name, type; Apos pos; bool escape; };
+struct AST_para_list_   { AST_para   head; AST_para_list   tail; };
+struct AST_dec_list_    { AST_dec    head; AST_dec_list    tail; };
+struct AST_exp_list_    { AST_exp    head; AST_exp_list    tail; };
 
 /****************************************************************************
  * Public: declaration constructor
@@ -155,7 +155,7 @@ struct A_exp_list_      { A_exp     head; A_exp_list    tail; };
  * @param[in] init  init expression.
  * @return new astnode.
  */
-A_dec A_mk_dec_var(Apos pos, S_symbol name, S_symbol type, A_exp init);
+AST_dec AST_mk_dec_var(Apos pos, SYM_symbol name, SYM_symbol type, AST_exp init);
 /**
  * make type declare astnode.
  * @param[in] pos
@@ -163,7 +163,7 @@ A_dec A_mk_dec_var(Apos pos, S_symbol name, S_symbol type, A_exp init);
  * @param[in] type  type definition astnode.
  * @return new astnode.
  */
-A_dec A_mk_dec_type(S_symbol name, A_type type);
+AST_dec AST_mk_dec_type(SYM_symbol name, AST_type type);
 /**
  * make function declare astnode.
  * @param[in] pos
@@ -173,8 +173,8 @@ A_dec A_mk_dec_type(S_symbol name, A_type type);
  * @param[in] body  functions body expressions.
  * @return new astnode.
  */
-A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list paras, S_symbol ret,
-                    A_exp body);
+AST_dec AST_mk_dec_func(Apos pos, SYM_symbol name, AST_para_list paras,
+                        SYM_symbol ret, AST_exp body);
 
 /****************************************************************************
  * Public: expression constructor
@@ -186,27 +186,27 @@ A_dec A_mk_dec_func(Apos pos, S_symbol name, A_para_list paras, S_symbol ret,
  * @param[in] var   left value.
  * @return new astnode.
  */
-A_exp A_mk_exp_var(Apos pos, A_var var);
+AST_exp AST_mk_exp_var(Apos pos, AST_var var);
 /**
  * make nil astnode.
  * @param[in] pos
  * @return new astnode.
  */
-A_exp A_mk_exp_nil(Apos pos);
+AST_exp AST_mk_exp_nil(Apos pos);
 /**
  * make const integer astnode.
  * @param[in] pos
  * @param[in] i     const integer.
  * @return new astnode.
  */
-A_exp A_mk_exp_int(Apos pos, int i);
+AST_exp AST_mk_exp_int(Apos pos, int i);
 /**
  * make const string astnode.
  * @param[in] pos
  * @param[in] s     const string.
  * @return new astnode.
  */
-A_exp A_mk_exp_str(Apos pos, const char *s);
+AST_exp AST_mk_exp_str(Apos pos, const char *s);
 /**
  * make function calling astnode.
  * @param[in] pos
@@ -214,7 +214,7 @@ A_exp A_mk_exp_str(Apos pos, const char *s);
  * @param[in] args  argment expression list.
  * @return new astnode.
  */
-A_exp A_mk_exp_call(Apos pos, S_symbol func, A_exp_list args);
+AST_exp AST_mk_exp_call(Apos pos, SYM_symbol func, AST_exp_list args);
 /**
  * make "op1 op op2" astnode.
  * @param[in] pos
@@ -223,7 +223,8 @@ A_exp A_mk_exp_call(Apos pos, S_symbol func, A_exp_list args);
  * @param[in] right right operand expression.
  * @return new astnode.
  */
-A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right);
+AST_exp AST_mk_exp_op(Apos pos, AST_kind_op oper,
+                      AST_exp left, AST_exp right);
 /**
  * make array creating astnode.
  * @param[in] pos
@@ -232,7 +233,8 @@ A_exp A_mk_exp_op(Apos pos, A_kind_op oper, A_exp left, A_exp right);
  * @param[in] init  array element initial value.
  * @return new astnode.
  */
-A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init);
+AST_exp AST_mk_exp_array(Apos pos, SYM_symbol type, AST_exp size,
+                         AST_exp init);
 /**
  * make record creating astnode.
  * @param[in] pos
@@ -240,14 +242,14 @@ A_exp A_mk_exp_array(Apos pos, S_symbol type, A_exp size, A_exp init);
  * @param[in] args  field initialize.
  * @return new astnode.
  */
-A_exp A_mk_exp_record(Apos pos, S_symbol type, A_arg_list args);
+AST_exp AST_mk_exp_record(Apos pos, SYM_symbol type, AST_arg_list args);
 /**
  * make expression sequence astnode.
  * @param[in] pos
  * @param[in] seq   expression sequence.
  * @return new astnode.
  */
-A_exp A_mk_exp_seq(Apos pos, A_exp_list seq);
+AST_exp AST_mk_exp_seq(Apos pos, AST_exp_list seq);
 /**
  * make variable assignment astnode.
  * @param[in] pos
@@ -255,7 +257,7 @@ A_exp A_mk_exp_seq(Apos pos, A_exp_list seq);
  * @param[in] exp   expression.
  * @return new astnode.
  */
-A_exp A_mk_exp_assign(Apos pos, A_var var, A_exp exp);
+AST_exp AST_mk_exp_assign(Apos pos, AST_var var, AST_exp exp);
 /**
  * make if-then, if-then-else, and, or astnode.
  * @param[in] pos
@@ -264,7 +266,7 @@ A_exp A_mk_exp_assign(Apos pos, A_var var, A_exp exp);
  * @param[in] else_ expression for false confition, can be null.
  * @return new astnode.
  */
-A_exp A_mk_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_);
+AST_exp AST_mk_exp_if(Apos pos, AST_exp cond, AST_exp then, AST_exp else_);
 /**
  * make while loop astnode.
  * @param[in] pos
@@ -272,7 +274,7 @@ A_exp A_mk_exp_if(Apos pos, A_exp cond, A_exp then, A_exp else_);
  * @param[in] body  loop body.
  * @return new astnode.
  */
-A_exp A_mk_exp_while(Apos pos, A_exp cond, A_exp body);
+AST_exp AST_mk_exp_while(Apos pos, AST_exp cond, AST_exp body);
 /**
  * make for loop astnode.
  * @param[in] pos
@@ -282,13 +284,14 @@ A_exp A_mk_exp_while(Apos pos, A_exp cond, A_exp body);
  * @param[in] body  loop body.
  * @return new astnode.
  */
-A_exp A_mk_exp_for(Apos pos, S_symbol var, A_exp lo, A_exp hi, A_exp body);
+AST_exp AST_mk_exp_for(Apos pos, SYM_symbol var, AST_exp lo, AST_exp hi,
+                       AST_exp body);
 /**
  * make break astnode.
  * @param[in] pos
  * @return new astnode.
  */
-A_exp A_mk_exp_break(Apos pos);
+AST_exp AST_mk_exp_break(Apos pos);
 /**
  * make let ... in ... astnode
  * @param[in] pos
@@ -296,7 +299,7 @@ A_exp A_mk_exp_break(Apos pos);
  * @param[in] body  expression sequence.
  * @return new astnode.
  */
-A_exp A_mk_exp_let(Apos pos, A_dec_list decs, A_exp_list body);
+AST_exp AST_mk_exp_let(Apos pos, AST_dec_list decs, AST_exp_list body);
 
 /****************************************************************************
  * Public: variables constructor
@@ -309,7 +312,7 @@ A_exp A_mk_exp_let(Apos pos, A_dec_list decs, A_exp_list body);
  * @param[in] suffix    array index or record field.
  * @return new astnode.
  */
-A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix);
+AST_var AST_mk_var_base(Apos pos, SYM_symbol name, AST_var suffix);
 /**
  * make array index suffix astnode.
  * @param[in] pos
@@ -317,7 +320,7 @@ A_var A_mk_var_base(Apos pos, S_symbol name, A_var suffix);
  * @param[in] suffix    more array index or record field.
  * @return new astnode.
  */
-A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix);
+AST_var AST_mk_var_index(Apos pos, AST_exp exp, AST_var suffix);
 /**
  * make field member suffix astnode.
  * @param[in] pos
@@ -325,7 +328,7 @@ A_var A_mk_var_index(Apos pos, A_exp exp, A_var suffix);
  * @param[in] suffix    array index or record field.
  * @return new astnode.
  */
-A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix);
+AST_var AST_mk_var_field(Apos pos, SYM_symbol field, AST_var suffix);
 
 /****************************************************************************
  * Public: type definition constructor
@@ -337,21 +340,21 @@ A_var A_mk_var_field(Apos pos, S_symbol field, A_var suffix);
  * @param[in] name      type name.
  * @return new astnode.
  */
-A_type A_mk_type_name(Apos pos, S_symbol name);
+AST_type AST_mk_type_name(Apos pos, SYM_symbol name);
 /**
  * make array type name definition astnode.
  * @param[in] pos
  * @param[in] array     array element type name.
  * @return new astnode.
  */
-A_type A_mk_type_array(Apos pos, S_symbol array);
+AST_type AST_mk_type_array(Apos pos, SYM_symbol array);
 /**
  * make record definition astnode.
  * @param[in] pos
  * @param[in] fields    record fields' definition.
  * @return new astnode.
  */
-A_type A_mk_type_record(Apos pos, A_para_list fields);
+AST_type AST_mk_type_record(Apos pos, AST_para_list fields);
 
 /****************************************************************************
  * Public: link list constructor
@@ -363,28 +366,28 @@ A_type A_mk_type_record(Apos pos, A_para_list fields);
  * @param[in] tail
  * @return new astnode.
  */
-A_dec_list A_mk_dec_list(A_dec head, A_dec_list tail);
+AST_dec_list AST_mk_dec_list(AST_dec head, AST_dec_list tail);
 /**
  * make expression link list node.
  * @param[in] head
  * @param[in] tail
  * @return new astnode.
  */
-A_exp_list A_mk_exp_list(A_exp head, A_exp_list tail);
+AST_exp_list AST_mk_exp_list(AST_exp head, AST_exp_list tail);
 /**
  * make parameter link list node.
  * @param[in] head
  * @param[in] tail
  * @return new astnode.
  */
-A_para_list A_mk_para_list(A_para head, A_para_list tail);
+AST_para_list AST_mk_para_list(AST_para head, AST_para_list tail);
 /**
  * make argument link list node.
  * @param[in] head
  * @param[in] tail
  * @return new astnode.
  */
-A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail);
+AST_arg_list AST_mk_arg_list(AST_arg head, AST_arg_list tail);
 /**
  * make parameter astnode.
  * @param[in] pos
@@ -392,14 +395,14 @@ A_arg_list A_mk_arg_list(A_arg head, A_arg_list tail);
  * @param[in] type 
  * @return new astnode.
  */
-A_para A_mk_para(Apos pos, S_symbol var, S_symbol type);
+AST_para AST_mk_para(Apos pos, SYM_symbol var, SYM_symbol type);
 /**
  * make argument astnode.
  * @param[in] var 
  * @param[in] exp 
  * @return new astnode.
  */
-A_arg A_mk_arg(S_symbol var, A_exp exp);
+AST_arg AST_mk_arg(SYM_symbol var, AST_exp exp);
 
 /****************************************************************************
  * Public: tool function
@@ -410,4 +413,4 @@ A_arg A_mk_arg(S_symbol var, A_exp exp);
  * @param[in] out   output file.
  * @param[in] root  root node.
  */
-void A_print(FILE *out, A_exp root);
+void AST_print(FILE *out, AST_exp root);

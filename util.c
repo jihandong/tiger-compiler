@@ -12,25 +12,25 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct U_slice_ * U_slice;
+typedef struct UTL_slice_ * UTL_slice;
 
-struct U_slice_
+struct UTL_slice_
 {
     void *  ptr;
-    U_slice next;
+    UTL_slice next;
 };
 
 /****************************************************************************
  * Privates
  ****************************************************************************/
 
-static U_slice slices;
+static UTL_slice slices;
 
-static void U_add(void* p)
+static void UTL_add(void* p)
 {
-    U_slice s = malloc(sizeof(*s));
+    UTL_slice s = malloc(sizeof(*s));
     if (!s)
-        U_error(0, "run out of memory");
+        UTL_error(0, "run out of memory");
 
     s->ptr  = p;
     s->next = slices;
@@ -41,10 +41,10 @@ static void U_add(void* p)
  * Public Functions
  ****************************************************************************/
 
-void U_free(void)
+void UTL_free(void)
 {
     int cnt = 0;
-    U_slice tmp;
+    UTL_slice tmp;
 
     while(slices) {
         cnt++;
@@ -57,27 +57,27 @@ void U_free(void)
     printf("%d slices have been free\n", cnt);
 }
 
-void *U_alloc(int size)
+void *UTL_alloc(int size)
 {
     void *p = malloc(size);
     if (!p)
-        U_error(-1, "run out of memory");
+        UTL_error(-1, "run out of memory");
 
-    U_add(p);
+    UTL_add(p);
     return p;
 }
 
-char *U_strdup(const char *s)
+char *UTL_strdup(const char *s)
 {
     char *p = strdup(s);
     if (!p)
-        U_error(-1, "run out of memory");
+        UTL_error(-1, "run out of memory");
 
-    U_add(p);
+    UTL_add(p);
     return p;
 }
 
-void U_error(int pos, const char *fmt, ...)
+void UTL_error(int pos, const char *fmt, ...)
 {
     va_list ap;
 
@@ -92,7 +92,7 @@ void U_error(int pos, const char *fmt, ...)
 
     printf("\n");
 
-    U_free();
+    UTL_free();
     exit(1);
 }
 

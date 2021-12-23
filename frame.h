@@ -21,9 +21,9 @@ struct FRM_escapes { int npara; int mask; }
  * Public Functions
  ****************************************************************************/
 
-FRM_frame FRM_mk_frame(T_lable name, FRM_escapes paras);
+FRM_frame FRM_mk_frame(TYP_lable name, FRM_escapes paras);
 
-T_lable FRM_get_name(FRM_frame f);
+TYP_lable FRM_get_name(FRM_frame f);
 
 FRM_access_list FRM_get_paras(FRM_frame f);
 

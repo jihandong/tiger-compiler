@@ -4,8 +4,8 @@
  * Definitions
  ****************************************************************************/
 
-typedef struct S_symbol_ *S_symbol;
-typedef struct S_table_ *S_table;
+typedef struct SYM_symbol_ *SYM_symbol;
+typedef struct SYM_table_ *SYM_table;
 
 /****************************************************************************
  * Public Functions
@@ -17,20 +17,20 @@ typedef struct S_table_ *S_table;
  * @param[in] mame  symbol name
  * @return new symbol, cannot fail.
  */
-S_symbol S_mk_symbol(const char *name);
+SYM_symbol SYM_mk_symbol(const char *name);
 
 /**
  * @brief Make a new empty bind table.
  * @return new bind table, cannot fail.
  */
-S_table S_mk_table(void);
+SYM_table SYM_mk_table(void);
 
 /**
  * @brief Get symbol name.
  * @param[in] s symbol
  * @return symbol name, cannot fail.
  */
-const char *S_get_name(S_symbol s);
+const char *SYM_get_name(SYM_symbol s);
 
 /**
  * @brief Add a new bind(symbol->value) to bind table.
@@ -39,7 +39,7 @@ const char *S_get_name(S_symbol s);
  * @param[in] s     bind symbol
  * @param[in] v     bind value
  */
-void S_enter(S_table t, S_symbol s, void *v);
+void SYM_enter(SYM_table t, SYM_symbol s, void *v);
 
 /**
  * @brief Get symbol's current value.
@@ -47,7 +47,7 @@ void S_enter(S_table t, S_symbol s, void *v);
  * @param[in] s     symbol
  * @return symbol value, cannot fail.
  */
-void *S_look(S_table t, S_symbol s);
+void *SYM_look(SYM_table t, SYM_symbol s);
 
 /**
  * @brief Begin of scope.
@@ -55,17 +55,17 @@ void *S_look(S_table t, S_symbol s);
  * @param[in] t     bind table
  * @param[in] name  scope name
  */
-void S_begin(S_table t, const char *name);
+void SYM_begin(SYM_table t, const char *name);
 
 /**
  * @brief End of scope.
  * Pop out till begin sign.
  * @param[in] t     bind table
  */
-void S_end(S_table t);
+void SYM_end(SYM_table t);
 
 /**
  * @brief Show content of a bind table.
  * @param[in] t     bind table
  */
-void S_show(S_table t);
+void SYM_show(SYM_table t);

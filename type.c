@@ -11,7 +11,7 @@
  * Private 
  ****************************************************************************/
 
-static const char *TYP_type_name[] =
+static const char *TY_type_name[] =
 {
     "nil",
     "int",
@@ -27,30 +27,30 @@ static const char *TYP_type_name[] =
  * Public: basic type
  ****************************************************************************/
 
-TYP_type TYP_nil(void)
+TY_type TY_nil(void)
 {
-    static struct TYP_type_ type_nil  = { TYP_kind_nil };
+    static struct TY_type_ type_nil  = { TY_kind_nil };
 
     return &type_nil;
 }
 
-TYP_type TYP_int(void)
+TY_type TY_int(void)
 {
-    static struct TYP_type_ type_int  = { TYP_kind_int };
+    static struct TY_type_ type_int  = { TY_kind_int };
 
     return &type_int;
 }
 
-TYP_type TYP_str(void)
+TY_type TY_str(void)
 {
-    static struct TYP_type_ type_str  = { TYP_kind_str };
+    static struct TY_type_ type_str  = { TY_kind_str };
 
     return &type_str;
 }
 
-TYP_type TYP_void(void)
+TY_type TY_void(void)
 {
-    static struct TYP_type_ type_void = { TYP_kind_void };
+    static struct TY_type_ type_void = { TY_kind_void };
 
     return &type_void;
 }
@@ -60,43 +60,43 @@ TYP_type TYP_void(void)
  * Public: type constructor
  ****************************************************************************/
 
-TYP_type TYP_mk_name(SYM_symbol symbol, TYP_type type)
+TY_type TY_mk_name(SYM_symbol symbol, TY_type type)
 {
-    TYP_type t = UTL_alloc(sizeof(*t));
+    TY_type t = UTL_alloc(sizeof(*t));
 
-    t->kind          = TYP_kind_name;
+    t->kind          = TY_kind_name;
     t->u.name.symbol = symbol;
     t->u.name.type   = type;
 
     return t;
 }
 
-TYP_type TYP_mk_func(TYP_type ret, TYP_type_list paras)
+TY_type TY_mk_func(TY_type ret, TY_type_list paras)
 {
-    TYP_type t = UTL_alloc(sizeof(*t));
+    TY_type t = UTL_alloc(sizeof(*t));
 
-    t->kind         = TYP_kind_func;
+    t->kind         = TY_kind_func;
     t->u.func.ret   = ret;
     t->u.func.paras = paras;
 
     return t;
 }
 
-TYP_type TYP_mk_array(TYP_type type)
+TY_type TY_mk_array(TY_type type)
 {
-    TYP_type t = UTL_alloc(sizeof(*t));
+    TY_type t = UTL_alloc(sizeof(*t));
 
-    t->kind    = TYP_kind_array;
+    t->kind    = TY_kind_array;
     t->u.array = type;
 
     return t;
 }
 
-TYP_type TYP_mk_record(TYP_field_list fields)
+TY_type TY_mk_record(TY_field_list fields)
 {
-    TYP_type t = UTL_alloc(sizeof(*t));
+    TY_type t = UTL_alloc(sizeof(*t));
 
-    t->kind     = TYP_kind_record;
+    t->kind     = TY_kind_record;
     t->u.record = fields;
 
     return t;
@@ -106,9 +106,9 @@ TYP_type TYP_mk_record(TYP_field_list fields)
  * Public: parameter/argument constructor
  ****************************************************************************/
 
-TYP_field TYP_mk_field(SYM_symbol name, TYP_type type)
+TY_field TY_mk_field(SYM_symbol name, TY_type type)
 {
-    TYP_field t = UTL_alloc(sizeof(*t));
+    TY_field t = UTL_alloc(sizeof(*t));
 
     t->name = name;
     t->type = type;
@@ -116,9 +116,9 @@ TYP_field TYP_mk_field(SYM_symbol name, TYP_type type)
     return t;
 }
 
-TYP_type_list TYP_mk_type_list(TYP_type head, TYP_type_list tail)
+TY_type_list TY_mk_type_list(TY_type head, TY_type_list tail)
 {
-    TYP_type_list t = UTL_alloc(sizeof(*t));
+    TY_type_list t = UTL_alloc(sizeof(*t));
 
     t->head = head;
     t->tail = tail;
@@ -126,9 +126,9 @@ TYP_type_list TYP_mk_type_list(TYP_type head, TYP_type_list tail)
     return t;
 }
 
-TYP_field_list TYP_mk_field_list(TYP_field head, TYP_field_list tail)
+TY_field_list TY_mk_field_list(TY_field head, TY_field_list tail)
 {
-    TYP_field_list t = UTL_alloc(sizeof(*t));
+    TY_field_list t = UTL_alloc(sizeof(*t));
 
     t->head = head;
     t->tail = tail;
@@ -140,23 +140,23 @@ TYP_field_list TYP_mk_field_list(TYP_field head, TYP_field_list tail)
  * Public: display functions
  ****************************************************************************/
 
-inline int TYP_get_kind(TYP_type t)
+inline int TY_get_kind(TY_type t)
 {
     if (!t)
         return -1;
-    else if (t->kind == TYP_kind_name)
+    else if (t->kind == TY_kind_name)
         return t->u.name.type->kind;
     else
         return t->kind;
 }
 
 
-inline bool TYP_match(TYP_type left, TYP_type right)
+inline bool TY_match(TY_type left, TY_type right)
 {
     if (left == right)
         return true;
 
-    if (TYP_get_kind(left) == TYP_kind_record && TYP_get_kind(right) == TYP_kind_nil)
+    if (TY_get_kind(left) == TY_kind_record && TY_get_kind(right) == TY_kind_nil)
         return true;
 
     return false;

@@ -377,4 +377,3 @@ AST_arg AST_mk_arg(SYM_symbol name, AST_exp exp)
 
     return p;
 }
-

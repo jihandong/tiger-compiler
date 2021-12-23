@@ -4,27 +4,27 @@
  * Includes
  ****************************************************************************/
 
-#include <stdbool.h>
+#include "frame.h"
+#include "temp.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-typedef struct FRM_frame_ *         FRM_frame;
-typedef struct FRM_access_ *        FRM_access;
-typedef struct FRM_access_list_ *   FRM_access_list;
+typedef struct TR_access_ *         TR_access;
+typedef struct TR_access_list_ *    TR_access_list;
 
-struct FRM_access_list_ { FRM_access head; FRM_access_list tail; };
-struct FRM_escapes { int npara; int mask; }
+struct TR_access_list_ { TR_access head; TR_access_list tail; };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-FRM_frame FRM_mk_frame(TY_lable name, FRM_escapes paras);
+TR_access_list TR_mk_access_list(TR_access head, TR_access_list tail);
 
-TY_lable FRM_get_name(FRM_frame f);
+TR_level TR_mk_level(TR_level parent, TMP_label name, FRM_escapes paras);
 
-FRM_access_list FRM_get_paras(FRM_frame f);
+TR_access_list TR_get_paras(TR_level level);
 
-FRM_access FRM_alloc_local(FRM_frame f, bool escape);
+TR_access TR_alloc_local(TR_level level, bool escape);
+

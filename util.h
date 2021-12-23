@@ -1,5 +1,23 @@
 #pragma once
 
+/****************************************************************************
+ * Includes
+ ****************************************************************************/
+
+#include <stdbool.h>
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+typedef struct UTL_bool_list_ * UTL_bool_list;
+
+struct UTL_bool_list_ { bool head; UTL_bool_list tail; };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /**
  * exit if running out of memory.
  * @param[in] size
@@ -24,3 +42,11 @@ void UTL_free(void);
  * @param[in] ...   formatted args.
  */
 void UTL_error(int pos, const char *fmt, ...);
+
+/**
+ * @brief Bool list constructor.
+ * 
+ * @param head  Bool.
+ * @param tail  Bool list.
+ */
+void UTL_mk_bool_list(bool head, UTL_bool_list tail);

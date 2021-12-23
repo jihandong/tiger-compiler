@@ -322,41 +322,41 @@ static void AST_pr_arg_list(FILE *out, AST_arg_list n, int d)
  * Private: type display
  ****************************************************************************/
 
-static void TYP_pr_type(FILE *out, TYP_type t);
-static void TYP_pr_type_list(FILE *out, TYP_type_list t);
-static void TYP_pr_field_list(FILE *out, TYP_field_list t);
+static void TY_pr_type(FILE *out, TY_type t);
+static void TY_pr_type_list(FILE *out, TY_type_list t);
+static void TY_pr_field_list(FILE *out, TY_field_list t);
 
-static void TYP_pr_type(FILE *out, TYP_type t)
+static void TY_pr_type(FILE *out, TY_type t)
 {
     if (!t)
         fprintf(out, "<none>");
 
     switch(t->kind) {
-        case TYP_kind_nil:
-        case TYP_kind_int:
-        case TYP_kind_str:
-        case TYP_kind_void:
+        case TY_kind_nil:
+        case TY_kind_int:
+        case TY_kind_str:
+        case TY_kind_void:
             fprintf(out, "%s", str_type[t->kind]);
             break;
 
-        case TYP_kind_name:
+        case TY_kind_name:
             fprintf(out, "`%s", SYM_get_name(t->u.name.symbol));
             break;
 
-        case TYP_kind_func:
-            TYP_pr_type_list(out, t->u.func.paras);
+        case TY_kind_func:
+            TY_pr_type_list(out, t->u.func.paras);
             fprintf(out, "->");
-            TYP_pr_type(out, t->u.func.ret);
+            TY_pr_type(out, t->u.func.ret);
             break;
 
-        case TYP_kind_array: 
-            TYP_pr_type(out, t->u.array);
+        case TY_kind_array: 
+            TY_pr_type(out, t->u.array);
             fprintf(out, "[]");
             break;
 
-        case TYP_kind_record:
+        case TY_kind_record:
             fprintf(out, "{");
-            TYP_pr_field_list(out, t->u.record);
+            TY_pr_field_list(out, t->u.record);
             fprintf(out, "}");
             break;
 
@@ -365,25 +365,25 @@ static void TYP_pr_type(FILE *out, TYP_type t)
     }
 }
 
-static void TYP_pr_type_list(FILE *out, TYP_type_list t)
+static void TY_pr_type_list(FILE *out, TY_type_list t)
 {
     if (t) {
-        TYP_pr_type(out, t->head);
+        TY_pr_type(out, t->head);
         if (t->tail) {
             fprintf(out, ",");
-            TYP_pr_type_list(out, t->tail);
+            TY_pr_type_list(out, t->tail);
         }
     }
 }
 
-static void TYP_pr_field_list(FILE *out, TYP_field_list t)
+static void TY_pr_field_list(FILE *out, TY_field_list t)
 {
     if (t) {
         fprintf(out, "%s:", SYM_get_name(t->head->name));
-        TYP_pr_type(out, t->head->type);
+        TY_pr_type(out, t->head->type);
         if (t->tail) {
             fprintf(out, ",");
-            TYP_pr_field_list(out, t->tail);
+            TY_pr_field_list(out, t->tail);
         }
     }
 }
@@ -397,7 +397,7 @@ void AST_print(FILE *out, AST_exp root)
     AST_pr_exp(out, root, 0);
 }
 
-void TYP_print(FILE *out, TYP_type type)
+void TY_print(FILE *out, TY_type type)
 {
-    TYP_pr_type(out, type);
+    TY_pr_type(out, type);
 }

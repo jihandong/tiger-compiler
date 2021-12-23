@@ -14,11 +14,11 @@
 
 #define printt(x,y) ({ printf("%s\t", x); TY_print(stdout, y); printf("\n"); })
 
-typedef void *I_ir;             /*< ir not implemented yet */
+typedef void *IR_ir;             /*< ir not implemented yet */
 typedef struct SMT_tyir_ SMT_tyir;  /*< ir with type */
 
 struct SMT_tyir_ {
-    I_ir    ir;
+    IR_ir    ir;
     TY_type  type;
 };
 
@@ -73,7 +73,7 @@ static void SMT_trans_init(SYM_table venv, SYM_table tenv);
  * Private
  ****************************************************************************/
 
-static inline SMT_tyir TY_mk_tyir(I_ir ir, TY_type type)
+static inline SMT_tyir TY_mk_tyir(IR_ir ir, TY_type type)
 {
     SMT_tyir e;
 

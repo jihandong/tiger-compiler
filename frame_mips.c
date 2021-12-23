@@ -39,7 +39,7 @@ static FRM_access FRM_in_reg(TY_temp reg)
  * Public Functions
  ****************************************************************************/
 
-FRM_frame FRM_mk_frame(TY_lable name, FRM_escapes paras)
+FRM_frame FRM_mk_frame(TMP_label name, UTL_bool_list escapes)
 {
 
 }

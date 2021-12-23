@@ -33,4 +33,3 @@ TMP_label TMP_mk_label_with_name(const char *name);
 TMP_label TMP_mk_label_list(TMP_label head, TMP_label_list tail);
 
 TMP_lable TMP_get_name(TMP_label label);
-

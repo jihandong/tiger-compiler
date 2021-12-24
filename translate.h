@@ -14,8 +14,6 @@
 typedef struct TR_access_ *         TR_access;
 typedef struct TR_access_list_ *    TR_access_list;
 
-struct TR_access_list_ { TR_access head; TR_access_list tail; };
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

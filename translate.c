@@ -8,13 +8,20 @@
  * Definitions
  ****************************************************************************/
 
+struct TR_level_ {}
 struct TR_access_ { TR_level level; FRM_access access; };
+struct TR_access_list_ { TR_access head; TR_access_list tail; };
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 TR_access_list TR_mk_access_list(TR_access head, TR_access_list tail)
+{
+    
+}
+
+TR_level TR_root_level(void)
 {
     
 }

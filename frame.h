@@ -25,13 +25,13 @@ struct FRM_access_list_ { FRM_access head; FRM_access_list tail; };
  * @brief Frame constructor.
  *
  * @param[in] name      Name.
- * @param[in] escapes   Parameters are escapable.
+ * @param[in] escapes   Wether parameters escapable.
  * @return FRM_frame    New Frame.
  */
 FRM_frame FRM_mk_frame(TMP_label name, UTL_bool_list escapes);
 
 /**
- * @brief Get Frame name.
+ * @brief Get frame name.
  *
  * @param[in] f         Frame.
  * @return TMP_label    Frame name.
@@ -39,16 +39,19 @@ FRM_frame FRM_mk_frame(TMP_label name, UTL_bool_list escapes);
 TMP_label FRM_get_name(FRM_frame f);
 
 /**
- * @brief Get Frame parameters.
- * 
- * @param[in] f             Frame
+ * @brief Get frame parameters(access entries).
+ *
+ * @param[in] f             Frame.
  * @return FRM_access_list  Frame parameters.
  */
 FRM_access_list FRM_get_paras(FRM_frame f);
 
 /**
  * @brief Alloc local variable.
- * 
+ *
+ * If variable is not escapable, it can be alloc in reg,
+ * otherwise it must be alloced in frame.
+ *
  * @param[in] f         Frame.
  * @param[in] escape    Is escapable.
  * @return FRM_access   Alloc result(in-frame or in-reg).

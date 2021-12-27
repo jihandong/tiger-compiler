@@ -17,7 +17,7 @@ typedef struct TMP_label_list * TMP_label_list;
 typedef struct TMP_map_ *       TMP_map;
 
 /****************************************************************************
- * Public Functions
+ * Public: temp
  ****************************************************************************/
 
 /**
@@ -35,6 +35,10 @@ TMP_temp TMP_mk_temp(void);
  * @return TMP_temp_list
  */
 TMP_temp_list TMP_mk_temp_list(TMP_temp head, TMP_temp_list tail);
+
+/****************************************************************************
+ * Public: label
+ ****************************************************************************/
 
 /**
  * @brief Temp Address constructor.
@@ -54,8 +58,8 @@ TMP_label TMP_mk_label_named(const char *name);
 /**
  * @brief Temp Address List constructor.
  *
- * @param[in] head  Temp Address
- * @param[in] tail  Temp Address List
+ * @param[in] head  Temp Address.
+ * @param[in] tail  Temp Address List.
  * @return TMP_label
  */
 TMP_label TMP_mk_label_list(TMP_label head, TMP_label_list tail);
@@ -68,24 +72,56 @@ TMP_label TMP_mk_label_list(TMP_label head, TMP_label_list tail);
  */
 TMP_label TMP_get_label_name(TMP_label label);
 
+/****************************************************************************
+ * Public: map
+ ****************************************************************************/
+
+/**
+ * @brief Empty map table.
+ *
+ * @return TMP_map
+ */
+TMP_map TMP_empty(void);
+
+/**
+ * @brief Map Table constructor.
+ *
+ * Map Table has <temp,string> type.
+ *
+ * @param[in] tab   Value field.
+ * @param[in] under Next field.
+ * @return TMP_map  New Node.
+ */
+TMP_map TMP_mk_map(TAB_table tab, TMP_map under);
+
+/**
+ * @brief Combine new map list.
+ *
+ * Example:
+ *  over:   t1 -> t2 -> t3
+ *  under:  t4 -> t5
+ *  return: t1 -> t2 -> t3 -> t4 -> t5
+ *
+ * @param[in] over  Front map list.
+ * @param[in] under Back map list.
+ * @return TMP_map  Combined map list.
+ */
 TMP_map TMP_layer_map(TMP_map over, TMP_map under);
 
 /**
- * @brief Add temp to map table.
+ * @brief Add temp to table in map node.
  * 
- * @param[in] m     Map table.
+ * @param[in] m     Map node.
  * @param[in] t     Temp as mapping key.
  * @param[in] s     Name as mapping Value.
  */
 void TMP_enter(TMP_map m, TMP_temp t, const char *s);
 
 /**
- * @brief Find temp in map table recursively.
+ * @brief Find temp in table in map node, recursively.
  *
- * @param[in] m     Map table.
+ * @param[in] m     Map node.
  * @param[in] t     Temp as mapping key.
  * @return char *   Name on success and NULL on failure.
  */
 char *TMP_look(TMP_map m, TMP_temp t);
-
-void TMP_dump_map(FILE *out, TMP_map m);

@@ -95,4 +95,3 @@ void UTL_error(int pos, const char *fmt, ...)
     UTL_free();
     exit(1);
 }
-

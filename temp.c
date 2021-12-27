@@ -2,6 +2,7 @@
  * Includes
  ****************************************************************************/
 
+#include "table.h"
 #include "temp.h"
 #include "util.h"
 
@@ -12,6 +13,7 @@
 struct TMP_temp_ { int index; };
 struct TMP_temp_list { TMP_temp head;  TMP_temp_list tail; };
 struct TMP_label_list { TMP_label head; TMP_label_list tail; };
+struct TMP_map_ { TAB_table tab; TMP_map under; };
 
 /****************************************************************************
  * Private Variables
@@ -25,7 +27,6 @@ static int nlabels;
  ****************************************************************************/
 
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -35,8 +36,6 @@ TMP_temp TMP_mk_temp(void)
     TMP_temp p = UTL_alloc(sizeof(*p));
 
     p->index = ntemps++;
-
-    // enter table.
 
     return p;
 }
@@ -75,7 +74,7 @@ TMP_label TMP_mk_label_list(TMP_label head, TMP_label_list tail)
     return p;
 }
 
-TMP_label TMP_get_name(TMP_label label)
+TMP_label TMP_get_label_name(TMP_label label)
 {
     return SYM_get_name(label);
 }

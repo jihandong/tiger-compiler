@@ -15,9 +15,6 @@ typedef struct TMP_temp_list *  TMP_temp_list;
 typedef SYM_symbol              TMP_label;  /*< temp address, asm label */
 typedef struct TMP_label_list * TMP_label_list;
 
-struct TMP_temp_list { TMP_temp head;  TMP_temp_list tail; };
-struct TMP_label_list { TMP_label head; TMP_label_list tail; };
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -68,4 +65,4 @@ TMP_label TMP_mk_label_list(TMP_label head, TMP_label_list tail);
  * @param label
  * @return TMP_lable
  */
-TMP_lable TMP_get_name(TMP_label label);
+TMP_label TMP_get_name(TMP_label label);

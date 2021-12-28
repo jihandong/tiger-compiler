@@ -85,10 +85,10 @@ static inline SMT_tyir TY_mk_tyir(IR_ir ir, TY_type type)
 
 static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
 {
-    AST_dec_list  vars;
-    AST_dec_list  types;
-    AST_dec_list  funcs;
-    TY_type_list  dummys;
+    AST_dec_list  vars   = NULL;
+    AST_dec_list  types  = NULL;
+    AST_dec_list  funcs  = NULL;
+    TY_type_list  dummys = NULL;
     AST_dec_list  p, v, t, f;
     TY_type_list  d;
 
@@ -97,7 +97,7 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
     //////////////////////////////////////////////////////////////////////////
 
     // separate decs into 3 list: variables, types, functions.
-    for (p = n, vars = NULL, types = NULL, funcs = NULL; p; p = p->tail) {
+    for (p = n; p; p = p->tail) {
         AST_dec dec = p->head;
 
         switch(dec->kind) {
@@ -186,7 +186,7 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
 
                 // detect illegal loop definition
                 if (lsymbol == symbol)
-                    UTL_error(-1, "LOOP");
+                    UTL_error(UTL_NOPOS, "LOOP");
 
                 s = lsymbol;
             } else {
@@ -288,7 +288,7 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
         AST_para_list p;
         TY_type_list  t;
 
-        SYM_begin(venv, SYM_get_name(fname));
+        SYM_begin(venv);
 
         for (p = paras, t = para_tys; p && t; p = p->tail, t = t->tail) {
             SYM_symbol name = p->head->name;
@@ -525,7 +525,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 UTL_error(cond->pos, "exp while, cond is not integer");
             }
 
-            SYM_begin(venv, "while");
+            SYM_begin(venv);
             body_tyir = SMT_trans_exp(venv, tenv, body, loop + 1);
             SYM_end(venv);
 
@@ -553,7 +553,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 UTL_error(hi->pos, "exp for, high is not integer");
             }
 
-            SYM_begin(venv, "for");
+            SYM_begin(venv);
             SYM_enter(venv, var, TY_int());
 
             body_tyir = SMT_trans_exp(venv, tenv, body, loop + 1);
@@ -575,8 +575,8 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir     body_tyir;
             AST_exp_list b;
 
-            SYM_begin(venv, "let");
-            SYM_begin(tenv, "let");
+            SYM_begin(venv);
+            SYM_begin(tenv);
 
             SMT_trans_dec(venv, tenv, decs);
             for (b = body; b; b = b->tail)
@@ -750,8 +750,8 @@ static TY_type SMT_trans_type(SYM_table tenv, AST_type n)
 static void SMT_trans_init(SYM_table venv, SYM_table tenv)
 {
     // inner types.
-    SYM_enter(tenv, SYM_mk_symbol("int"), TY_int());
-    SYM_enter(tenv, SYM_mk_symbol("string"), TY_str());
+    SYM_enter(tenv, SYM_declare("int"), TY_int());
+    SYM_enter(tenv, SYM_declare("string"), TY_str());
 
     // inner variables.
 
@@ -764,8 +764,8 @@ static void SMT_trans_init(SYM_table venv, SYM_table tenv)
 
 void SMT_trans(AST_exp root)
 {
-    SYM_table venv = SYM_mk_table();
-    SYM_table tenv = SYM_mk_table();
+    SYM_table venv = SYM_empty();
+    SYM_table tenv = SYM_empty();
 
     SMT_trans_init(venv, tenv);
 

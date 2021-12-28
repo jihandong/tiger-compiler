@@ -1,71 +1,92 @@
 #pragma once
 
 /****************************************************************************
+ * Includes
+ ****************************************************************************/
+
+#include "table.h"
+
+/****************************************************************************
  * Definitions
  ****************************************************************************/
 
+/**
+ * @brief symbol-bind-table
+ *
+ * Table has <symbol,void*> type.
+ */
+typedef TAB_table           SYM_table;
 typedef struct SYM_symbol_ *SYM_symbol;
-typedef struct SYM_table_ *SYM_table;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /**
- * @brief Get symbol or make a new symbol if not exists.
- * Hash symbol name into integer as index.
- * @param[in] mame  symbol name
- * @return new symbol, cannot fail.
+ * @brief Declare existence of symbol.
+ *
+ * If symbol name exist, return found symbol, otherwise make a new one.
+ *
+ * @param name          Symbol name.
+ * @return SYM_symbol   New/Found symbol.
  */
-SYM_symbol SYM_mk_symbol(const char *name);
-
-/**
- * @brief Make a new empty bind table.
- * @return new bind table, cannot fail.
- */
-SYM_table SYM_mk_table(void);
+SYM_symbol SYM_declare(const char *name);
 
 /**
  * @brief Get symbol name.
- * @param[in] s symbol
- * @return symbol name, cannot fail.
+ *
+ * @param symbol
+ * @return const char*  Name.
  */
-const char *SYM_get_name(SYM_symbol s);
+const char *SYM_get_name(SYM_symbol symbol);
 
 /**
- * @brief Add a new bind(symbol->value) to bind table.
- * If symbol already exists, old value will be shadowed.
- * @param[in] t     bind table
- * @param[in] s     bind symbol
- * @param[in] v     bind value
+ * @brief Empty symbol-bind-table constructor.
+ *
+ * @return SYM_table.
  */
-void SYM_enter(SYM_table t, SYM_symbol s, void *v);
+SYM_table SYM_empty(void);
 
 /**
- * @brief Get symbol's current value.
- * @param[in] t     bind table
- * @param[in] s     symbol
- * @return symbol value, cannot fail.
+ * @brief Enter(push,insert) a symbol-value pair to bind-table.
+ *
+ * @param[in] table
+ * @param[in] symbol
+ * @param[in] value
  */
-void *SYM_look(SYM_table t, SYM_symbol s);
+void SYM_enter(SYM_table table, SYM_symbol symbol, void *value);
+
+/**
+ * @brief Look(find) a symbol in bind-table.
+ *
+ * @param[in] table
+ * @param[in] symbol
+ * @return void*        Value.
+ */
+void *SYM_look(SYM_table table, SYM_symbol symbol);
 
 /**
  * @brief Begin of scope.
- * Push a begin sign into table.
- * @param[in] t     bind table
- * @param[in] name  scope name
+ *
+ * Enter an begin sign.
+ *
+ * @param[in] table.
  */
-void SYM_begin(SYM_table t, const char *name);
+void SYM_begin(SYM_table table);
 
 /**
  * @brief End of scope.
- * Pop out till begin sign.
- * @param[in] t     bind table
+ *
+ * Pop till previous begin sign.
+ *
+ * @param[in] table.
  */
-void SYM_end(SYM_table t);
+void SYM_end(SYM_table table);
 
 /**
  * @brief Show content of a bind table.
- * @param[in] t     bind table
+ *
+ * @param[in] table.
+ * @param[in] show      Display function.
  */
-void SYM_show(SYM_table t);
+void SYM_dump(SYM_table table, void (*show)(SYM_symbol s, void *v));

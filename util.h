@@ -10,6 +10,8 @@
  * Definitions
  ****************************************************************************/
 
+#define UTL_NOPOS -1
+
 typedef struct UTL_bool_list_ * UTL_bool_list;
 
 struct UTL_bool_list_ { bool head; UTL_bool_list tail; };

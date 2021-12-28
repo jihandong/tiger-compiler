@@ -107,25 +107,25 @@ dec
 
 dec_var
 : VAR ID ASSIGN exp {
-    $$ = AST_mk_dec_var(0, SYM_mk_symbol($2), NULL, $4);
+    $$ = AST_mk_dec_var(0, SYM_declare($2), NULL, $4);
 }
 | VAR ID COLON ID ASSIGN exp {
-    $$ = AST_mk_dec_var(0, SYM_mk_symbol($2), SYM_mk_symbol($4), $6);
+    $$ = AST_mk_dec_var(0, SYM_declare($2), SYM_declare($4), $6);
 }
 
 dec_type
-: TYPE ID EQ type { $$ = AST_mk_dec_type(SYM_mk_symbol($2), $4); }
+: TYPE ID EQ type { $$ = AST_mk_dec_type(SYM_declare($2), $4); }
 
 dec_func
 : FUNCTION ID LP RP EQ exp {
-    $$ = AST_mk_dec_func(0, SYM_mk_symbol($2), NULL, NULL, $6); }
+    $$ = AST_mk_dec_func(0, SYM_declare($2), NULL, NULL, $6); }
 | FUNCTION ID LP RP COLON ID EQ exp {
-    $$ = AST_mk_dec_func(0, SYM_mk_symbol($2), NULL, SYM_mk_symbol($6), $8);
+    $$ = AST_mk_dec_func(0, SYM_declare($2), NULL, SYM_declare($6), $8);
 }
 | FUNCTION ID LP paras RP EQ exp {
-    $$ = AST_mk_dec_func(0,  SYM_mk_symbol($2), $4, NULL, $7); }
+    $$ = AST_mk_dec_func(0,  SYM_declare($2), $4, NULL, $7); }
 | FUNCTION ID LP paras RP COLON ID EQ exp {
-    $$ = AST_mk_dec_func(0, SYM_mk_symbol($2), $4, SYM_mk_symbol($7), $9);
+    $$ = AST_mk_dec_func(0, SYM_declare($2), $4, SYM_declare($7), $9);
 }
 
 /****************************************************************************
@@ -172,13 +172,13 @@ exp_op
 }
 
 exp_call
-: ID LP RP           { $$ = AST_mk_exp_call(0, SYM_mk_symbol($1), NULL); }
-| ID LP arguments RP { $$ = AST_mk_exp_call(0, SYM_mk_symbol($1), $3); }
+: ID LP RP           { $$ = AST_mk_exp_call(0, SYM_declare($1), NULL); }
+| ID LP arguments RP { $$ = AST_mk_exp_call(0, SYM_declare($1), $3); }
 
 exp_create
-: ID LC RC      { $$ = AST_mk_exp_record(0, SYM_mk_symbol($1), NULL); }
-| ID LC args RC { $$ = AST_mk_exp_record(0, SYM_mk_symbol($1), $3); }
-| ID LK exp RK OF exp { $$ = AST_mk_exp_array(0, SYM_mk_symbol($1), $3, $6); }
+: ID LC RC      { $$ = AST_mk_exp_record(0, SYM_declare($1), NULL); }
+| ID LC args RC { $$ = AST_mk_exp_record(0, SYM_declare($1), $3); }
+| ID LK exp RK OF exp { $$ = AST_mk_exp_array(0, SYM_declare($1), $3, $6); }
 
 exp_assign
 : lvalue ASSIGN exp { $$ = AST_mk_exp_assign(0, $1, $3); }
@@ -191,7 +191,7 @@ exp_if
 
 exp_for
 : FOR ID ASSIGN exp TO exp DO exp {
-    $$ = AST_mk_exp_for(0, SYM_mk_symbol($2), $4, $6, $8);
+    $$ = AST_mk_exp_for(0, SYM_declare($2), $4, $6, $8);
 }
 
 exp_while
@@ -209,21 +209,21 @@ exp_let
  ****************************************************************************/
 
 lvalue
-: ID         { $$ = AST_mk_var_base(0, SYM_mk_symbol($1), NULL); }
-| ID suffix  { $$ = AST_mk_var_base(0, SYM_mk_symbol($1), $2); }
+: ID         { $$ = AST_mk_var_base(0, SYM_declare($1), NULL); }
+| ID suffix  { $$ = AST_mk_var_base(0, SYM_declare($1), $2); }
 
 suffix
 : /* spsilon */    { $$ = NULL; }
 | LK exp RK suffix { $$ = AST_mk_var_index(0, $2, $4); }
-| DOT ID suffix    { $$ = AST_mk_var_field(0, SYM_mk_symbol($2), $3); }
+| DOT ID suffix    { $$ = AST_mk_var_field(0, SYM_declare($2), $3); }
 
 /****************************************************************************
  * types
  ****************************************************************************/
 
 type
-: ID          { $$ = AST_mk_type_name(0, SYM_mk_symbol($1)); }
-| ARRAY OF ID { $$ = AST_mk_type_array(0, SYM_mk_symbol($3)); }
+: ID          { $$ = AST_mk_type_name(0, SYM_declare($1)); }
+| ARRAY OF ID { $$ = AST_mk_type_array(0, SYM_declare($3)); }
 | LC paras RC { $$ = AST_mk_type_record(0, $2); }
 | LC RC       { $$ = AST_mk_type_record(0, NULL); }
 
@@ -236,14 +236,14 @@ paras
 | para COMMA paras { $$ = AST_mk_para_list($1, $3); }
 
 para
-: ID COLON ID { $$ = AST_mk_para(0, SYM_mk_symbol($1), SYM_mk_symbol($3)); }
+: ID COLON ID { $$ = AST_mk_para(0, SYM_declare($1), SYM_declare($3)); }
 
 args
 : arg            { $$ = AST_mk_arg_list($1, NULL); }
 | arg COMMA args { $$ = AST_mk_arg_list($1, $3); }
 
 arg
-: ID EQ exp { $$ = AST_mk_arg(SYM_mk_symbol($1), $3); }
+: ID EQ exp { $$ = AST_mk_arg(SYM_declare($1), $3); }
 
 sequence
 : exp                    { $$ = AST_mk_exp_list($1, NULL); }

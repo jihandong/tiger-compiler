@@ -15,8 +15,6 @@ typedef struct FRM_frame_ *         FRM_frame;
 typedef struct FRM_access_ *        FRM_access;
 typedef struct FRM_access_list_ *   FRM_access_list;
 
-struct FRM_access_list_ { FRM_access head; FRM_access_list tail; };
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

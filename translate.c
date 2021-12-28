@@ -44,6 +44,7 @@ TR_access_list TR_mk_access_list(TR_access head, TR_access_list tail)
 TR_level TR_root_level(void)
 {
     // should keep root level?
+    return NULL;
 }
 
 TR_level TR_mk_level(TR_level parent, TMP_label name, UTL_bool_list escapes)
@@ -60,6 +61,7 @@ TR_access_list TR_get_paras(TR_level level)
 {
     // call FRM_get_paras, then make TR_access_list_?
     // how can I know level of each FRM_access
+    return NULL;
 }
 
 TR_access TR_alloc_local(TR_level level, bool escape)

@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include "temp.h"
+#include "util.h"
 
 /****************************************************************************
  * Definitions

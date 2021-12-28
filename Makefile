@@ -1,4 +1,4 @@
-test: test.o y.tab.o lex.yy.o ast.o print.o semant.o symbol.o table.o type.o util.o
+test: test.o y.tab.o lex.yy.o ast.o env.o print.o semant.o symbol.o table.o type.o util.o
 	cc -g *.o
 
 test.o: test.c
@@ -28,6 +28,9 @@ semant.o: semant.c
 # common
 ast.o: ast.c
 	cc -g -c ast.c
+
+env.o: env.c
+	cc -g -c env.c
 
 print.o: print.c
 	cc -g -c print.c -Wincompatible-pointer-types

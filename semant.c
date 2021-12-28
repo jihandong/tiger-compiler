@@ -3,8 +3,10 @@
  ****************************************************************************/
 
 #include <stdbool.h>
+#include "env.h"
 #include "semant.h"
 #include "symbol.h"
+#include "translate.h"
 #include "type.h"
 #include "util.h"
 
@@ -15,12 +17,32 @@
 #define printt(x,y) ({ printf("%s\t", x); TY_print(stdout, y); printf("\n"); })
 
 typedef void *IR_ir;             /*< ir not implemented yet */
+
 typedef struct SMT_tyir_ SMT_tyir;  /*< ir with type */
 
-struct SMT_tyir_ {
+struct SMT_tyir_
+{
     IR_ir    ir;
     TY_type  type;
 };
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static SMT_tyir SMT_mk_tyir(IR_ir ir, TY_type type)
+{
+    SMT_tyir e;
+
+    e.ir    = ir;
+    e.type  = type;
+
+    return e;
+}
+
+/****************************************************************************
+ * Trans (do type check now)
+ ****************************************************************************/
 
 /**
  * @brief Translate declarations.
@@ -68,20 +90,6 @@ static TY_type SMT_trans_type(SYM_table tenv, AST_type n);
  * @param tenv  type symbol table.
  */
 static void SMT_trans_init(SYM_table venv, SYM_table tenv);
-
-/****************************************************************************
- * Private
- ****************************************************************************/
-
-static inline SMT_tyir TY_mk_tyir(IR_ir ir, TY_type type)
-{
-    SMT_tyir e;
-
-    e.ir    = ir;
-    e.type  = type;
-
-    return e;
-}
 
 static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
 {
@@ -309,13 +317,13 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             return SMT_trans_var(venv, tenv, n->u.var);
 
         case AST_kind_exp_nil:
-            return TY_mk_tyir(NULL, TY_nil());
+            return SMT_mk_tyir(NULL, TY_nil());
 
         case AST_kind_exp_int:
-            return TY_mk_tyir(NULL, TY_int());
+            return SMT_mk_tyir(NULL, TY_int());
 
         case AST_kind_exp_str:
-            return TY_mk_tyir(NULL, TY_str());
+            return SMT_mk_tyir(NULL, TY_str());
 
         case AST_kind_exp_call: {
             SYM_symbol   func = n->u.call.func;
@@ -351,7 +359,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 }
             }
 
-            return TY_mk_tyir(NULL, ret_ty);
+            return SMT_mk_tyir(NULL, ret_ty);
         }
 
         case AST_kind_exp_op: {
@@ -373,7 +381,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 UTL_error(right->pos, "exp op, right is not integer");
             }
 
-            return TY_mk_tyir(NULL, TY_int());
+            return SMT_mk_tyir(NULL, TY_int());
         }
 
         case AST_kind_exp_array: {
@@ -413,7 +421,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                         SYM_get_name(array));
             }
 
-            return TY_mk_tyir(NULL, array_ty);
+            return SMT_mk_tyir(NULL, array_ty);
         }
 
         case AST_kind_exp_record: {
@@ -453,7 +461,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 }
             }
 
-            return TY_mk_tyir(NULL, record_ty);
+            return SMT_mk_tyir(NULL, record_ty);
         }
 
         case AST_kind_exp_seq: {
@@ -464,7 +472,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             for (s = seq; s; s = s->tail)
                 exp_tyir = SMT_trans_exp(venv, tenv, s->head, loop);
 
-            return TY_mk_tyir(NULL, seq ? exp_tyir.type : TY_void());
+            return SMT_mk_tyir(NULL, seq ? exp_tyir.type : TY_void());
         }
 
         case AST_kind_exp_assign: {
@@ -481,7 +489,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 UTL_error(n->pos, "exp assign, type not match");
             }
 
-            return TY_mk_tyir(NULL, TY_void());
+            return SMT_mk_tyir(NULL, TY_void());
         }
 
         case AST_kind_exp_if: {
@@ -500,7 +508,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             // if-then
             then_tyir = SMT_trans_exp(venv, tenv, then, loop);
             if (!else_)
-                return TY_mk_tyir(NULL, TY_void());
+                return SMT_mk_tyir(NULL, TY_void());
 
             // if-then-else, check branches type.
             else_tyir = SMT_trans_exp(venv, tenv, else_, loop);
@@ -510,7 +518,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 UTL_error(n->pos, "exp if, branches type not match");
             }
 
-            return TY_mk_tyir(NULL, then_tyir.type);
+            return SMT_mk_tyir(NULL, then_tyir.type);
         }
 
         case AST_kind_exp_while: {
@@ -529,7 +537,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             body_tyir = SMT_trans_exp(venv, tenv, body, loop + 1);
             SYM_end(venv);
 
-            return TY_mk_tyir(NULL, TY_void());
+            return SMT_mk_tyir(NULL, TY_void());
         }
 
         case AST_kind_exp_for: {
@@ -560,14 +568,14 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
 
             SYM_end(venv);
 
-            return TY_mk_tyir(NULL, body_tyir.type);
+            return SMT_mk_tyir(NULL, body_tyir.type);
         }
 
         case AST_kind_exp_break:
             if (loop <= 0)
                 UTL_error(n->pos, "exp break, not in loop");
 
-            return TY_mk_tyir(NULL, TY_void());
+            return SMT_mk_tyir(NULL, TY_void());
 
         case AST_kind_exp_let: {
             AST_dec_list decs = n->u.let.decs;
@@ -585,7 +593,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SYM_end(tenv);
             SYM_end(venv);
 
-            return TY_mk_tyir(NULL, body? body_tyir.type : TY_void());
+            return SMT_mk_tyir(NULL, body? body_tyir.type : TY_void());
         }
 
         default:
@@ -675,7 +683,7 @@ static SMT_tyir SMT_trans_var(SYM_table venv, SYM_table tenv, AST_var n)
         }
     }
 
-    return TY_mk_tyir(NULL, t);
+    return SMT_mk_tyir(NULL, t);
 }
 
 static TY_type SMT_trans_type(SYM_table tenv, AST_type n)
@@ -758,16 +766,10 @@ static void SMT_trans_init(SYM_table venv, SYM_table tenv)
     // inner functions.
 }
 
-/****************************************************************************
- * Public
- ****************************************************************************/
-
 void SMT_trans(AST_exp root)
 {
-    SYM_table venv = SYM_empty();
-    SYM_table tenv = SYM_empty();
-
-    SMT_trans_init(venv, tenv);
+    SYM_table venv = ENV_base_venv();
+    SYM_table tenv = ENV_base_tenv();
 
     SMT_trans_exp(venv, tenv, root, 0);
 }

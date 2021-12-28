@@ -23,7 +23,7 @@ static int ntemps;
 static int nlabels;
 
 /****************************************************************************
- * Public: temp
+ * Public: temp & label
  ****************************************************************************/
 
 TMP_temp TMP_mk_temp(void)
@@ -44,10 +44,6 @@ TMP_temp_list TMP_mk_temp_list(TMP_temp head, TMP_temp_list tail)
 
     return p;
 }
-
-/****************************************************************************
- * Public: label
- ****************************************************************************/
 
 TMP_label TMP_mk_label(void)
 {
@@ -82,11 +78,6 @@ TMP_label TMP_get_label_name(TMP_label label)
  * Public: map
  ****************************************************************************/
 
-TMP_map TMP_empty(void)
-{
-    return TMP_mk_map(TAB_empty(), NULL);
-}
-
 TMP_map TMP_mk_map(TAB_table tab, TMP_map under)
 {
     TMP_map m = UTL_alloc(sizeof(*m));
@@ -95,6 +86,11 @@ TMP_map TMP_mk_map(TAB_table tab, TMP_map under)
     m->under = under;
 
     return m;
+}
+
+TMP_map TMP_empty(void)
+{
+    return TMP_mk_map(TAB_empty(), NULL);
 }
 
 TMP_map TMP_layer_map(TMP_map over, TMP_map under)
@@ -108,7 +104,7 @@ TMP_map TMP_layer_map(TMP_map over, TMP_map under)
 void TMP_enter(TMP_map m, TMP_temp t, const char *s);
 {
     if (!m || !m->tab)
-        UTL_error(-1, "temp map not exists");
+        UTL_error(UTL_NOPOS, "enter temp to a null map");
 
     TAB_enter(m->tab, t, s);
 }
@@ -118,7 +114,7 @@ char *TMP_look(TMP_map m, TMP_temp t)
     const char *s;
 
     if (!m || !m->tab)
-        UTL_error(-1, "temp map not exists");
+        UTL_error(UTL_NOPOS, "enter temp to a null map");
 
     s = TAB_look(m->tab, t);
 

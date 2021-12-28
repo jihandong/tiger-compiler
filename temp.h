@@ -17,7 +17,7 @@ typedef struct TMP_label_list * TMP_label_list;
 typedef struct TMP_map_ *       TMP_map;
 
 /****************************************************************************
- * Public: temp
+ * Public: temp & label
  ****************************************************************************/
 
 /**
@@ -35,10 +35,6 @@ TMP_temp TMP_mk_temp(void);
  * @return TMP_temp_list
  */
 TMP_temp_list TMP_mk_temp_list(TMP_temp head, TMP_temp_list tail);
-
-/****************************************************************************
- * Public: label
- ****************************************************************************/
 
 /**
  * @brief Temp Address constructor.
@@ -77,22 +73,20 @@ TMP_label TMP_get_label_name(TMP_label label);
  ****************************************************************************/
 
 /**
- * @brief Empty map table.
+ * @brief Map constructor.
+ *
+ * @param[in] tab
+ * @param[in] under
+ * @return TMP_map
+ */
+TMP_map TMP_mk_map(TAB_table tab, TMP_map under);
+
+/**
+ * @brief Empty map constructor.
  *
  * @return TMP_map
  */
 TMP_map TMP_empty(void);
-
-/**
- * @brief Map Table constructor.
- *
- * Map Table has <temp,string> type.
- *
- * @param[in] tab   Value field.
- * @param[in] under Next field.
- * @return TMP_map  New Node.
- */
-TMP_map TMP_mk_map(TAB_table tab, TMP_map under);
 
 /**
  * @brief Combine new map list.

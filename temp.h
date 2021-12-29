@@ -23,6 +23,8 @@ typedef struct TMP_map_ *       TMP_map;
 /**
  * @brief Temp Value constructor.
  *
+ * Just return a temp with integer index: t0, t1, t2 ...
+ *
  * @return TMP_temp     new temp value.
  */
 TMP_temp TMP_mk_temp(void);
@@ -38,6 +40,8 @@ TMP_temp_list TMP_mk_temp_list(TMP_temp head, TMP_temp_list tail);
 
 /**
  * @brief Temp Address constructor.
+ *
+ * Just return a symbol as label, witch has name: "l0", "l2", "l3" ...
  *
  * @return TMP_label    New temp address.
  */
@@ -89,12 +93,12 @@ TMP_map TMP_mk_map(TAB_table tab, TMP_map under);
 TMP_map TMP_empty(void);
 
 /**
- * @brief Combine new map list.
+ * @brief Combine new table list.
  *
  * Example:
- *  over:   t1 -> t2 -> t3
- *  under:  t4 -> t5
- *  return: t1 -> t2 -> t3 -> t4 -> t5
+ *  over:   T1 -> T2 -> T3
+ *  under:  T4 -> T5
+ *  return: T1 -> T2 -> T3 -> T4 -> T5
  *
  * @param[in] over  Front map list.
  * @param[in] under Back map list.

@@ -49,7 +49,7 @@ TMP_label TMP_mk_label(void)
 {
     char buf[64];
 
-    snprintf(buf, sizeof(buf), "label%s", nlabels++);
+    snprintf(buf, sizeof(buf), "l%s", nlabels++);
 
     return TMP_mk_label_named(buf);
 }

@@ -47,8 +47,9 @@ FRM_access_list FRM_get_paras(FRM_frame f);
 /**
  * @brief Alloc local variable.
  *
- * If variable is not escapable, it can be alloc in reg,
- * otherwise it must be alloced in frame.
+ * Escaped variable alloced in frame, others can be alloced in reg.
+ *
+ * @note Now not-escaped variables all alloced in reg.
  *
  * @param[in] f         Frame.
  * @param[in] escape    Is escapable.

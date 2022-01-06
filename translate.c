@@ -11,7 +11,6 @@
 
 struct TR_level_ { TR_level parent;  FRM_frame frame; TR_access_list paras; };
 struct TR_access_ { TR_level level; FRM_access access; };
-struct TR_access_list_ { TR_access head; TR_access_list tail; };
 
 /****************************************************************************
  * Private Variables

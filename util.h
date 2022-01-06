@@ -50,5 +50,6 @@ void UTL_error(int pos, const char *fmt, ...);
  * 
  * @param head  Bool.
  * @param tail  Bool list.
+ * @return UTL_bool_list
  */
-void UTL_mk_bool_list(bool head, UTL_bool_list tail);
+UTL_bool_list UTL_mk_bool_list(bool head, UTL_bool_list tail);

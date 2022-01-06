@@ -95,3 +95,13 @@ void UTL_error(int pos, const char *fmt, ...)
     UTL_free();
     exit(1);
 }
+
+UTL_bool_list UTL_mk_bool_list(bool head, UTL_bool_list tail)
+{
+    UTL_bool_list p = UTL_alloc(sizeof(*p));
+
+    p->head = head;
+    p->tail = tail;
+
+    return p;
+}

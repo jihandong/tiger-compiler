@@ -11,7 +11,7 @@
 
 ENV_entry ENV_mk_entry_var(TR_access access, TY_type type)
 {
-    ENV_entry p = UTL_alloc(*p);
+    ENV_entry p = UTL_alloc(sizeof(*p));
 
     p->kind         = ENV_KIND_ENTRY_VAR;
     p->u.var.access = access;
@@ -23,7 +23,7 @@ ENV_entry ENV_mk_entry_var(TR_access access, TY_type type)
 ENV_entry ENV_mk_entry_func(TR_level level, TMP_label label,
                             TY_type_list paras, TY_type ret)
 {
-    ENV_entry p = UTL_alloc(*p);
+    ENV_entry p = UTL_alloc(sizeof(*p));
 
     p->kind         = ENV_KIND_ENTRY_FUNC;
     p->u.func.level = level;

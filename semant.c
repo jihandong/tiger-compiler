@@ -755,17 +755,6 @@ static TY_type SMT_trans_type(SYM_table tenv, AST_type n)
     }
 }
 
-static void SMT_trans_init(SYM_table venv, SYM_table tenv)
-{
-    // inner types.
-    SYM_enter(tenv, SYM_declare("int"), TY_int());
-    SYM_enter(tenv, SYM_declare("string"), TY_str());
-
-    // inner variables.
-
-    // inner functions.
-}
-
 void SMT_trans(AST_exp root)
 {
     SYM_table venv = ENV_base_venv();

@@ -49,8 +49,6 @@ FRM_access_list FRM_get_paras(FRM_frame f);
  *
  * Escaped variable alloced in frame, others can be alloced in reg.
  *
- * @note Now not-escaped variables all alloced in reg.
- *
  * @param[in] f         Frame.
  * @param[in] escape    Is escapable.
  * @return FRM_access   Alloc result(in-frame or in-reg).

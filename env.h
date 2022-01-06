@@ -4,14 +4,14 @@
  * Includes
  ****************************************************************************/
 
-#include "symbol.h"
 #include "translate.h"
+#include "type.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
-typedef ENV_entry_ *ENV_entry;
+typedef struct ENV_entry_ *ENV_entry;
 
 struct ENV_entry_
 {

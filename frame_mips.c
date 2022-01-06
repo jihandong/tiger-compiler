@@ -71,13 +71,13 @@ static FRM_access FRM_alloc_in_reg(TMP_temp reg)
 }
 
 /**
- * @brief Frame list constructor.
+ * @brief Access list constructor.
  *
  * @param head
  * @param tail
  * @return FRM_frame_list
  */
-static FRM_frame_list FRM_mk_frame_list(FRM_access head, FRM_access_list tail)
+static FRM_frame_list FRM_mk_access_list(FRM_access head, FRM_access_list tail)
 {
     FRM_access_list p = UTL_alloc(sizeof(*p));
 
@@ -112,6 +112,9 @@ FRM_access FRM_alloc_local(FRM_frame f, bool escape)
 {
     FRM_access access;
 
+    /* Trival alloc strategy ...
+     * Alloc escaped variable in frame, others in register.
+     */
     if (escape) {
         access = FRM_alloc_in_frame(f->offset);
         f->offset += FRM_WORD_SIZE;
@@ -135,13 +138,15 @@ FRM_frame FRM_mk_frame(TMP_label name, UTL_bool_list escapes)
         access = FRM_alloc_local(frame, escapes->head);
 
         if (!paras) {
-            paras = FRM_mk_frame_list(access, NULL);
+            paras = FRM_mk_access_list(access, NULL);
             p = paras;
         } else {
-            p->tail = FRM_mk_frame_list(access, NULL);
+            p->tail = FRM_mk_access_list(access, NULL);
             p = p->tail;
         }
     }
+
+    frame->paras = paras;
 
     return frame;
 }

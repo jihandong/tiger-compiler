@@ -47,51 +47,50 @@ static SMT_tyir SMT_mk_tyir(IR_ir ir, TY_type type)
 /**
  * @brief Translate declarations.
  * can detect loop type definitions; support recursive definitions.
- * @param[in] venv  value environment for variables and functions.
- * @param[in] tenv  type environment for types.
- * @param[in] n     astnode.
+ * @param[in] level Static link level.
+ * @param[in] venv  Value environment for variables and functions.
+ * @param[in] tenv  Type environment for types.
+ * @param[in] n     Astnode.
  */
-static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n);
+static void SMT_trans_dec(TR_level level, SYM_table venv, SYM_table tenv,
+                          AST_dec_list n);
 
 /**
  * @brief Translate expressions.
  * support break validity.
- * @param[in] venv  value environment for variables and functions.
- * @param[in] tenv  type environment for types.
- * @param[in] n     astnode.
- * @param[in] loop  loop layer counter.
- * @return SMT_tyir   translated ir with type.
+ * @param[in] level Static link level.
+ * @param[in] venv  Value environment for variables and functions.
+ * @param[in] tenv  Type environment for types.
+ * @param[in] n     Astnode.
+ * @param[in] loop  Loop layer counter.
+ * @return SMT_tyir Translated ir with type.
  */
-static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n,
-                              int loop);
+static SMT_tyir SMT_trans_exp(TR_level level, SYM_table venv, SYM_table tenv,
+                              AST_exp n, int loop);
 
 /**
  * @brief Translate variables(lvalue).
- * @param[in] venv  value environment for variables and functions.
- * @param[in] tenv  type environment for types.
- * @param[in] n     astnode.
- * @return SMT_tyir   translated ir with type.
+ * @param[in] level Static link level.
+ * @param[in] venv  Value environment for variables and functions.
+ * @param[in] tenv  Type environment for types.
+ * @param[in] n     Astnode.
+ * @return SMT_tyir Translated ir with type.
  */
-static SMT_tyir SMT_trans_var(SYM_table venv, SYM_table tenv, AST_var n);
+static SMT_tyir SMT_trans_var(TR_level level, SYM_table venv, SYM_table tenv,
+                              AST_var n);
 
 /**
  * @brief Translate types.
- * @param[in] tenv  type environment for types.
- * @param[in] n     astnode.
- * @return TY_type   translated ir with type.
+ * @param[in] level Static link level.
+ * @param[in] tenv  Type environment for types.
+ * @param[in] n     Astnode.
+ * @return TY_type  Translated ir with type.
  * @note won't look into TY_name(name, ...) as it might not be defined yet.
  */
-static TY_type SMT_trans_type(SYM_table tenv, AST_type n);
+static TY_type SMT_trans_type(TR_level level, SYM_table tenv, AST_type n);
 
-/**
- * @brief Initialize transition.
- * add language inner symbols into symbol table.
- * @param venv  value symbol table.
- * @param tenv  type symbol table.
- */
-static void SMT_trans_init(SYM_table venv, SYM_table tenv);
-
-static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
+static void SMT_trans_dec(TR_level level, SYM_table venv, SYM_table tenv,
+                          AST_dec_list n)
 {
     AST_dec_list  vars   = NULL;
     AST_dec_list  types  = NULL;
@@ -173,7 +172,7 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
         AST_dec    dec  = t->head;
         SYM_symbol name = dec->u.type.name;
         AST_type   type = dec->u.type.type;
-        TY_type    type_ty = SMT_trans_type(tenv, type);
+        TY_type    type_ty = SMT_trans_type(level, tenv, type);
 
         // cover dummy with raw definitions
         SYM_enter(tenv, name, type_ty);
@@ -205,20 +204,23 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
     }
 
     //////////////////////////////////////////////////////////////////////////
-    // Vatiable Declarations
+    // Variable Declarations
     //////////////////////////////////////////////////////////////////////////
 
     // translate variable definitions
     for (v = vars; v; v = v->tail) {
-        AST_dec    dec  = v->head;
-        SYM_symbol name = dec->u.var.name;
-        SYM_symbol type = dec->u.var.type;
-        AST_exp    init = dec->u.var.init;
+        AST_dec    dec    = v->head;
+        SYM_symbol name   = dec->u.var.name;
+        SYM_symbol type   = dec->u.var.type;
+        AST_exp    init   = dec->u.var.init;
+        bool       escape = dec->u.var.escape;
         TY_type    type_ty;
         SMT_tyir   init_tyir;
+        TR_access  access;
+        ENV_entry  entry;
 
         // check variable init.
-        init_tyir = SMT_trans_exp(venv, tenv, init, 0);
+        init_tyir = SMT_trans_exp(level, venv, tenv, init, 0);
         if (type) {
             type_ty = SYM_look(tenv, type);
             if (!TY_match(init_tyir.type, type_ty)) {
@@ -229,7 +231,10 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
             }
         }
 
-        SYM_enter(venv, name, init_tyir.type);
+        // variable allocation and keep entry.
+        access = TR_alloc_local(level, escape);
+        entry  = ENV_mk_entry_var(access, init_tyir.type);
+        SYM_enter(venv, name, entry);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -244,12 +249,17 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
         SYM_symbol    ret   = dec->u.func.ret;
         AST_exp       body  = dec->u.func.body;
 
+        UTL_bool_list para_escs;
         TY_type_list  para_tys;
         TY_type       ret_ty;
         SMT_tyir      body_tyir;
+        TR_level      child;
+        TMP_label     label;
+        ENV_entry     entry;
 
         AST_para_list p;
         TY_type_list  t;
+        UTL_bool_list b;
 
         // check return type.
         ret_ty = ret ? SYM_look(tenv, ret) : TY_void();
@@ -259,8 +269,9 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
         }
 
         // check parameter type.
-        for (p = paras, para_tys = NULL; p; p = p->tail) {
-            SYM_symbol type = p->head->type;
+        for (p = paras, para_tys = NULL, para_escs = NULL; p; p = p->tail) {
+            SYM_symbol type   = p->head->type;
+            bool       escape = p->head->escape;
             TY_type para_ty;
 
             para_ty = SYM_look(tenv, type);
@@ -269,7 +280,7 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
                         SYM_get_name(fname), SYM_get_name(type));
             }
 
-            // make parameter list.
+            // make parameter type list.
             if (!para_tys) {
                 t = TY_mk_type_list(para_ty, NULL);
                 para_tys = t;
@@ -277,44 +288,65 @@ static void SMT_trans_dec(SYM_table venv, SYM_table tenv, AST_dec_list n)
                 t->tail = TY_mk_type_list(para_ty, NULL);
                 t = t->tail;
             }
+
+            // make parameter escape list.
+            if (!para_escs) {
+                b = UTL_mk_bool_list(escape, NULL);
+                para_escs = b;
+            } else {
+                b->tail = UTL_mk_bool_list(escape, NULL);
+                b = b->tail;
+            }
         }
 
-        SYM_enter(venv, fname, TY_mk_func(ret_ty, para_tys));
+        // make child level and entry.
+        label = TMP_mk_label();
+        child = TR_mk_level(level, label, para_escs);
+        entry = ENV_mk_entry_func(child, label, para_tys, ret_ty);
+        SYM_enter(venv, fname, entry);
     }
 
     // translate function bodies
     for (f = funcs; f; f = f->tail) {
-        AST_dec       dec   = f->head;
-        SYM_symbol    fname = dec->u.func.name;
-        AST_para_list paras = dec->u.func.paras;
-        AST_exp       body  = dec->u.func.body;
+        AST_dec        dec   = f->head;
+        SYM_symbol     fname = dec->u.func.name;
+        AST_para_list  paras = dec->u.func.paras;
+        AST_exp        body  = dec->u.func.body;
 
-        TY_type       func     = SYM_look(venv, fname);
-        TY_type_list  para_tys = func->u.func.paras;
-        SMT_tyir      body_tyir;
+        ENV_entry      func     = SYM_look(venv, fname);
+        TR_access_list para_acs = TR_get_paras(func->u.func.level);
+        TY_type_list   para_tys = func->u.func.paras;
+        SMT_tyir       body_tyir;
+        ENV_entry      entry;
 
-        AST_para_list p;
-        TY_type_list  t;
+        AST_para_list  p;
+        TY_type_list   t;
+        TR_access_list a;
 
         SYM_begin(venv);
 
-        for (p = paras, t = para_tys; p && t; p = p->tail, t = t->tail) {
-            SYM_symbol name = p->head->name;
-            TY_type   type = t->head;
+        for (p = paras, t = para_tys, a = para_acs; p && t && a;
+             p = p->tail, t = t->tail, a = a->tail) {
+            SYM_symbol name  = p->head->name;
+            TY_type    type  = t->head;
+            TR_access  acess = a->head;
 
-            SYM_enter(venv, name, type);
+            // parameter already alloced, make entry is ok.
+            entry = ENV_mk_entry_var(acess, type);
+            SYM_enter(venv, name, entry);
         }
-        body_tyir = SMT_trans_exp(venv, tenv, body, 0); // do nothing
+        body_tyir = SMT_trans_exp(level, venv, tenv, body, 0); // do nothing
 
         SYM_end(venv);
     }
 }
 
-static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loop)
+static SMT_tyir SMT_trans_exp(TR_level level, SYM_table venv, SYM_table tenv,
+                              AST_exp n, int loop)
 {
     switch(n->kind) {
         case AST_kind_exp_var:
-            return SMT_trans_var(venv, tenv, n->u.var);
+            return SMT_trans_var(level, venv, tenv, n->u.var);
 
         case AST_kind_exp_nil:
             return SMT_mk_tyir(NULL, TY_nil());
@@ -349,7 +381,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                 TY_type para_ty = para_tys->head;
                 SMT_tyir arg_tyir;
 
-                arg_tyir = SMT_trans_exp(venv, tenv, arg, loop);
+                arg_tyir = SMT_trans_exp(level, venv, tenv, arg, loop);
                 if (!TY_match(para_ty, arg_tyir.type)) {
                     printt("para", para_ty);
                     printt("arg", arg_tyir.type);
@@ -368,14 +400,14 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir left_tyir, right_tyir;
 
             // check left operand
-            left_tyir = SMT_trans_exp(venv, tenv, left, loop);
+            left_tyir = SMT_trans_exp(level, venv, tenv, left, loop);
             if (TY_get_kind(left_tyir.type) != TY_kind_int) {
                 printt("left", left_tyir.type);
                 UTL_error(left->pos, "exp op, left is not integer");
             }
 
             // check right operand
-            right_tyir = SMT_trans_exp(venv, tenv, right, loop);
+            right_tyir = SMT_trans_exp(level, venv, tenv, right, loop);
             if (TY_get_kind(right_tyir.type) != TY_kind_int) {
                 printt("right", right_tyir.type);
                 UTL_error(right->pos, "exp op, right is not integer");
@@ -404,7 +436,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             }
 
             // check array size.
-            size_tyir = SMT_trans_exp(venv, tenv, size, loop);
+            size_tyir = SMT_trans_exp(level, venv, tenv, size, loop);
             if (TY_get_kind(size_tyir.type) != TY_kind_int) {
                 printt("array", size_tyir.type);
                 UTL_error(size->pos, "exp array(%s), size is not integer",
@@ -412,7 +444,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             }
 
             // check array init.
-            init_tyir = SMT_trans_exp(venv, tenv, init, loop);
+            init_tyir = SMT_trans_exp(level, venv, tenv, init, loop);
             if (init_tyir.type != array_ty->u.array) {
                 printt("element", array_ty->u.array);
                 printt("init", init_tyir.type);
@@ -452,7 +484,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
                             SYM_get_name(name1), SYM_get_name(name2));
                 }
 
-                exp_tyir = SMT_trans_exp(venv, tenv, exp, loop);
+                exp_tyir = SMT_trans_exp(level ,venv, tenv, exp, loop);
                 if (!TY_match(type, exp_tyir.type)) {
                     printt("give", exp_tyir.type);
                     printt("need", type);
@@ -470,7 +502,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             AST_exp_list s;
 
             for (s = seq; s; s = s->tail)
-                exp_tyir = SMT_trans_exp(venv, tenv, s->head, loop);
+                exp_tyir = SMT_trans_exp(level, venv, tenv, s->head, loop);
 
             return SMT_mk_tyir(NULL, seq ? exp_tyir.type : TY_void());
         }
@@ -481,8 +513,8 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir var_tyir, exp_tyir;
 
             // check type match.
-            var_tyir = SMT_trans_var(venv, tenv, var);
-            exp_tyir = SMT_trans_exp(venv, tenv, exp, loop);
+            var_tyir = SMT_trans_var(level, venv, tenv, var);
+            exp_tyir = SMT_trans_exp(level, venv, tenv, exp, loop);
             if (!TY_match(var_tyir.type, exp_tyir.type)) {
                 printt("var", var_tyir.type);
                 printt("exp", exp_tyir.type);
@@ -499,19 +531,19 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir cond_tyir, then_tyir, else_tyir;
 
             // check condition type.
-            cond_tyir = SMT_trans_exp(venv, tenv, cond, loop);
+            cond_tyir = SMT_trans_exp(level, venv, tenv, cond, loop);
             if (TY_get_kind(cond_tyir.type) != TY_kind_int) {
                 printt("cond", cond_tyir.type);
                 UTL_error(cond->pos, "exp if, cond is not integer");
             }
 
             // if-then
-            then_tyir = SMT_trans_exp(venv, tenv, then, loop);
+            then_tyir = SMT_trans_exp(level, venv, tenv, then, loop);
             if (!else_)
                 return SMT_mk_tyir(NULL, TY_void());
 
             // if-then-else, check branches type.
-            else_tyir = SMT_trans_exp(venv, tenv, else_, loop);
+            else_tyir = SMT_trans_exp(level, venv, tenv, else_, loop);
             if (then_tyir.type != else_tyir.type) {
                 printt("then", then_tyir.type);
                 printt("else", else_tyir.type);
@@ -527,14 +559,14 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir cond_tyir, body_tyir;
 
             // check condition type.
-            cond_tyir = SMT_trans_exp(venv, tenv, cond, loop);
+            cond_tyir = SMT_trans_exp(level, venv, tenv, cond, loop);
             if (TY_get_kind(cond_tyir.type) != TY_kind_int) {
                 printt("cond", cond_tyir.type);
                 UTL_error(cond->pos, "exp while, cond is not integer");
             }
 
             SYM_begin(venv);
-            body_tyir = SMT_trans_exp(venv, tenv, body, loop + 1);
+            body_tyir = SMT_trans_exp(level, venv, tenv, body, loop + 1);
             SYM_end(venv);
 
             return SMT_mk_tyir(NULL, TY_void());
@@ -548,14 +580,14 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SMT_tyir   lo_tyir, hi_tyir, body_tyir;
 
             // check lowest exp type.
-            lo_tyir = SMT_trans_exp(venv, tenv, lo, loop);
+            lo_tyir = SMT_trans_exp(level, venv, tenv, lo, loop);
             if (TY_get_kind(lo_tyir.type) != TY_kind_int) {
                 printt("low", lo_tyir.type);
                 UTL_error(lo->pos, "exp for, low is not integer");
             }
 
             // check highest exp type.
-            hi_tyir = SMT_trans_exp(venv, tenv, hi, loop);
+            hi_tyir = SMT_trans_exp(level, venv, tenv, hi, loop);
             if (TY_get_kind(hi_tyir.type) != TY_kind_int) {
                 printt("high", hi_tyir.type);
                 UTL_error(hi->pos, "exp for, high is not integer");
@@ -564,7 +596,7 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SYM_begin(venv);
             SYM_enter(venv, var, TY_int());
 
-            body_tyir = SMT_trans_exp(venv, tenv, body, loop + 1);
+            body_tyir = SMT_trans_exp(level, venv, tenv, body, loop + 1);
 
             SYM_end(venv);
 
@@ -586,9 +618,9 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
             SYM_begin(venv);
             SYM_begin(tenv);
 
-            SMT_trans_dec(venv, tenv, decs);
+            SMT_trans_dec(level, venv, tenv, decs);
             for (b = body; b; b = b->tail)
-                body_tyir = SMT_trans_exp(venv, tenv, b->head, loop);
+                body_tyir = SMT_trans_exp(level, venv, tenv, b->head, loop);
 
             SYM_end(tenv);
             SYM_end(venv);
@@ -601,7 +633,8 @@ static SMT_tyir SMT_trans_exp(SYM_table venv, SYM_table tenv, AST_exp n, int loo
     }
 }
 
-static SMT_tyir SMT_trans_var(SYM_table venv, SYM_table tenv, AST_var n)
+static SMT_tyir SMT_trans_var(TR_level level, SYM_table venv, SYM_table tenv,
+                              AST_var n)
 {
     SYM_symbol base;
     AST_var    suffix;
@@ -628,7 +661,7 @@ static SMT_tyir SMT_trans_var(SYM_table venv, SYM_table tenv, AST_var n)
             case AST_kind_var_index: {
                 AST_exp  exp      = p->u.index.exp;
                 AST_var  suffix   = p->u.index.suffix;
-                SMT_tyir exp_tyir = SMT_trans_exp(venv, tenv, exp, 0);
+                SMT_tyir exp_tyir = SMT_trans_exp(level, venv, tenv, exp, 0);
 
                 // check array type.
                 if (TY_get_kind(t) != TY_kind_array) {
@@ -686,7 +719,7 @@ static SMT_tyir SMT_trans_var(SYM_table venv, SYM_table tenv, AST_var n)
     return SMT_mk_tyir(NULL, t);
 }
 
-static TY_type SMT_trans_type(SYM_table tenv, AST_type n)
+static TY_type SMT_trans_type(TR_level level, SYM_table tenv, AST_type n)
 {
     switch(n->kind) {
         case AST_kind_type_name: {
@@ -760,5 +793,5 @@ void SMT_trans(AST_exp root)
     SYM_table venv = ENV_base_venv();
     SYM_table tenv = ENV_base_tenv();
 
-    SMT_trans_exp(venv, tenv, root, 0);
+    SMT_trans_exp(TR_root_level(), venv, tenv, root, 0);
 }
